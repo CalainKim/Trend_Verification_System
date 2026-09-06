@@ -1,0 +1,24 @@
+# data
+data/*.sqlite
+data/*.sqlite-journal
+data/*.db
+data/raw/
+*.csv.gz
+
+# secrets
+.env
+.env.local
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# os
+.DS_Store
+
+# 스냅샷은 소급 수집이 불가능한 원본이므로 반드시 커밋한다
+!data/snapshots/

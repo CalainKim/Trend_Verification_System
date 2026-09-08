@@ -88,6 +88,11 @@ cases/{case_id}/
   29CM 베스트 랭킹 API                순위, 리뷰 수, 좋아요 수, 품절 여부
 ```
 
+네이버 데이터랩 두 API 는 절대량이 아니라 요청 안에서 정규화된 상대 지수를 돌려준다.
+조회 구간의 최댓값이 100 이 되도록 스케일된 값이라, 요청이 다르면 값을 직접 비교할 수
+없다. 서로 다른 케이스의 지수를 그대로 비교하면 잘못된 결론이 나온다. 비교가 필요하면
+같은 요청 안에 함께 넣거나, 변화율·기울기처럼 스케일에 영향받지 않는 형태로 바꿔 쓴다.
+
 무신사 랭킹은 robots.txt가 화이트리스트 방식이라 자체 수집기를 전면 차단한다.
 수집 허가가 나오기 전까지는 29CM를 대체 소스로 쓴다. docs/robots-compliance.md 참고.
 
@@ -179,15 +184,20 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
     storage.py           저장 레이어
     snapshots.py         일별 CSV 스냅샷 입출력
     export.py            케이스 번들 생성, 누수 차단
+    config.py            .env 로딩, API 키 확인
     collectors/
       base.py            수집기 공통 인터페이스, 요청 간격 제어
       cm29_rank.py       29CM 베스트 랭킹 수집기
+      naver_base.py      네이버 오픈 API 공통 계층
+      naver_datalab.py   검색어 트렌드 수집기
+      naver_shopping.py  쇼핑인사이트 수집기 (성별·연령 분해)
     analytics.py         수집 데이터 요약 집계 (리포트와 대시보드가 공유)
   scripts/
     collect_daily.py     트랙 B 일별 수집 진입점
     load_snapshots.py    스냅샷으로부터 DB 재구성
     report.py            터미널 리포트
     build_dashboard.py   docs/index.html 생성
+    verify_naver_key.py  API 키 확인 및 실제 제약 실측
   data/snapshots/        수집 원본 CSV (커밋 대상)
   cases/                 역추적 케이스 산출물 (검증팀 전달용)
   docs/                  GitHub Pages 대시보드와 근거 문서
@@ -223,6 +233,7 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   python scripts/load_snapshots.py            스냅샷으로부터 DB 재구성
   python scripts/report.py                    터미널 리포트
   python scripts/build_dashboard.py           대시보드 생성
+  python scripts/verify_naver_key.py          네이버 키 확인
   python -m pytest tests -q                   테스트
 ```
 
@@ -234,11 +245,13 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   공통 스키마, 저장 레이어, 스냅샷, 누수 차단 (테스트 11건 통과)
   29CM 베스트 랭킹 수집기 및 일별 자동 수집
   터미널 리포트와 정적 대시보드 (수집 결측일, 순위 변화, 반증 신호)
+  네이버 검색어 트렌드 / 쇼핑인사이트 수집기 (키 발급 대기, 테스트 18건 통과)
 ```
 
 ```
 대기
-  네이버 데이터랩 / 쇼핑인사이트 수집기 (API 키 발급 필요)
+  네이버 API 키 발급 후 verify_naver_key.py 로 실측 확인
+  쇼핑인사이트 상의 카테고리 코드 확인 (datalab robots.txt 로 자동 조회 불가)
   Google Trends 수집기
   역추적 케이스 선정 (real / noise)
   동의어 클러스터링, 특징 추출

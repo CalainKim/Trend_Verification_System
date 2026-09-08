@@ -30,3 +30,25 @@ robots.txt(최종 갱신 2026.05.13)는 화이트리스트 구조다.
 무신사를 트랙 B 소스로 쓰려면 연계 산업체 채널을 통한 **명시적 수집 허가(또는 데이터 제공)**
 가 선행되어야 한다. 허가 이전 기간에는 robots.txt가 일반 수집기를 허용하는 사이트를
 대체 소스로 사용한다.
+
+## 네이버 데이터랩 (2026-09-08 확인)
+
+`datalab.naver.com/robots.txt`
+
+```
+User-Agent: *
+Allow: /$
+Allow: /index.naver
+Disallow: /
+```
+
+루트와 index 를 제외한 전 경로가 차단이다. 쇼핑인사이트 카테고리 코드를 돌려주는
+내부 엔드포인트(`/shoppingInsight/getCategory.naver`)도 여기에 포함되므로
+**자동 조회하지 않는다.**
+
+카테고리 코드는 브라우저에서 쇼핑인사이트 분야 선택 화면을 직접 보고 확인해
+`collectors/naver_shopping.py` 의 `TOPS_CATEGORIES` 에 상수로 적어 넣는다.
+값이 자주 바뀌지 않는 식별자라 일회성 확인으로 충분하다.
+
+데이터 수집 자체는 `openapi.naver.com` 의 공식 오픈 API 로만 한다.
+공식 API 는 별도 이용 신청과 키 발급을 거친 정상 경로이며 robots.txt 대상이 아니다.

@@ -128,12 +128,15 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
     collectors/
       base.py            수집기 공통 인터페이스, 요청 간격 제어
       cm29_rank.py       29CM 베스트 랭킹 수집기
+    analytics.py         수집 데이터 요약 집계 (리포트와 대시보드가 공유)
   scripts/
     collect_daily.py     트랙 B 일별 수집 진입점
     load_snapshots.py    스냅샷으로부터 DB 재구성
+    report.py            터미널 리포트
+    build_dashboard.py   docs/index.html 생성
   data/snapshots/        수집 원본 CSV (커밋 대상)
   cases/                 역추적 케이스 산출물 (검증팀 전달용)
-  docs/                  robots.txt 확인 기록 등 근거 문서
+  docs/                  GitHub Pages 대시보드와 근거 문서
   tests/                 저장 및 누수 차단 계약 테스트
 
 
@@ -162,6 +165,8 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   python scripts/collect_daily.py             상의 카테고리 일간 랭킹 100위 수집
   python scripts/collect_daily.py --status    누적 현황 출력
   python scripts/load_snapshots.py            스냅샷으로부터 DB 재구성
+  python scripts/report.py                    터미널 리포트
+  python scripts/build_dashboard.py           대시보드 생성
   python -m pytest tests -q                   테스트
 
 
@@ -169,8 +174,9 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
 ------------
 
 완료
-  공통 스키마, 저장 레이어, 스냅샷, 누수 차단 (테스트 8건 통과)
+  공통 스키마, 저장 레이어, 스냅샷, 누수 차단 (테스트 11건 통과)
   29CM 베스트 랭킹 수집기 및 일별 자동 수집
+  터미널 리포트와 정적 대시보드 (수집 결측일, 순위 변화, 반증 신호)
 
 대기
   네이버 데이터랩 / 쇼핑인사이트 수집기 (API 키 발급 필요)

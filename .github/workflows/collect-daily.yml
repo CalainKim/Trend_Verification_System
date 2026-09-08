@@ -34,14 +34,22 @@ jobs:
       - name: 수집
         run: python scripts/collect_daily.py
 
-      - name: 스냅샷 커밋
+      - name: 리포트 (로그에서 바로 확인)
+        run: python scripts/report.py --no-color
+
+      - name: 대시보드 생성
+        run: python scripts/build_dashboard.py
+
+      - name: 스냅샷·대시보드 커밋
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/snapshots
+          git add data/snapshots docs
           if git diff --staged --quiet; then
             echo "변경 없음"
           else
             git commit -m "chore(data): 29CM 랭킹 스냅샷 $(date -u +%Y-%m-%d)"
+            # 다른 실행이 먼저 밀어넣었을 수 있다
+            git pull --rebase --autostash origin main || true
             git push
           fi

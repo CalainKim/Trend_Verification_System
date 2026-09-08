@@ -111,3 +111,58 @@ def test_snapshot_round_trip(conn, tmp_path):
     assert len(restored) == 1
     assert restored[0].observed_at == "2024-10-01"
     assert restored[0].keyword_raw == "발라클라바"
+
+
+def _rank_rec(observed_at, item, rank):
+    return RawRecord(
+        channel="commerce_rank",
+        keyword_raw=f"item-{item}",
+        entity=f"29cm:{item}",
+        metric_type="rank",
+        metric_value=rank,
+        observed_at=observed_at,
+    )
+
+
+def test_two_runs_same_day_stay_separate_snapshots(conn):
+    """하루 두 번 수집해도 순위가 섞이면 안 된다.
+
+    observed_at 이 날짜뿐이면 1차 실행값이 고정된 채 그 사이 새로 진입한
+    상품만 통과해서, 한 날짜 안에 같은 순위가 두 번 나타났다.
+    """
+    morning = "2026-09-08T09:00:00+09:00"
+    evening = "2026-09-08T21:00:00+09:00"
+    # 아침: A,B,C 가 1,2,3위 / 저녁: D 가 진입해 1위, A,B 가 밀림
+    storage.insert_raw(conn, [_rank_rec(morning, i, r) for i, r in [("A", 1), ("B", 2), ("C", 3)]])
+    storage.insert_raw(conn, [_rank_rec(evening, i, r) for i, r in [("D", 1), ("A", 2), ("B", 3)]])
+
+    for snapshot in (morning, evening):
+        ranks = [r["metric_value"] for r in storage.rows_at(conn, "commerce_rank", snapshot)]
+        assert sorted(ranks) == [1.0, 2.0, 3.0], f"{snapshot} 의 순위가 온전하지 않다: {ranks}"
+
+    days = storage.daily_snapshots(conn, "commerce_rank")
+    assert len(days) == 1
+    assert days[0]["n_snapshots"] == 2
+    assert days[0]["observed_at"] == evening  # pick='last'
+
+
+def test_daily_snapshots_first_and_last(conn):
+    morning = "2026-09-08T09:00:00+09:00"
+    evening = "2026-09-08T21:00:00+09:00"
+    storage.insert_raw(conn, [_rank_rec(morning, "A", 1), _rank_rec(evening, "A", 2)])
+    assert storage.daily_snapshots(conn, "commerce_rank", "first")[0]["observed_at"] == morning
+    assert storage.daily_snapshots(conn, "commerce_rank", "last")[0]["observed_at"] == evening
+
+
+def test_observed_at_is_unique_per_run():
+    from datetime import datetime, timedelta, timezone
+
+    from trend_pipeline.collectors.cm29_rank import KST, Cm29RankCollector
+
+    t1 = datetime(2026, 9, 8, 9, 0, tzinfo=KST)
+    t2 = t1 + timedelta(hours=12)
+    a = Cm29RankCollector.observed_at_for("ONE_DAY", t1)
+    b = Cm29RankCollector.observed_at_for("ONE_DAY", t2)
+    assert a != b
+    assert a[:10] == b[:10] == "2026-09-08"   # 같은 날, 다른 스냅샷
+    assert a < "2026-09-09"                   # T_cut 문자열 비교가 여전히 성립

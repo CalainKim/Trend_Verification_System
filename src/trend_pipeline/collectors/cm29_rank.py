@@ -120,17 +120,20 @@ class Cm29RankCollector(Collector):
 
     @staticmethod
     def observed_at_for(period_sort: str, now: Optional[datetime] = None) -> str:
-        """관측 시점.
+        """관측 시점. 수집 실행 하나가 곧 스냅샷 하나다.
 
-        ONE_DAY(일간 랭킹)는 하루 단위 집계라 날짜만 쓴다. 하루에 두 번 돌려도
-        같은 관측치이므로 UNIQUE 제약이 중복을 걸러준다.
-        그 외(실시간 등)는 스냅샷마다 값이 다르므로 KST 정시 단위까지 기록한다.
+        날짜만 기록하면 하루 두 번 수집할 때 두 실행이 같은 키로 충돌한다.
+        UNIQUE 제약이 1차 실행값을 지키는 사이 그동안 랭킹에 새로 진입한 상품만
+        통과해서, 한 날짜 안에 서로 다른 시점의 순위가 섞이고 같은 순위가
+        두 번 나타난다. 부분 실패한 실행이 그날 데이터를 영구히 오염시키는
+        경로이기도 하다.
+
+        그래서 KST 초 단위까지 기록해 실행마다 독립된 스냅샷이 되게 한다.
+        하루 두 번 수집은 중복이 아니라 이중화가 되고, 일 단위 분석은
+        그날의 스냅샷 중 하나를 고르면 된다(daily_snapshots 참고).
         """
         now = now or datetime.now(KST)
-        now = now.astimezone(KST)
-        if period_sort == "ONE_DAY":
-            return now.strftime("%Y-%m-%d")
-        return now.replace(minute=0, second=0, microsecond=0).isoformat()
+        return now.astimezone(KST).replace(microsecond=0).isoformat()
 
     # --------------------------------------------------------------- 수집
 
@@ -188,18 +191,22 @@ class Cm29RankCollector(Collector):
         }
         entity = f"{self.platform}:{item_no}"
 
+        # 순위는 (상품, 랭킹 목록)의 속성이고, 리뷰/좋아요는 상품 자체의 속성이다.
+        # 유니섹스 상품은 여성·남성 랭킹에 동시에 오르므로 순위 행의 키에
+        # 랭킹 목록을 포함시켜야 한 쪽이 유실되지 않는다. 반대로 리뷰/좋아요는
+        # 어느 목록에서 보든 같은 값이라 상품 단위로 한 번만 저장한다.
         metrics = (
-            ("rank", rank),
-            ("review_count", item.get("reviewCount")),
-            ("heart_count", item.get("heartCount")),
+            ("rank", rank, f"{entity}@{category_code}"),
+            ("review_count", item.get("reviewCount"), entity),
+            ("heart_count", item.get("heartCount"), entity),
         )
-        for metric_type, value in metrics:
+        for metric_type, value, key in metrics:
             if value is None:
                 continue
             yield RawRecord(
                 channel=self.channel,
                 keyword_raw=name,
-                entity=entity,
+                entity=key,
                 metric_type=metric_type,
                 metric_value=value,
                 observed_at=observed_at,

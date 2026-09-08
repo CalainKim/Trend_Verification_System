@@ -92,3 +92,42 @@ def channel_coverage(conn: sqlite3.Connection) -> List[sqlite3.Row]:
             """
         )
     )
+
+
+def daily_snapshots(
+    conn: sqlite3.Connection, channel: str, pick: str = "last"
+) -> List[sqlite3.Row]:
+    """관측일별로 스냅샷 하나씩만 고른다.
+
+    수집은 이중화를 위해 하루 여러 번 돌지만, 일 단위 분석에는 그중 하나만 써야
+    한다. 서로 다른 실행을 섞으면 같은 날에 같은 순위가 두 번 나타난다.
+    pick='last' 는 그날의 마지막 스냅샷, 'first' 는 첫 스냅샷.
+    """
+    if pick not in ("first", "last"):
+        raise ValueError("pick 은 'first' 또는 'last'")
+    agg = "MAX" if pick == "last" else "MIN"
+    return list(
+        conn.execute(
+            f"""
+            SELECT substr(observed_at, 1, 10) AS day,
+                   {agg}(observed_at)         AS observed_at,
+                   COUNT(DISTINCT observed_at) AS n_snapshots
+            FROM signal_raw
+            WHERE channel = ?
+            GROUP BY day
+            ORDER BY day
+            """,
+            (channel,),
+        )
+    )
+
+
+def rows_at(conn: sqlite3.Connection, channel: str, observed_at: str) -> List[sqlite3.Row]:
+    """특정 스냅샷 시점의 행 전체."""
+    return list(
+        conn.execute(
+            "SELECT * FROM signal_raw WHERE channel = ? AND observed_at = ? "
+            "ORDER BY metric_type, metric_value",
+            (channel, observed_at),
+        )
+    )

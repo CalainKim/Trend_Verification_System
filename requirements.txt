@@ -4,3 +4,7 @@ python-dotenv>=1.0
 beautifulsoup4>=4.12
 lxml>=5.0
 pytest>=8.0
+
+# 벡터 검색 (동의어 클러스터링, 후보 -> 실제 수집 아이템 되찾기)
+sqlite-vec>=0.1.9
+sentence-transformers>=3.0

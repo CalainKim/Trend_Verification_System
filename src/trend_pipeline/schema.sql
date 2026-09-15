@@ -63,3 +63,7 @@ CREATE TABLE IF NOT EXISTS trend_case (
     label_reason TEXT NOT NULL DEFAULT '',
     created_at   TEXT NOT NULL
 );
+
+-- 벡터 색인 테이블(item_vec, item_text)은 여기에 없다.
+-- sqlite-vec 확장이 올라간 연결에서만 만들 수 있어서 vectorstore.init() 이 담당한다.
+-- 같은 DB 파일 안에 두므로 스냅샷에서 재구성해도 원시 데이터와 어긋나지 않는다.

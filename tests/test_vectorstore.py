@@ -48,7 +48,7 @@ def conn(tmp_path, monkeypatch):
 
 ROWS = [
     ("발라클라바 니트 비니", "commerce_rank", "29cm:1"),
-    ("발라클라바 니트 비니 2color", "commerce_rank", "29cm:2"),
+    ("발라클라바 니트 모자", "commerce_rank", "29cm:2"),
     ("오버핏 반팔 티셔츠", "commerce_rank", "29cm:3"),
     ("발라클라바", "naver_datalab", ""),
 ]
@@ -72,7 +72,7 @@ def test_duplicate_texts_in_one_batch_indexed_once(conn):
 
 def test_search_returns_nearest_first(conn):
     vectorstore.index_texts(conn, ROWS)
-    hits = vectorstore.search(conn, "발라클라바 니트 비니", limit=4)
+    hits = vectorstore.search(conn, "발라클라바 니트 비니", limit=4, min_similarity=None)
     assert hits[0].text == "발라클라바 니트 비니"
     assert hits[0].similarity > hits[-1].similarity
     assert all(0.0 <= h.similarity <= 1.0 for h in hits)
@@ -80,13 +80,35 @@ def test_search_returns_nearest_first(conn):
 
 def test_search_can_filter_by_channel(conn):
     vectorstore.index_texts(conn, ROWS)
-    hits = vectorstore.search(conn, "발라클라바", limit=5, channel="naver_datalab")
+    hits = vectorstore.search(conn, "발라클라바", limit=5, channel="naver_datalab",
+                              min_similarity=None)
     assert hits and all(h.channel == "naver_datalab" for h in hits)
+
+
+def test_search_floor_can_return_nothing(conn):
+    """맞는 것이 없으면 빈 결과가 나와야 한다.
+
+    하한선이 없으면 벡터 검색은 언제나 가장 가까운 무언가를 돌려주므로,
+    관련 없는 상품이 그럴듯한 점수로 판정에 섞여 들어간다.
+    """
+    vectorstore.index_texts(conn, ROWS)
+    assert vectorstore.search(conn, "발라클라바", limit=3, min_similarity=None)
+    assert vectorstore.search(conn, "발라클라바", limit=3, min_similarity=1.01) == []
+
+
+def test_normalization_collapses_variant_markers():
+    """색상·차수·품번은 상품이 무엇인지와 무관하므로 임베딩 전에 걷어낸다."""
+    n = embeddings.normalize_for_embedding
+    assert n("데일리 레글런 티셔츠 (레몬)") == n("데일리 레글런 티셔츠 (라벤더)")
+    assert n("LAUNDRY SHIRT (SKY BLUE)") == n("LAUNDRY SHIRT [DEEP CHARCOAL]")
+    assert n("[29CM 단독] (2차_9/11 순차배송) 데일리 레글런 티셔츠") == "데일리 레글런 티셔츠"
+    # 품목이 다르면 남아야 한다
+    assert n("니트 비니") != n("니트 모자")
 
 
 def test_similarity_of_identical_text_is_one(conn):
     vectorstore.index_texts(conn, [("동일 문자열", "commerce_rank", "")])
-    hit = vectorstore.search(conn, "동일 문자열", limit=1)[0]
+    hit = vectorstore.search(conn, "동일 문자열", limit=1, min_similarity=None)[0]
     assert hit.similarity == pytest.approx(1.0, abs=1e-5)
 
 
@@ -97,8 +119,9 @@ def test_clustering_respects_threshold(conn):
     실제 유사도를 먼저 구하고, 그 값의 위아래로 임계값을 움직여 확인한다.
     """
     vectorstore.index_texts(conn, ROWS)
-    pair = next(h for h in vectorstore.search(conn, "발라클라바 니트 비니", limit=4)
-                if h.text == "발라클라바 니트 비니 2color")
+    pair = next(h for h in vectorstore.search(conn, "발라클라바 니트 비니",
+                                              limit=4, min_similarity=None)
+                if h.text == "발라클라바 니트 모자")
     assert pair.similarity < 0.999, "두 이름이 구분되지 않으면 이 테스트가 무의미하다"
 
     tight = clustering.cluster_texts(conn, threshold=pair.similarity + 0.005)

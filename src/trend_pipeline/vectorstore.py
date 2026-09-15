@@ -22,6 +22,11 @@ from typing import List, Optional, Sequence, Tuple
 
 from . import embeddings
 
+#: 이 값 미만이면 "맞는 것이 없다"로 본다. 하한선이 없으면 벡터 검색은 언제나
+#: 가장 가까운 무언가를 돌려주므로, 관련 없는 상품이 그럴듯한 점수로 올라온다.
+#: 실측 예: 29CM 에 럭비 셔츠가 없는데도 "럭비티" 검색에 블라우스가 0.79 로 나왔다.
+MIN_SIMILARITY = 0.80
+
 VEC_TABLE = "item_vec"
 META_TABLE = "item_text"
 
@@ -106,7 +111,11 @@ def index_texts(
     now = utcnow_iso()
     for start in range(0, len(unique), batch_size):
         chunk = unique[start:start + batch_size]
-        vectors = embeddings.encode_passages([c[0] for c in chunk], model_name)
+        # 임베딩은 정규화된 이름으로 한다. 프로모션 태그와 품번이 남아 있으면
+        # 그것들이 유사도를 지배해 서로 다른 품목이 묶인다. 원문은 그대로 저장한다.
+        vectors = embeddings.encode_passages(
+            [embeddings.normalize_for_embedding(c[0]) for c in chunk], model_name
+        )
         for (text, channel, entity), vector in zip(chunk, vectors):
             cur = conn.execute(
                 f"INSERT INTO {META_TABLE}(text, channel, entity, model, embedded_at) "
@@ -127,10 +136,15 @@ def search(
     limit: int = 10,
     channel: Optional[str] = None,
     model_name: str = embeddings.DEFAULT_MODEL,
+    min_similarity: Optional[float] = MIN_SIMILARITY,
 ) -> List[Hit]:
-    """질의와 유사한 수집 아이템을 가까운 순으로."""
-    vector = embeddings.encode_query(query, model_name)
-    return search_vector(conn, vector, limit, channel)
+    """질의와 유사한 수집 아이템을 가까운 순으로.
+
+    min_similarity 미만은 버린다. 결과가 비는 것은 정상이며 "우리가 수집한
+    범위에 해당하는 상품이 없다"는 뜻이다. 억지로 채우면 판정이 오염된다.
+    """
+    vector = embeddings.encode_query(embeddings.normalize_for_embedding(query), model_name)
+    return search_vector(conn, vector, limit, channel, min_similarity)
 
 
 def search_vector(
@@ -138,6 +152,7 @@ def search_vector(
     vector: Sequence[float],
     limit: int = 10,
     channel: Optional[str] = None,
+    min_similarity: Optional[float] = None,
 ) -> List[Hit]:
     # 채널로 걸러야 하면 넉넉히 받아서 거른다. vec0 는 MATCH 와 일반 조건을
     # 함께 쓰는 데 제약이 있어 후처리하는 편이 안전하다.
@@ -154,6 +169,8 @@ def search_vector(
     hits = [Hit(r[0], r[1], r[2], r[3]) for r in rows]
     if channel:
         hits = [h for h in hits if h.channel == channel]
+    if min_similarity is not None:
+        hits = [h for h in hits if h.similarity >= min_similarity]
     return hits[:limit]
 
 

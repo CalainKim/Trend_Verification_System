@@ -10,16 +10,25 @@
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence
 
 from . import embeddings, vectorstore
+from .embeddings import normalize_for_embedding  # noqa: F401  (재노출)
 from .models import utcnow_iso
 
-#: 이 값 이상이면 같은 후보로 본다. 실측으로 조정할 대상이다.
-DEFAULT_THRESHOLD = 0.92
-
+#: 이 값 이상이면 같은 후보로 본다.
+#: 실제 수집 데이터 321건으로 임계값을 훑어 정했다 (2026-09-15).
+#: normalize_for_embedding() 적용 후 기준:
+#:   0.92   한 묶음이 111건까지 뭉치고 품목이 섞임 (3건)
+#:   0.94   최대 67건, 품목 혼합 2건
+#:   0.95   최대 47건, 품목 혼합 1건
+#:   0.96   최대 15건, 품목 혼합 없음, 묶인 후보 57개  <- 채택
+#: 정규화를 하면 이름이 짧아져 유사도가 전반적으로 올라가므로, 정규화 전
+#: 기준(0.95)을 그대로 쓰면 과병합이 된다. 둘은 함께 조정해야 한다.
+DEFAULT_THRESHOLD = 0.96
 
 @dataclass
 class Cluster:

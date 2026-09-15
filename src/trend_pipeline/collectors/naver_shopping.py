@@ -40,9 +40,12 @@ DEVICE_CODES = ("pc", "mo")
 FASHION_CLOTHING = "50000000"
 
 #: 1차 분석 범위(상의)의 네이버 쇼핑 카테고리 코드.
-#: 코드는 shopping.naver.com 의 쇼핑인사이트 분야 선택에서 확인해 채운다.
-#: 추측해서 넣으면 조용히 엉뚱한 분야를 수집하게 되므로 비워 둔다.
-TOPS_CATEGORIES: Dict[str, str] = {}
+#: datalab 쇼핑인사이트에서 분야를 고를 때 나가는 요청의 cid 로 확인한다.
+#: 추측해서 넣으면 조용히 엉뚱한 분야를 수집하게 되므로, 확인한 것만 넣는다.
+#: 50000169 는 조회한 일별 지수가 웹 화면의 티셔츠 차트와 일치함을 대조해 확인했다.
+TOPS_CATEGORIES: Dict[str, str] = {
+    "50000169": "패션의류>남성의류>티셔츠",
+}
 
 
 class NaverShoppingCollector(NaverCollector):

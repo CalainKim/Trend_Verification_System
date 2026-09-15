@@ -1,4 +1,12 @@
-"""네이버 오픈 API 공통 계층 (데이터랩 검색어 트렌드 · 쇼핑인사이트).
+"""NAVER API HUB 공통 계층 (데이터랩 검색어 트렌드 · 쇼핑인사이트).
+
+데이터랩 API 는 developers.naver.com 이 아니라 네이버 클라우드 플랫폼의
+NAVER API HUB 를 통해 제공된다. 그래서 인증 헤더가 X-Naver-Client-* 가 아니라
+X-NCP-APIGW-* 이고 호스트도 openapi.naver.com 이 아니다. 예전 방식으로 부르면
+키가 멀쩡해도 401 이 난다.
+
+경로는 실제 호출로 확인했다(2026-09-15). 문서에 전체 경로가 나와 있지 않아
+추측하면 404 만 돌아온다.
 
 두 API 는 인증 방식과 응답 구조가 같아서 HTTP 계층을 공유한다.
 
@@ -19,7 +27,7 @@ import requests
 
 from .base import Collector
 
-API_HOST = "https://openapi.naver.com"
+API_HOST = "https://naverapihub.apigw.ntruss.com"
 
 
 class NaverApiError(RuntimeError):
@@ -49,8 +57,8 @@ class NaverCollector(Collector):
         self.session = session or requests.Session()
         self.session.headers.update(
             {
-                "X-Naver-Client-Id": client_id,
-                "X-Naver-Client-Secret": client_secret,
+                "X-NCP-APIGW-API-KEY-ID": client_id,
+                "X-NCP-APIGW-API-KEY": client_secret,
                 "Content-Type": "application/json",
             }
         )

@@ -18,7 +18,7 @@ from typing import Any, Dict, Iterator, List, Optional, Sequence
 from ..models import RawRecord
 from .naver_base import NaverCollector
 
-BASE = "/v1/datalab/shopping"
+BASE = "/shopping/v1"
 PATHS = {
     "category":           f"{BASE}/categories",
     "category_device":    f"{BASE}/category/device",
@@ -31,8 +31,13 @@ PATHS = {
 }
 
 #: 쇼핑인사이트의 연령 코드. 검색어 트렌드(1~11)와 체계가 다르다. 섞어 쓰면 안 된다.
-#: 실제 응답 값은 scripts/verify_naver_key.py 가 확인한다.
+#: 2026-09-15 실제 응답으로 확인한 값이다.
 AGE_CODES = ("10", "20", "30", "40", "50", "60")
+GENDER_CODES = ("f", "m")
+DEVICE_CODES = ("pc", "mo")
+
+#: 상위 분야 코드. 실제 호출로 확인했다.
+FASHION_CLOTHING = "50000000"
 
 #: 1차 분석 범위(상의)의 네이버 쇼핑 카테고리 코드.
 #: 코드는 shopping.naver.com 의 쇼핑인사이트 분야 선택에서 확인해 채운다.

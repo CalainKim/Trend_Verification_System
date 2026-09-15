@@ -73,10 +73,10 @@ def test_search_trend_sends_expected_request():
     list(c.collect({"발라클라바": ["발라클라바"]}, "2024-10-01", "2024-10-03",
                    gender="f", ages=["4", "5"]))
     url, body = s.calls[0]
-    assert url.endswith("/v1/datalab/search")
+    assert url.endswith("/search-trend/v1/search")
     assert body["keywordGroups"] == [{"groupName": "발라클라바", "keywords": ["발라클라바"]}]
     assert body["gender"] == "f" and body["ages"] == ["4", "5"]
-    assert s.headers["X-Naver-Client-Id"] == "id"
+    assert s.headers["X-NCP-APIGW-API-KEY-ID"] == "id"
 
 
 def test_segments_are_stored_separately(tmp_path):
@@ -99,7 +99,7 @@ def test_api_error_is_raised_with_context():
     with pytest.raises(NaverApiError) as exc:
         list(c.collect({"a": ["a"]}, "2024-10-01", "2024-10-03"))
     assert exc.value.status == 401
-    assert "/v1/datalab/search" in str(exc.value)
+    assert "/search-trend/v1/search" in str(exc.value)
 
 
 def test_keyword_group_limits_rejected():

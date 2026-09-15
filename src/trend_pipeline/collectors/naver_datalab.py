@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterator, List, Optional, Sequence
 from ..models import RawRecord
 from .naver_base import NaverCollector
 
-PATH = "/v1/datalab/search"
+PATH = "/search-trend/v1/search"
 
 TIME_UNITS = ("date", "week", "month")
 DEVICES = (None, "pc", "mo")

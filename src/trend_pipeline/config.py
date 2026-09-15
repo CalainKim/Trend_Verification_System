@@ -38,8 +38,9 @@ def naver_credentials() -> Tuple[str, str]:
     if not cid or not secret:
         raise MissingCredentials(
             "네이버 API 키가 없다.\n"
-            "  1. https://developers.naver.com -> Application -> 애플리케이션 등록\n"
-            "  2. 사용 API 에서 '데이터랩 (검색어 트렌드)' 와 '데이터랩 (쇼핑인사이트)' 를 모두 체크\n"
+            "  1. https://console.ncloud.com/naver-api-hub/application (NAVER API HUB)\n"
+            "     데이터랩 API 는 developers.naver.com 이 아니라 여기서 발급한다\n"
+            "  2. Application 등록 후 Data Lab 의 검색어트렌드 / 쇼핑인사이트를 모두 추가\n"
             "  3. 발급받은 값을 프로젝트 루트 .env 에 넣는다 (.env.example 참고)\n"
             "       NAVER_CLIENT_ID=...\n"
             "       NAVER_CLIENT_SECRET=...\n"

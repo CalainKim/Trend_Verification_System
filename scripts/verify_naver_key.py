@@ -20,6 +20,7 @@ from trend_pipeline import config  # noqa: E402
 from trend_pipeline.collectors.naver_base import NaverApiError  # noqa: E402
 from trend_pipeline.collectors.naver_datalab import NaverDataLabCollector  # noqa: E402
 from trend_pipeline.collectors.naver_shopping import (  # noqa: E402
+    FASHION_CLOTHING,
     TOPS_CATEGORIES,
     NaverShoppingCollector,
 )
@@ -87,18 +88,13 @@ def main() -> int:
 
     # --- 쇼핑인사이트 ---------------------------------------------------
     shopping = NaverShoppingCollector(cid, secret)
-    if not TOPS_CATEGORIES:
-        print(SKIP, "쇼핑인사이트 미확인 - 카테고리 코드가 비어 있다.")
-        print("       shopping.naver.com 쇼핑인사이트에서 상의 분야 코드를 확인해")
-        print("       collectors/naver_shopping.py 의 TOPS_CATEGORIES 에 넣을 것")
-        print("       (datalab robots.txt 가 자동 조회를 막으므로 수동 확인한다)")
-        return 0
-
-    code = next(iter(TOPS_CATEGORIES))
+    # 상의 코드가 아직 없으면 상위 분야로라도 연결 여부를 확인한다.
+    code = next(iter(TOPS_CATEGORIES), FASHION_CLOTHING)
+    scope = "상의" if TOPS_CATEGORIES else "패션의류(상위 분야, 임시)"
     try:
-        rows = list(shopping.collect_category({"상의": [code]},
+        rows = list(shopping.collect_category({scope: [code]},
                                               start.isoformat(), end.isoformat()))
-        print(OK, f"쇼핑인사이트 분야 클릭 추이 {len(rows)}행")
+        print(OK, f"쇼핑인사이트 분야 클릭 추이 {len(rows)}행  [{scope} {code}]")
     except NaverApiError as exc:
         print(FAIL, f"쇼핑인사이트 호출 실패: {exc}")
         print("       '데이터랩 (쇼핑인사이트)' 사용 API 가 등록됐는지 확인할 것")
@@ -112,6 +108,12 @@ def main() -> int:
         print("       실제 그룹:", groups)
     except NaverApiError as exc:
         print(FAIL, f"성별·연령 분해 실패: {exc}")
+
+    if not TOPS_CATEGORIES:
+        print(SKIP, "상의 카테고리 코드는 아직 비어 있다.")
+        print("       datalab 쇼핑인사이트에서 분야를 고르고 개발자도구 Network 탭의")
+        print("       요청 Payload 에 있는 cid 값을 확인해 TOPS_CATEGORIES 에 넣을 것")
+        print("       (datalab robots.txt 가 자동 조회를 막으므로 수동 확인한다)")
 
     print("\n확인 완료. 실측값이 코드 상수와 다르면 상수를 고칠 것.")
     return 0

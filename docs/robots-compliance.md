@@ -52,3 +52,20 @@ Disallow: /
 
 데이터 수집 자체는 `openapi.naver.com` 의 공식 오픈 API 로만 한다.
 공식 API 는 별도 이용 신청과 키 발급을 거친 정상 경로이며 robots.txt 대상이 아니다.
+
+## 데이터랩 API 접근 경로 (2026-09-15 확인)
+
+수집은 공식 API 로만 한다. 단, 데이터랩 API 는 developers.naver.com 이 아니라
+네이버 클라우드 플랫폼의 NAVER API HUB 를 통해 제공된다.
+
+    호스트   https://naverapihub.apigw.ntruss.com
+    인증     X-NCP-APIGW-API-KEY-ID / X-NCP-APIGW-API-KEY
+    경로     /search-trend/v1/search
+             /shopping/v1/categories
+             /shopping/v1/category/{device,gender,age}
+             /shopping/v1/category/keywords
+             /shopping/v1/category/keyword/{device,gender,age}
+
+예전 방식(openapi.naver.com + X-Naver-Client-*)으로 부르면 키가 유효해도
+401 NID AUTH Result Invalid 가 난다. 경로는 공개 문서에 전부 나와 있지 않아
+실제 호출로 확인했다.

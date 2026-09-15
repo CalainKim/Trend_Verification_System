@@ -134,3 +134,11 @@ def test_shopping_generic_collect_refuses():
     c = NaverShoppingCollector("id", "secret", min_interval_sec=0, session=FakeSession([]))
     with pytest.raises(NotImplementedError, match="collect_category"):
         list(c.collect())
+
+
+def test_shopping_keyword_group_rejects_multiple_params():
+    """쇼핑인사이트는 그룹당 표현 1개만 받는다. 검색어 트렌드와 다르다."""
+    c = NaverShoppingCollector("id", "secret", min_interval_sec=0, session=FakeSession([]))
+    with pytest.raises(ValueError, match="표현 1개만"):
+        list(c.collect_keyword("50000169", {"럭비티": ["럭비티", "럭비셔츠"]},
+                               "2024-01-01", "2024-02-01"))

@@ -19,6 +19,12 @@ from ..models import RawRecord
 from .naver_base import NaverCollector
 
 BASE = "/shopping/v1"
+#: 쇼핑인사이트는 키워드 그룹 하나에 표현을 하나만 받는다. 검색어 트렌드가
+#: 한 그룹에 동의어를 최대 20개까지 묶어 합산해 주는 것과 다르다. 여러 개를 넣으면
+#: 400 "should NOT have more than 1 items" 가 난다. 동의어는 그룹을 나눠서 보내고,
+#: 합산이 필요하면 받은 뒤에 우리가 합친다.
+MAX_PARAMS_PER_KEYWORD = 1
+
 PATHS = {
     "category":           f"{BASE}/categories",
     "category_device":    f"{BASE}/category/device",
@@ -103,7 +109,19 @@ class NaverShoppingCollector(NaverCollector):
         time_unit: str = "date",
         run_id: Optional[str] = None,
     ) -> Iterator[RawRecord]:
-        """특정 분야 안에서 키워드별 클릭 추이."""
+        """특정 분야 안에서 키워드별 클릭 추이.
+
+        한 그룹에 표현을 하나만 넣을 수 있다(MAX_PARAMS_PER_KEYWORD).
+        같은 요청 안의 그룹끼리는 정규화 기준이 같아 서로 비교할 수 있다.
+        """
+        for name, params in keyword_groups.items():
+            if len(params) != MAX_PARAMS_PER_KEYWORD:
+                raise ValueError(
+                    f"쇼핑인사이트는 키워드 그룹당 표현 1개만 받는다 "
+                    f"(그룹 {name!r} 에 {len(params)}개). 검색어 트렌드와 다르다. "
+                    f"동의어는 그룹을 나눠서 보낼 것: "
+                    f"{{'{name}': ['{params[0] if params else ''}'], ...}}"
+                )
         payload = {
             "startDate": start_date,
             "endDate": end_date,

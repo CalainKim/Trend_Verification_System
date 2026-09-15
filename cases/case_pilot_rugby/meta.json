@@ -1,0 +1,17 @@
+{
+  "case_id": "case_pilot_rugby",
+  "keyword": "럭비티",
+  "keywords_included": [
+    "럭비티"
+  ],
+  "t_cut": "2024-08-04",
+  "channels": [
+    "naver_datalab",
+    "naver_shopping"
+  ],
+  "row_counts": {
+    "naver_datalab": 3285,
+    "naver_shopping": 7948
+  },
+  "note": "T_cut 이전 관측치만 포함. 정답 라벨과 T_peak 은 의도적으로 제외했다."
+}

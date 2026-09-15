@@ -228,9 +228,12 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
     verify_naver_key.py  API 키 확인 및 실제 제약 실측
     build_index.py       벡터 색인 생성, 동의어 클러스터링
     search_items.py      수집 아이템 유사도 검색
+    build_case.py        역추적 케이스 번들 생성
   data/snapshots/        수집 원본 CSV (커밋 대상)
   cases/                 역추적 케이스 산출물 (검증팀 전달용)
+  verification/          검증 파트 인터페이스 (판정 결과 스키마)
   docs/                  GitHub Pages 대시보드와 근거 문서
+                         verification-handoff.md 는 검증 파트 인수인계 문서
   tests/                 저장 및 누수 차단 계약 테스트
 ```
 
@@ -286,13 +289,14 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   터미널 리포트와 정적 대시보드 (수집 결측일, 순위 변화, 반증 신호)
   네이버 검색어 트렌드 / 쇼핑인사이트 수집기 (키 발급 및 실호출 확인 완료)
   상의 카테고리 코드 확인 (여성 50000167 / 남성 50000169)
+  케이스 번들 생성 도구와 파일럿 케이스 1건 (cases/case_pilot_rugby)
   sqlite-vec 벡터 검색과 동의어 클러스터링 (테스트 28건 통과)
 ```
 
 ```
 대기
   Google Trends 수집기
-  역추적 케이스 선정 (real / noise)
+  역추적 케이스 선정 기준 합의 후 케이스 선정 (real / noise)
   실데이터로 클러스터링 임계값 조정
   특징 추출 (candidate_summary)
   무신사 수집 허가 확보 시 무신사 수집 모듈 추가

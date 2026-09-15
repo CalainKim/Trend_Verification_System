@@ -1,0 +1,66 @@
+{
+  "case_id": "case_pilot_rugby",
+  "verdict": "confirm",
+  "_verdict_values": ["confirm", "hold", "reject"],
+  "confidence": 0.0,
+  "decided_at": "2026-09-15T21:00:00+09:00",
+  "decided_by": "reasoning-model + 사람 검토",
+
+  "evidence_for": [
+    {
+      "claim": "무엇을 관측했는지",
+      "channel": "naver_datalab",
+      "observation": "근거가 된 수치나 구간",
+      "weight": "high | medium | low"
+    }
+  ],
+
+  "evidence_against": [
+    {
+      "claim": "반증 근거",
+      "channel": "naver_shopping",
+      "observation": "",
+      "weight": "high | medium | low"
+    }
+  ],
+
+  "falsification_attempts": [
+    {
+      "hypothesis": "단일 채널에서만 나타나는 현상이다",
+      "method": "채널별 변화 시점과 기울기 비교",
+      "result": "기각 | 지지 | 판단 불가",
+      "note": ""
+    },
+    {
+      "hypothesis": "계절성으로 설명된다",
+      "method": "전년 동기 대비",
+      "result": "",
+      "note": ""
+    },
+    {
+      "hypothesis": "특정 연령·성별에 국한된다",
+      "method": "채널 기저 분포 대비 편차",
+      "result": "",
+      "note": ""
+    },
+    {
+      "hypothesis": "일회성 캠페인 효과다",
+      "method": "급등 시점과 캠페인·미디어 노출 시점 대조",
+      "result": "",
+      "note": ""
+    }
+  ],
+
+  "unresolved": [
+    "판단에 필요했으나 번들에 없던 정보"
+  ],
+
+  "matched_items": [
+    {
+      "channel": "commerce_rank",
+      "entity": "29cm:0000000",
+      "name": "",
+      "similarity": 0.0
+    }
+  ]
+}

@@ -46,7 +46,9 @@ jobs:
         run: python scripts/report.py --no-color
 
       - name: 대시보드 생성
-        run: python scripts/build_dashboard.py
+        run: |
+          python scripts/build_dashboard.py
+          python scripts/build_case_dashboard.py
 
       - name: 변경분 커밋
         run: |

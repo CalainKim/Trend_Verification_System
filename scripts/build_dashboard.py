@@ -17,152 +17,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from trend_pipeline import analytics, storage  # noqa: E402
+from trend_pipeline import analytics, storage, webtheme  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
 OUT = ROOT / "docs" / "index.html"
 
 # dataviz 기본 팔레트 슬롯 1~3 (all-pairs 검증 통과: light/dark 양쪽)
-SERIES = [("#2a78d6", "#3987e5"), ("#eb6834", "#d95926"), ("#1baf7a", "#199e70")]
-
-CSS = """
-:root {
-  color-scheme: light;
-  --page:        #f9f9f7;
-  --surface:     #fcfcfb;
-  --ink:         #0b0b0b;
-  --ink-2:       #52514e;
-  --muted:       #898781;
-  --grid:        #e1e0d9;
-  --axis:        #c3c2b7;
-  --border:      rgba(11,11,11,0.10);
-  --good:        #0ca30c;
-  --warning:     #fab219;
-  --critical:    #d03b3b;
-  --up:          #006300;
-  --series-1:    #2a78d6;
-  --series-2:    #eb6834;
-  --series-3:    #1baf7a;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --page:      #0d0d0d;
-    --surface:   #1a1a19;
-    --ink:       #ffffff;
-    --ink-2:     #c3c2b7;
-    --muted:     #898781;
-    --grid:      #2c2c2a;
-    --axis:      #383835;
-    --border:    rgba(255,255,255,0.10);
-    --good:      #0ca30c;
-    --warning:   #fab219;
-    --critical:  #d03b3b;
-    --up:        #0ca30c;
-    --series-1:  #3987e5;
-    --series-2:  #d95926;
-    --series-3:  #199e70;
-  }
-}
-:root[data-theme="dark"] {
-    color-scheme: dark;
-    --page:      #0d0d0d;
-    --surface:   #1a1a19;
-    --ink:       #ffffff;
-    --ink-2:     #c3c2b7;
-    --muted:     #898781;
-    --grid:      #2c2c2a;
-    --axis:      #383835;
-    --border:    rgba(255,255,255,0.10);
-    --good:      #0ca30c;
-    --warning:   #fab219;
-    --critical:  #d03b3b;
-    --up:        #0ca30c;
-    --series-1:  #3987e5;
-    --series-2:  #d95926;
-    --series-3:  #199e70;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--page); color: var(--ink);
-  font: 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-.wrap { max-width: 1000px; margin: 0 auto; padding: 32px 20px 72px; }
-h1 { font-size: 21px; margin: 0 0 4px; letter-spacing: -0.01em; }
-h2 { font-size: 15px; margin: 0 0 2px; }
-.sub { color: var(--ink-2); font-size: 13px; margin: 0; }
-.note { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
-section { margin-top: 28px; }
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 18px 20px; margin-top: 10px;
-}
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
-.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.kpi .label { color: var(--muted); font-size: 12px; }
-.kpi .value { font-size: 26px; line-height: 1.2; margin-top: 2px; }
-.kpi .value.warn { color: var(--critical); }
-.strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.day {
-  border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px;
-  min-width: 92px; background: var(--surface);
-}
-.day .d { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.day .s { font-size: 12.5px; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-.dot.ok { background: var(--good); }
-.dot.miss { background: var(--critical); }
-.day.miss { border-color: var(--critical); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px;
-     padding: 0 10px 7px 0; border-bottom: 1px solid var(--grid); white-space: nowrap; }
-td { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
-tr:last-child td { border-bottom: none; }
-td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.up { color: var(--up); }
-.down { color: var(--critical); }
-.tag { font-size: 11px; border: 1px solid var(--border); border-radius: 4px;
-       padding: 1px 5px; color: var(--ink-2); white-space: nowrap; }
-.tag.soldout { color: var(--critical); border-color: var(--critical); }
-a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--border); }
-a:hover { border-bottom-color: var(--ink-2); }
-.scroll { overflow-x: auto; }
-.legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 10px; font-size: 12.5px; color: var(--ink-2); }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
-.swatch { width: 14px; height: 3px; border-radius: 2px; flex: none; }
-.banner {
-  border: 1px solid var(--warning); border-left-width: 3px; border-radius: 8px;
-  padding: 10px 14px; margin-top: 10px; font-size: 13px; color: var(--ink-2);
-  background: var(--surface);
-}
-.banner strong { color: var(--ink); }
-#tip {
-  position: fixed; pointer-events: none; opacity: 0; transition: opacity .1s;
-  background: var(--surface); color: var(--ink); border: 1px solid var(--border);
-  border-radius: 7px; padding: 7px 10px; font-size: 12.5px; max-width: 280px;
-  box-shadow: 0 4px 14px rgba(0,0,0,.12); z-index: 20;
-}
-footer { margin-top: 40px; color: var(--muted); font-size: 12px; line-height: 1.7; }
-"""
-
-JS = """
-(function () {
-  var tip = document.getElementById('tip');
-  function show(e, t) {
-    tip.textContent = t; tip.style.opacity = 1;
-    var x = e.clientX + 14, y = e.clientY + 14;
-    if (x + tip.offsetWidth > innerWidth - 8) x = e.clientX - tip.offsetWidth - 14;
-    if (y + tip.offsetHeight > innerHeight - 8) y = e.clientY - tip.offsetHeight - 14;
-    tip.style.left = x + 'px'; tip.style.top = y + 'px';
-  }
-  document.querySelectorAll('[data-tip]').forEach(function (el) {
-    el.addEventListener('pointerenter', function (e) { show(e, el.dataset.tip); });
-    el.addEventListener('pointermove', function (e) { show(e, el.dataset.tip); });
-    el.addEventListener('pointerleave', function () { tip.style.opacity = 0; });
-  });
-})();
-"""
-
+SERIES = webtheme.SERIES
 
 def esc(s: str) -> str:
     return html.escape(str(s), quote=True)
@@ -346,10 +207,11 @@ def build(conn, top: int = 10) -> str:
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>트렌드 시그널 수집 현황</title>
-<style>{CSS}</style></head>
+<style>{webtheme.CSS}</style></head>
 <body><div class="wrap">
 <h1>트렌드 시그널 수집 현황</h1>
 <p class="sub">29CM 상의 카테고리 랭킹 · 트랙 B 실시간 축적분</p>
+{webtheme.nav("index.html")}
 <p class="note">생성 {esc(now)}</p>
 {"".join(body)}
 <footer>
@@ -359,7 +221,7 @@ def build(conn, top: int = 10) -> str:
 <a href="https://github.com/CalainKim/Trend_Verification_System">저장소</a>
 </footer>
 </div><div id="tip" role="status"></div>
-<script>{JS}</script></body></html>
+<script>{webtheme.TOOLTIP_JS}</script></body></html>
 """
 
 

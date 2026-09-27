@@ -18,6 +18,7 @@ if ! ./.venv/bin/python scripts/collect_daily.py; then
 fi
 
 ./.venv/bin/python scripts/build_dashboard.py || true
+./.venv/bin/python scripts/build_case_dashboard.py || true
 
 git add data/snapshots docs
 if git diff --staged --quiet; then

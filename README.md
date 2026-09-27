@@ -219,6 +219,7 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
       naver_datalab.py   검색어 트렌드 수집기
       naver_shopping.py  쇼핑인사이트 수집기 (성별·연령 분해)
     analytics.py         수집 데이터 요약 집계 (리포트와 대시보드가 공유)
+    demographics.py      인구통계 쏠림 (분야 기준선 대비 리프트)
     embeddings.py        텍스트 임베딩 (로컬 다국어 모델)
     vectorstore.py       sqlite-vec 벡터 색인 및 유사도 검색
     clustering.py        동의어·유사 표현 클러스터링
@@ -301,5 +302,6 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   역추적 케이스 선정 기준 합의 후 케이스 선정 (real / noise)
   실데이터로 클러스터링 임계값 조정
   특징 추출 (candidate_summary)
+  채널 기저 분포 보정을 특징에 반영
   무신사 수집 허가 확보 시 무신사 수집 모듈 추가
 ```

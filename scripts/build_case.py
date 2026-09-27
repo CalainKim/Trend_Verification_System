@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from trend_pipeline import config, export, storage  # noqa: E402
+from trend_pipeline import config, demographics as dg, export, storage  # noqa: E402
 from trend_pipeline.collectors.naver_base import NaverApiError  # noqa: E402
 from trend_pipeline.collectors import naver_datalab, naver_shopping  # noqa: E402
 from trend_pipeline.collectors.naver_datalab import NaverDataLabCollector  # noqa: E402
@@ -124,6 +124,14 @@ def build(args) -> int:
                                              start.isoformat(), end.isoformat(), run_id=run_id))
             total += storage.insert_raw(conn, recs)
             print(f"  쇼핑 클릭 추이           {len(recs):>5}행")
+            # 분야 전체 분포. 키워드 쏠림을 읽을 기준선이다. 이게 없으면
+            # 네이버쇼핑은 어느 키워드든 40대가 최다로 나와 판정에 쓸 수 없다.
+            recs = list(shop.collect_category_demographics(
+                args.shopping_category, start.isoformat(), end.isoformat(),
+                run_id=run_id))
+            total += storage.insert_raw(conn, recs)
+            print(f"  쇼핑 분야 기준선          {len(recs):>5}행")
+
             recs = list(shop.collect_keyword_demographics(
                 args.shopping_category, args.keyword,
                 start.isoformat(), end.isoformat(), run_id=run_id))
@@ -162,6 +170,17 @@ def build(args) -> int:
     )
     conn.commit()
     print(f"  trend_case 에 정답 기록 (label={args.label}) - 산출물에는 넣지 않는다")
+
+    if args.shopping_category:
+        for prefix, label in (("age", "연령"), ("gender", "성별")):
+            skews = dg.profile(conn, args.keyword, args.shopping_category, prefix=prefix)
+            if not skews:
+                continue
+            top = dg.concentration(skews)
+            print(f"\n  {label} 쏠림 (분야 기준선 대비)"
+                  + (f"  최대 리프트 {top:.2f}" if top else ""))
+            for sk in skews:
+                print(f"    {sk}")
 
     case = export.TrendCase(args.case_id, args.keyword, t_peak.isoformat(),
                             t_cut.isoformat(), args.label, args.reason)

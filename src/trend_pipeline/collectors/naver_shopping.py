@@ -110,6 +110,59 @@ class NaverShoppingCollector(NaverCollector):
             run_id=run_id,
         )
 
+    def collect_category_demographics(
+        self,
+        category_code: str,
+        start_date: str,
+        end_date: str,
+        time_unit: str = "date",
+        run_id: Optional[str] = None,
+    ) -> Iterator[RawRecord]:
+        """분야 전체의 성별·연령 분포. 키워드 쏠림을 재는 기준선이다.
+
+        네이버쇼핑은 어느 키워드를 보든 40대가 최다로 나온다. 채널 이용자층이
+        그렇기 때문이지 키워드의 특성이 아니다. 키워드 분포를 그대로 읽으면
+        모든 키워드가 '40대 트렌드'가 된다.
+
+        분야 전체 분포를 따로 받아 기준선으로 두고, 키워드 분포를 그 대비로
+        읽어야 "이 키워드가 어느 연령에 기대 이상으로 쏠렸는가"를 말할 수 있다.
+        keyword_raw 에는 분야 코드를 넣어 키워드 행과 구분한다.
+        """
+        for kind, prefix in (("category_gender", "gender"), ("category_age", "age")):
+            payload = {
+                "startDate": start_date,
+                "endDate": end_date,
+                "timeUnit": time_unit,
+                "category": category_code,
+            }
+            response = self.post(PATHS[kind], payload)
+            for result in self.series(response):
+                points = result.get("data") or []
+                for point in points:
+                    group = str(point.get("group", ""))
+                    yield RawRecord(
+                        channel=self.channel,
+                        keyword_raw=f"category:{category_code}",
+                        entity=f"{prefix}={group}",
+                        metric_type="click_index",
+                        metric_value=point["ratio"],
+                        observed_at=point["period"],
+                        metadata={
+                            "kind": kind,
+                            "role": "baseline",
+                            "group": group,
+                            "category_code": category_code,
+                            "category_name": TOPS_CATEGORIES.get(category_code, ""),
+                            "time_unit": time_unit,
+                            "query_start": start_date,
+                            "query_end": end_date,
+                            "returned_days": len(points),
+                            "normalized": True,
+                            "note": "분야 전체 기준선. 키워드 분포를 이 대비로 읽는다",
+                        },
+                        run_id=run_id,
+                    )
+
     # ---------------------------------------------------------- 키워드 단위
 
     def collect_keyword(

@@ -202,6 +202,33 @@ def case_section(conn, case) -> str:
         notes = ('<div class="banner"><strong>확인 필요</strong><br>'
                  + "<br>".join(esc(n) for n in feats.notes) + "</div>")
 
+    commerce = ""
+    c = feats.commerce
+    if c:
+        warn = ('<div class="banner"><strong>반증 신호</strong><br>'
+                '순위는 올랐는데 리뷰 증가가 없다. 리뷰는 실제 구매를 거쳐야 쌓이므로 '
+                '광고 노출이나 프로모션 효과를 의심할 근거가 된다.</div>') if c.contradiction else ""
+        items = "".join(f"<li>{esc(e)}</li>" for e in c.examples)
+        commerce = f"""<div class="card">
+  <h3>커머스에서 관측된 것</h3>
+  {warn}
+  <div class="scroll"><table><thead><tr>
+    <th>연결된 상품</th><th>순위 상승</th><th>순위 하락</th>
+    <th>평균 순위 변화</th><th>리뷰 증가</th><th>품절</th></tr></thead>
+    <tbody><tr>
+      <td class="num">{c.matched_items}개</td>
+      <td class="num up">{c.rank_improved}</td>
+      <td class="num down">{c.rank_worsened}</td>
+      <td class="num">{fmt(c.mean_rank_change, 1)}</td>
+      <td class="num">{c.review_growth_total:,}</td>
+      <td class="num">{c.sold_out}</td>
+    </tr></tbody></table></div>
+  {f'<p class="note">예: <ul>{items}</ul></p>' if items else ''}
+  <p class="note">후보는 검색어이고 커머스 자료는 상품명이라 문자열로는 이어지지 않는다.
+  벡터 검색과 어휘 대조를 함께 써서 연결한다. 잘못 이어진 상품의 변동을 후보의
+  신호로 읽으면 판정이 오염되므로 근거가 약한 매칭은 버린다.</p>
+</div>"""
+
     return f"""<section>
 <h2>{esc(kw)}</h2>
 <p class="sub">판단 기준 시점 T_cut {esc(t_cut)} · 이 시점 이전 자료만 사용 ·
@@ -217,6 +244,7 @@ def case_section(conn, case) -> str:
   <p class="note">네이버쇼핑은 어느 키워드든 40대가 최다로 나온다. 채널 이용자층이
   그런 것이라 분야 전체 분포를 기준선으로 두고 그 대비로 읽는다.</p>
 </div>
+{commerce}
 <div class="card">
   <h3>수치 요약</h3>
   <div class="scroll"><table><thead><tr>

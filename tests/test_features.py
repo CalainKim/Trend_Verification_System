@@ -94,3 +94,27 @@ def test_save_roundtrip(conn):
     assert row["date"] == "2026-08-05"
     assert row["channel_count"] == 1
     assert "럭비" not in row["demographic_distribution"]
+
+
+def test_lexical_match_is_deterministic():
+    """같은 입력에 항상 같은 답이 나와야 한다.
+
+    토큰 집합(set)을 이어붙여 부분문자열을 찾으면 파이썬의 문자열 해시
+    무작위화 때문에 이어붙인 순서가 실행마다 달라진다. 실제로 '후드 티셔츠'가
+    어떤 실행에서는 '후드티'에 매칭되고 어떤 실행에서는 안 됐다.
+    """
+    pairs = [
+        ("후드티", "C로고 레귤러핏 후드 티셔츠 Oxford Grey", True),
+        ("맨투맨", "캣 스티치 레글런 피그먼트 맨투맨 고스트그레이", True),
+        ("래글런", "[29CM 단독] (2차_9/11 순차배송) 데일리 레글런 티셔츠 (레몬)", False),
+        ("럭비티", "[루피타 X 29editon] PINTUCK LACE FRILL BLOUSE_IVORY", False),
+        ("발라클라바", "오버핏 반팔 티셔츠", False),
+    ]
+    for keyword, text, expected in pairs:
+        results = {ft.lexical_match(keyword, text) for _ in range(20)}
+        assert results == {expected}, f"{keyword} vs {text}: {results}"
+
+
+def test_flat_preserves_order():
+    assert ft._flat("후드 티셔츠") == "후드티셔츠"
+    assert "후드티" in ft._flat("C로고 레귤러핏 후드 티셔츠")

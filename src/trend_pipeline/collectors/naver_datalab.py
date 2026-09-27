@@ -14,7 +14,7 @@ from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Optional, Sequence
 
 from ..models import RawRecord
-from .naver_base import NaverCollector
+from .naver_base import NaverCollector, segment_key
 
 PATH = "/search-trend/v1/search"
 
@@ -29,6 +29,15 @@ AGE_CODES = {
     "6": "35-39", "7": "40-44", "8": "45-49", "9": "50-54", "10": "55-59",
     "11": "60+",
 }
+
+#: 1차 MVP 대상인 20대. 검색어 트렌드는 5세 단위라 두 코드를 함께 넘겨야 한다.
+TWENTIES = ("3", "4")
+
+#: 성별·연령을 동시에 지정하면 교차 조건(20대 '이면서' 남성)이 적용된다.
+#: 2026-09-27 실측 확인: 남성+20대 시계열이 남성만·20대만·여성+20대와 모두 다르다.
+#: 주변분포 두 개(남성 전체 / 20대 전체)로는 교차셀을 복원할 수 없으므로,
+#: 20대 남성을 보려면 반드시 한 요청에서 두 조건을 함께 지정해야 한다.
+SUPPORTS_CROSS_FILTER = True
 
 MAX_KEYWORD_GROUPS = 5
 MAX_KEYWORDS_PER_GROUP = 20
@@ -115,19 +124,3 @@ class NaverDataLabCollector(NaverCollector):
                     },
                     run_id=run_id,
                 )
-
-
-def segment_key(
-    device: Optional[str] = None,
-    gender: Optional[str] = None,
-    ages: Optional[Sequence[str]] = None,
-) -> str:
-    """분해 조건을 나타내는 entity 키. 조건이 없으면 빈 문자열(전체)."""
-    parts = []
-    if device:
-        parts.append(f"device={device}")
-    if gender:
-        parts.append(f"gender={gender}")
-    if ages:
-        parts.append("ages=" + "+".join(ages))
-    return ";".join(parts)

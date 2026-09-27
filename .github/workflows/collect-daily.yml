@@ -1,12 +1,19 @@
 name: collect-daily
 
-# 크롤링은 과거 데이터를 소급 수집할 수 없다. 하루 거르면 그 날치는 영구 손실이므로
-# 노트북 cron 대신 Actions 로 돌린다.
+# 예약 실행을 걷어냈다. 29CM API 가 GitHub Actions 의 IP 대역에서 오는 요청을
+# 403 으로 막기 때문에 클라우드에서는 수집이 성립하지 않는다. 2026-09-09 ~ 09-15
+# 동안 16회 실행이 전부 실패했고 실패 알림만 쌓였다.
+#
+# 실제 수집은 로컬에서 돈다. scripts/install_local_schedule.sh 참고.
+# 여기에는 수동 실행만 남겨 둔다. 네트워크 조건이 바뀌었는지 확인하거나,
+# 로컬에서 만든 스냅샷을 다시 적재해 대시보드를 갱신할 때 쓴다.
 on:
-  schedule:
-    - cron: "0 0 * * *"   # UTC 00:00 = KST 09:00
-    - cron: "0 12 * * *"  # UTC 12:00 = KST 21:00
   workflow_dispatch:
+    inputs:
+      collect:
+        description: "29CM 수집까지 시도할지 (403 이면 실패한다)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -31,16 +38,17 @@ jobs:
       - name: 스냅샷으로부터 DB 재구성
         run: python scripts/load_snapshots.py
 
-      - name: 수집
+      - name: 수집 (선택)
+        if: ${{ inputs.collect }}
         run: python scripts/collect_daily.py
 
-      - name: 리포트 (로그에서 바로 확인)
+      - name: 리포트
         run: python scripts/report.py --no-color
 
       - name: 대시보드 생성
         run: python scripts/build_dashboard.py
 
-      - name: 스냅샷·대시보드 커밋
+      - name: 변경분 커밋
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -48,8 +56,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "변경 없음"
           else
-            git commit -m "chore(data): 29CM 랭킹 스냅샷 $(date -u +%Y-%m-%d)"
-            # 다른 실행이 먼저 밀어넣었을 수 있다
+            git commit -m "chore(data): 대시보드 갱신 $(date -u +%Y-%m-%d)"
             git pull --rebase --autostash origin main || true
             git push
           fi

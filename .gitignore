@@ -3,6 +3,7 @@ data/*.sqlite
 data/*.sqlite-journal
 data/*.db
 data/raw/
+data/*.log
 *.csv.gz
 
 # secrets

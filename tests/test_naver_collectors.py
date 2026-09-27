@@ -142,3 +142,46 @@ def test_shopping_keyword_group_rejects_multiple_params():
     with pytest.raises(ValueError, match="표현 1개만"):
         list(c.collect_keyword("50000169", {"럭비티": ["럭비티", "럭비셔츠"]},
                                "2024-01-01", "2024-02-01"))
+
+
+def test_segment_key_encodes_cross_condition():
+    """성별과 연령을 함께 지정한 것이 entity 에 드러나야 한다.
+
+    '남성 전체'와 '20대 전체'를 따로 받아서는 20대 남성을 복원할 수 없다.
+    두 조건이 한 요청에 같이 들어갔다는 사실이 키에 남아야 구분된다.
+    """
+    from trend_pipeline.collectors.naver_base import segment_key
+
+    assert segment_key() == ""
+    assert segment_key(gender="m") == "gender=m"
+    assert segment_key(ages=["3", "4"]) == "ages=3+4"
+    cross = segment_key(gender="m", ages=["3", "4"])
+    assert cross == "gender=m;ages=3+4"
+    assert cross != segment_key(gender="m")
+    assert cross != segment_key(ages=["3", "4"])
+
+
+def test_shopping_sends_cross_condition_and_tags_entity():
+    payload = {"results": [{"title": "맨투맨", "keyword": ["맨투맨"],
+                            "data": [{"period": "2026-08-01", "ratio": 50.0}]}]}
+    s = FakeSession([payload])
+    c = NaverShoppingCollector("id", "secret", min_interval_sec=0, session=s)
+    rows = list(c.collect_keyword("50000169", {"맨투맨": ["맨투맨"]},
+                                  "2026-08-01", "2026-08-31",
+                                  gender="m", ages=["20"]))
+    _, body = s.calls[0]
+    assert body["gender"] == "m" and body["ages"] == ["20"]
+    assert rows[0].entity == "gender=m;ages=20"
+    # 좁은 세그먼트는 결측이 많다. 커버리지를 알 수 있어야 한다.
+    assert rows[0].metadata["returned_days"] == 1
+
+
+def test_shopping_rejects_search_trend_age_codes():
+    """두 API 의 연령 코드 체계가 다르다. 섞어 쓰면 조용히 틀린 구간을 받는다."""
+    c = NaverShoppingCollector("id", "secret", min_interval_sec=0, session=FakeSession([]))
+    with pytest.raises(ValueError, match="연령 코드가 아니다"):
+        list(c.collect_keyword("50000169", {"a": ["a"]}, "2026-08-01", "2026-08-31",
+                               ages=["3", "4"]))       # 검색어 트렌드 코드
+    with pytest.raises(ValueError, match="gender"):
+        list(c.collect_keyword("50000169", {"a": ["a"]}, "2026-08-01", "2026-08-31",
+                               gender="male"))

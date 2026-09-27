@@ -21,13 +21,33 @@ X-NCP-APIGW-* 이고 호스트도 openapi.naver.com 이 아니다. 예전 방식
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 import requests
 
 from .base import Collector
 
 API_HOST = "https://naverapihub.apigw.ntruss.com"
+
+
+def segment_key(
+    device: Optional[str] = None,
+    gender: Optional[str] = None,
+    ages: Optional[Sequence[str]] = None,
+) -> str:
+    """분해 조건을 나타내는 entity 키. 조건이 없으면 빈 문자열(전체).
+
+    entity 하나로 전체 시계열과 모든 인구통계 조각을 같은 테이블에 담는다.
+    세그먼트가 늘어도 스키마를 바꿀 필요가 없다.
+    """
+    parts = []
+    if device:
+        parts.append(f"device={device}")
+    if gender:
+        parts.append(f"gender={gender}")
+    if ages:
+        parts.append("ages=" + "+".join(ages))
+    return ";".join(parts)
 
 
 class NaverApiError(RuntimeError):

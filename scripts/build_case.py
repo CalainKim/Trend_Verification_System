@@ -28,12 +28,21 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from trend_pipeline import config, export, storage  # noqa: E402
 from trend_pipeline.collectors.naver_base import NaverApiError  # noqa: E402
+from trend_pipeline.collectors import naver_datalab, naver_shopping  # noqa: E402
 from trend_pipeline.collectors.naver_datalab import NaverDataLabCollector  # noqa: E402
 from trend_pipeline.collectors.naver_shopping import (  # noqa: E402
     TOPS_CATEGORIES,
     NaverShoppingCollector,
 )
 from trend_pipeline.models import utcnow_iso  # noqa: E402
+
+#: 1차 MVP 분석 대상. (gender, 연령그룹) 형태이며 두 조건을 한 요청에 함께 보낸다.
+#: 연령 코드 체계가 API 마다 달라(검색어 트렌드 5세 단위, 쇼핑인사이트 10년 단위)
+#: 여기서는 ' 20s ' 라는 논리 이름으로 두고 수집기별 상수로 풀어 쓴다.
+SEGMENTS = {
+    "m20": ("m", "20s"),
+    "f20": ("f", "20s"),
+}
 
 #: T_cut 은 T_peak 에서 이만큼 앞선 시점. 재고 대응에 필요한 선행 시간이다.
 LEAD_WEEKS = 4
@@ -80,17 +89,31 @@ def build(args) -> int:
 
     search = NaverDataLabCollector(cid, secret, min_interval_sec=0.3)
     total = 0
+    span_days = (end - start).days + 1
 
     recs = list(search.collect({args.keyword: keywords}, start.isoformat(),
                                end.isoformat(), run_id=run_id))
     total += storage.insert_raw(conn, recs)
-    print(f"  검색어 트렌드            {len(recs):>5}행")
+    print(f"  검색어 트렌드  전체           {len(recs):>5}행")
 
     for gender in ("f", "m"):
         recs = list(search.collect({args.keyword: keywords}, start.isoformat(),
                                    end.isoformat(), gender=gender, run_id=run_id))
         total += storage.insert_raw(conn, recs)
-        print(f"  검색어 트렌드 (성별 {gender})   {len(recs):>5}행")
+        print(f"  검색어 트렌드  성별 {gender}         {len(recs):>5}행")
+
+    # 1차 MVP 대상인 20대 남성. 성별과 연령을 한 요청에 함께 지정해야 교차셀이
+    # 나온다. '남성 전체'와 '20대 전체'를 따로 받아 곱하거나 겹쳐서는 복원할 수 없다.
+    if args.segment:
+        g, ages = SEGMENTS[args.segment]
+        recs = list(search.collect({args.keyword: keywords}, start.isoformat(),
+                                   end.isoformat(), gender=g,
+                                   ages=naver_datalab.TWENTIES if ages == "20s" else None,
+                                   run_id=run_id))
+        total += storage.insert_raw(conn, recs)
+        days = len({r.observed_at for r in recs})
+        print(f"  검색어 트렌드  {args.segment:<12} {len(recs):>5}행  "
+              f"{days}/{span_days}일  커버리지 {days/span_days:.0%}")
 
     if args.shopping_category:
         shop = NaverShoppingCollector(cid, secret, min_interval_sec=0.3)
@@ -105,7 +128,26 @@ def build(args) -> int:
                 args.shopping_category, args.keyword,
                 start.isoformat(), end.isoformat(), run_id=run_id))
             total += storage.insert_raw(conn, recs)
-            print(f"  쇼핑 성별·연령 분해       {len(recs):>5}행")
+            print(f"  쇼핑 성별·연령 분해(주변분포) {len(recs):>5}행")
+
+            if args.segment:
+                g, ages = SEGMENTS[args.segment]
+                recs = list(shop.collect_keyword(
+                    args.shopping_category, {k: [k] for k in keywords},
+                    start.isoformat(), end.isoformat(), gender=g,
+                    ages=naver_shopping.TWENTIES if ages == "20s" else None,
+                    run_id=run_id))
+                total += storage.insert_raw(conn, recs)
+                # 커버리지는 시리즈당 개념이다. 키워드 그룹이 여럿이면 행 수는
+                # 그 배수가 되므로 행 수로 나누면 100% 를 넘는 값이 나온다.
+                # 수집기가 남긴 returned_days 를 쓴다.
+                days = max((r.metadata.get("returned_days", 0) for r in recs), default=0)
+                cov = days / span_days if span_days else 0
+                print(f"  쇼핑 {args.segment:<18} {len(recs):>5}행  "
+                      f"{days}/{span_days}일  커버리지 {cov:.0%}")
+                if cov < 0.5:
+                    print("      주의: 클릭이 없는 날은 응답에서 빠진다. 좁은 세그먼트는")
+                    print("            결측이 많아 추세 판단이 어려울 수 있다.")
         except NaverApiError as exc:
             print(f"  쇼핑인사이트 실패: {exc}")
 
@@ -142,6 +184,8 @@ def main(argv=None) -> int:
     p.add_argument("--reason", default="", help="이 라벨을 붙인 근거")
     p.add_argument("--shopping-category", default=None,
                    choices=list(TOPS_CATEGORIES) + [None])
+    p.add_argument("--segment", choices=sorted(SEGMENTS),
+                   help="인구통계 세그먼트도 함께 수집 (m20 = 20대 남성)")
     p.add_argument("--lead-weeks", type=int, default=LEAD_WEEKS)
     p.add_argument("--history-years", type=int, default=HISTORY_YEARS)
     args = p.parse_args(argv)

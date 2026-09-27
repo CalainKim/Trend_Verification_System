@@ -16,7 +16,7 @@ from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Optional, Sequence
 
 from ..models import RawRecord
-from .naver_base import NaverCollector
+from .naver_base import NaverCollector, segment_key
 
 BASE = "/shopping/v1"
 #: 쇼핑인사이트는 키워드 그룹 하나에 표현을 하나만 받는다. 검색어 트렌드가
@@ -41,6 +41,18 @@ PATHS = {
 AGE_CODES = ("10", "20", "30", "40", "50", "60")
 GENDER_CODES = ("f", "m")
 DEVICE_CODES = ("pc", "mo")
+
+#: 1차 MVP 대상. 쇼핑인사이트는 10년 단위라 코드 하나면 된다(검색어 트렌드는 5세 단위).
+TWENTIES = ("20",)
+
+#: 성별과 연령을 함께 지정하면 교차 조건이 적용된다. 2026-09-27 실측 확인:
+#: 여성의류>티셔츠에서 남성+20대(11일) / 여성+20대(58일) / 남성+30대(37일) /
+#: 20대만(59일)이 모두 다른 시계열이었다.
+#:
+#: 주의: 좁힐수록 응답 일수가 급격히 줄어든다. 클릭이 없는 날은 행 자체가
+#: 빠져서 오므로, "0 클릭"과 "데이터 없음"이 구분되지 않는다. 조회 구간과 실제
+#: 반환 일수를 메타데이터에 남겨 다운스트림이 커버리지를 알 수 있게 한다.
+SUPPORTS_CROSS_FILTER = True
 
 #: 상위 분야 코드. 실제 호출로 확인했다.
 FASHION_CLOTHING = "50000000"
@@ -107,6 +119,9 @@ class NaverShoppingCollector(NaverCollector):
         start_date: str,
         end_date: str,
         time_unit: str = "date",
+        device: Optional[str] = None,
+        gender: Optional[str] = None,
+        ages: Optional[Sequence[str]] = None,
         run_id: Optional[str] = None,
     ) -> Iterator[RawRecord]:
         """특정 분야 안에서 키워드별 클릭 추이.
@@ -122,19 +137,37 @@ class NaverShoppingCollector(NaverCollector):
                     f"동의어는 그룹을 나눠서 보낼 것: "
                     f"{{'{name}': ['{params[0] if params else ''}'], ...}}"
                 )
-        payload = {
+        if ages:
+            unknown = [a for a in ages if a not in AGE_CODES]
+            if unknown:
+                raise ValueError(
+                    f"쇼핑인사이트 연령 코드가 아니다: {unknown}. "
+                    f"{AGE_CODES} 중에서 쓸 것. 검색어 트렌드(1~11)와 체계가 다르다."
+                )
+        if gender and gender not in GENDER_CODES:
+            raise ValueError(f"gender 는 {GENDER_CODES} 중 하나여야 한다: {gender!r}")
+
+        payload: Dict[str, Any] = {
             "startDate": start_date,
             "endDate": end_date,
             "timeUnit": time_unit,
             "category": category_code,
             "keyword": [{"name": n, "param": list(p)} for n, p in keyword_groups.items()],
         }
+        if device:
+            payload["device"] = device
+        if gender:
+            payload["gender"] = gender
+        if ages:
+            payload["ages"] = list(ages)
+
         yield from self._emit(
             self.post(PATHS["keyword"], payload),
             metric_type="click_index",
-            entity="",
+            entity=segment_key(device=device, gender=gender, ages=ages),
             context={"kind": "keyword", "category_code": category_code,
-                     "time_unit": time_unit,
+                     "time_unit": time_unit, "device": device,
+                     "gender": gender, "ages": list(ages) if ages else None,
                      "query_start": start_date, "query_end": end_date},
             run_id=run_id,
         )
@@ -205,7 +238,11 @@ class NaverShoppingCollector(NaverCollector):
         for result in self.series(response):
             title = result.get("title") or ""
             params: List[str] = result.get("keyword") or result.get("category") or []
-            for point in result.get("data") or []:
+            points = result.get("data") or []
+            # 클릭이 없는 날은 응답에서 빠진다. 조회 구간 대비 몇 일이 왔는지
+            # 남겨야 다운스트림이 "0 클릭"과 "데이터 없음"을 구분할 수 있다.
+            context = {**context, "returned_days": len(points)}
+            for point in points:
                 yield RawRecord(
                     channel=self.channel,
                     keyword_raw=title,

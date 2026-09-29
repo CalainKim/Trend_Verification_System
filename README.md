@@ -84,6 +84,8 @@ cases/{case_id}/
                                       2016-01-01 부터 조회 가능 (실측 확인)
                                       성별·연령 교차 조건 지원 (20대 남성 등)
   Google Trends                       해외 선행 여부 검증
+                                      pytrends 사용. 첫 요청이 자주 429 라 재시도 필요
+                                      한국어 키워드는 해외 검색량이 0이므로 대응 영문어 필요
   뉴스 아카이브                       캠페인·미디어 노출 시점 확인 (반증 근거)
 
 트랙 B
@@ -218,6 +220,7 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
       naver_base.py      네이버 오픈 API 공통 계층
       naver_datalab.py   검색어 트렌드 수집기
       naver_shopping.py  쇼핑인사이트 수집기 (성별·연령 분해)
+      gtrends.py         Google Trends 수집기 (지역별 관심도)
     analytics.py         수집 데이터 요약 집계 (리포트와 대시보드가 공유)
     demographics.py      인구통계 쏠림 (분야 기준선 대비 리프트)
     features.py          후보별 특징 추출 (as_of 이전 자료만)
@@ -308,7 +311,6 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
 
 ```
 대기
-  Google Trends 수집기
   역추적 케이스 선정 기준 합의 후 케이스 선정 (real / noise)
   실데이터로 클러스터링 임계값 조정
   영문 상품명 대응 확대 (현재는 1차 범위 어휘만 손으로 대응)

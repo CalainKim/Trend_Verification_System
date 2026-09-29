@@ -8,3 +8,7 @@ pytest>=8.0
 # 벡터 검색 (동의어 클러스터링, 후보 -> 실제 수집 아이템 되찾기)
 sqlite-vec>=0.1.9
 sentence-transformers>=3.0
+
+# Google Trends (해외 선행 여부 검증). 비공식 라이브러리라
+# 첫 요청이 자주 429 로 막힌다. 수집기가 재시도로 흡수한다.
+pytrends>=4.9

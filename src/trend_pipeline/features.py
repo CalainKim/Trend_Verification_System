@@ -55,6 +55,30 @@ class ChannelTrend:
     last_value: Optional[float]
 
 
+#: 선행 여부를 볼 때 밀어보는 최대 일수. 한 계절을 넘기면 다른 유행을 겹쳐
+#: 보게 되므로 6주로 제한한다.
+MAX_LEAD_DAYS = 42
+
+#: 상관이 이 값보다 낮으면 어긋난 두 시계열을 억지로 맞춘 것이라 보고
+#: 선행 일수를 보고하지 않는다.
+MIN_LEAD_CORRELATION = 0.3
+
+
+@dataclass
+class LeadLag:
+    """해외 선행 여부. 계획서의 '유행은 해외에서 넘어온다' 가설을 자료로 확인한다.
+
+    해석 주의: 계절 상품은 한국과 해외의 계절 검색 시점 차이만으로도 선행이
+    나타난다. 유행 전파와 계절 차이를 구분하려면 계절성 지표를 함께 봐야 한다.
+    """
+    geo: str
+    lead_days: int            # 양수면 해외가 그만큼 앞섰다는 뜻
+    correlation: float
+    n_overlap: int
+    reliable: bool
+    at_boundary: bool = False  # 최적값이 탐색 범위 끝에 걸렸는가
+
+
 @dataclass
 class CommerceSignal:
     """커머스에서 관측된 것. 후보 키워드와 상품은 벡터 검색으로 잇는다."""
@@ -81,6 +105,7 @@ class CaseFeatures:
     segment_change_ratio: Optional[float] = None   # 20대 남성 등
     seasonality_ratio: Optional[float] = None      # 전년 동기 대비
     commerce: Optional[CommerceSignal] = None
+    lead_lag: Dict[str, LeadLag] = field(default_factory=dict)
     channel_count: int = 0
     notes: List[str] = field(default_factory=list)
 
@@ -278,6 +303,78 @@ def match_products(
     return out[:limit]
 
 
+def _pearson(xs: List[float], ys: List[float]) -> Optional[float]:
+    if len(xs) < 5:
+        return None
+    mx, my = statistics.fmean(xs), statistics.fmean(ys)
+    num = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    dx = sum((x - mx) ** 2 for x in xs) ** 0.5
+    dy = sum((y - my) ** 2 for y in ys) ** 0.5
+    if dx == 0 or dy == 0:
+        return None
+    return num / (dx * dy)
+
+
+def lead_lag(
+    conn: sqlite3.Connection,
+    keyword: str,
+    as_of: str,
+    geo: str,
+    home_geo: str = "KR",
+    window_days: int = 365,
+    max_shift: int = MAX_LEAD_DAYS,
+) -> Optional[LeadLag]:
+    """해외 시계열을 며칠 밀었을 때 한국과 가장 잘 겹치는지 찾는다.
+
+    상관계수는 스케일에 무관하므로, 지역마다 정규화 기준이 다른 지수끼리도
+    비교가 성립한다. 값의 크기가 아니라 시점을 보기 때문이다.
+
+    양수 lead_days 는 해외가 그만큼 앞섰다는 뜻이다. 다만 상관이 낮으면
+    어긋난 두 곡선을 억지로 맞춘 것이므로 신뢰할 수 없다고 표시한다.
+    """
+    cut = date.fromisoformat(as_of[:10])
+    start = (cut - timedelta(days=window_days)).isoformat()
+
+    def load(g):
+        rows = conn.execute(
+            """
+            SELECT observed_at, AVG(metric_value) v FROM signal_raw
+            WHERE channel='gtrends' AND keyword_raw=? AND entity=?
+              AND observed_at>=? AND observed_at<?
+            GROUP BY observed_at ORDER BY observed_at
+            """, (keyword, f"geo={g}", start, cut.isoformat())).fetchall()
+        return {r["observed_at"][:10]: r["v"] for r in rows}
+
+    home, away = load(home_geo), load(geo)
+    if len(home) < 10 or len(away) < 10:
+        return None
+
+    best = None
+    for shift in range(-max_shift, max_shift + 1):
+        xs, ys = [], []
+        for day, value in home.items():
+            shifted = (date.fromisoformat(day) - timedelta(days=shift)).isoformat()
+            if shifted in away:
+                xs.append(value)
+                ys.append(away[shifted])
+        r = _pearson(xs, ys)
+        if r is None:
+            continue
+        if best is None or r > best[1]:
+            best = (shift, r, len(xs))
+    if best is None:
+        return None
+
+    shift, corr, n = best
+    # 최적값이 탐색 범위 끝에 걸렸다면 진짜 최적은 범위 밖일 수 있다.
+    # 경계값을 그대로 결과로 보고하면 실제보다 짧은 시차로 읽힌다.
+    at_boundary = abs(shift) >= max_shift
+    return LeadLag(geo=geo, lead_days=shift, correlation=round(corr, 3),
+                   n_overlap=n,
+                   reliable=corr >= MIN_LEAD_CORRELATION and not at_boundary,
+                   at_boundary=at_boundary)
+
+
 def commerce_signals(
     conn: sqlite3.Connection,
     keyword: str,
@@ -435,6 +532,19 @@ def extract(
         feats.top_age_lift = dg.concentration(age)
         if age and not feats.age_lift:
             feats.notes.append("연령 기준선이 모두 희소해 리프트를 신뢰할 수 없다")
+
+    for geo in ("US", "WORLD"):
+        ll = lead_lag(conn, keyword, cut.isoformat(), geo)
+        if ll:
+            feats.lead_lag[geo] = ll
+            if ll.at_boundary:
+                feats.notes.append(
+                    f"{geo} 선행 일수가 탐색 범위 끝({MAX_LEAD_DAYS}일)에 걸렸다. "
+                    f"실제 시차는 더 클 수 있어 이 값을 근거로 쓸 수 없다")
+            elif not ll.reliable:
+                feats.notes.append(
+                    f"{geo} 와의 상관이 {ll.correlation} 로 낮다. 선행 일수를 "
+                    f"근거로 쓸 수 없다")
 
     feats.seasonality_ratio = seasonality(
         conn, keyword, "naver_datalab", "", cut.isoformat())

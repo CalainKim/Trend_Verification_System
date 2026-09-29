@@ -26,9 +26,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from trend_pipeline import config, demographics as dg, export, storage  # noqa: E402
+from trend_pipeline import (  # noqa: E402
+    config, demographics as dg, export, features as ft, storage,
+)
 from trend_pipeline.collectors.naver_base import NaverApiError  # noqa: E402
 from trend_pipeline.collectors import naver_datalab, naver_shopping  # noqa: E402
+from trend_pipeline.collectors.gtrends import (  # noqa: E402
+    GoogleTrendsCollector,
+    GoogleTrendsUnavailable,
+)
 from trend_pipeline.collectors.naver_datalab import NaverDataLabCollector  # noqa: E402
 from trend_pipeline.collectors.naver_shopping import (  # noqa: E402
     TOPS_CATEGORIES,
@@ -171,6 +177,32 @@ def build(args) -> int:
     conn.commit()
     print(f"  trend_case 에 정답 기록 (label={args.label}) - 산출물에는 넣지 않는다")
 
+    if args.overseas_term:
+        # 해외 선행은 같은 단어로 볼 수 없다. 한국어 키워드는 해외 검색량이
+        # 구조적으로 0이라 대응 영문 단어를 함께 줘야 한다.
+        try:
+            gt = GoogleTrendsCollector(min_interval_sec=2.0)
+            recs = list(gt.collect(
+                [args.keyword], start.isoformat(), end.isoformat(),
+                geos=("KR", "US", ""),
+                keywords_by_geo={"US": [args.overseas_term], "": [args.overseas_term]},
+                candidate=args.keyword, run_id=run_id))
+            total += storage.insert_raw(conn, recs)
+            print(f"  Google Trends           {len(recs):>5}행  "
+                  f"(해외 질의어 '{args.overseas_term}')")
+            for geo in ("US", "WORLD"):
+                ll = ft.lead_lag(conn, args.keyword, end.isoformat(), geo,
+                                 window_days=(end - start).days)
+                if not ll:
+                    continue
+                who = "해외 선행" if ll.lead_days > 0 else "한국 선행"
+                flag = ("  경계에 걸림, 근거 불가" if ll.at_boundary
+                        else ("" if ll.reliable else "  상관 낮음, 근거 불가"))
+                print(f"    {geo:<6} {who} {abs(ll.lead_days)}일 · "
+                      f"상관 {ll.correlation}{flag}")
+        except GoogleTrendsUnavailable as exc:
+            print(f"  Google Trends 실패: {exc}")
+
     if args.shopping_category:
         for prefix, label in (("age", "연령"), ("gender", "성별")):
             skews = dg.profile(conn, args.keyword, args.shopping_category, prefix=prefix)
@@ -203,6 +235,9 @@ def main(argv=None) -> int:
     p.add_argument("--reason", default="", help="이 라벨을 붙인 근거")
     p.add_argument("--shopping-category", default=None,
                    choices=list(TOPS_CATEGORIES) + [None])
+    p.add_argument("--overseas-term",
+                   help="해외 조회용 대응 단어 (예: 맨투맨 -> sweatshirt). "
+                        "없으면 Google Trends 를 건너뛴다")
     p.add_argument("--segment", choices=sorted(SEGMENTS),
                    help="인구통계 세그먼트도 함께 수집 (m20 = 20대 남성)")
     p.add_argument("--lead-weeks", type=int, default=LEAD_WEEKS)

@@ -50,14 +50,105 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
 
 ---
 
-## 4. DB 구조
+## 4. DB 에 직접 들어가서 자유롭게 질의
+
+    sqlite3 data/signals.sqlite
+
+들어가면 프롬프트가 `sqlite>` 로 바뀐다. SQL 을 그대로 치면 된다.
+`~/.sqliterc` 에 헤더·컬럼 정렬을 켜 두었으므로 결과가 표로 나온다.
+
+    sqlite> .tables
+    sqlite> .schema signal_raw
+    sqlite> SELECT * FROM signal_raw LIMIT 5;
+    sqlite> .quit
+
+### 질의를 짤 때 알아야 할 값
+
+채널
+
+    naver_datalab    검색어 트렌드
+    naver_shopping   쇼핑 클릭
+    gtrends          Google Trends
+    commerce_rank    29CM 랭킹
+
+metric_type
+
+    search_index     검색 지수
+    click_index      클릭 지수
+    rank             순위 (작을수록 상위)
+    review_count     리뷰 수
+    heart_count      좋아요 수
+
+entity (하위 구분)
+
+    (빈 문자열)          전체
+    gender=m / f        성별 (주변분포)
+    age=10 ~ age=60     연령 (주변분포)
+    gender=m;ages=3+4   20대 남성 (교차셀)
+    geo=KR / US / WORLD 지역
+    29cm:<번호>          커머스 상품
+    29cm:<번호>@<코드>    커머스 상품의 랭킹 내 순위
+
+keyword_raw 가 `category:50000169` 인 행은 분야 전체 기준선이다.
+
+### 즉석에서 쓸 만한 질의
+
+특정 키워드의 최근 추이
+
+    SELECT substr(observed_at,1,10) d, round(metric_value,1) v
+    FROM signal_raw
+    WHERE keyword_raw='럭비티' AND channel='naver_datalab' AND entity=''
+    ORDER BY d DESC LIMIT 20;
+
+오늘 순위가 가장 많이 오른 상품
+
+    SELECT keyword_raw,
+           MIN(CASE WHEN observed_at LIKE '2026-09-27%' THEN metric_value END) AS before_,
+           MIN(CASE WHEN observed_at LIKE '2026-09-29%' THEN metric_value END) AS after_
+    FROM signal_raw WHERE channel='commerce_rank' AND metric_type='rank'
+    GROUP BY keyword_raw
+    HAVING before_ IS NOT NULL AND after_ IS NOT NULL AND before_ - after_ > 20
+    ORDER BY before_ - after_ DESC LIMIT 15;
+
+품절된 상품
+
+    SELECT DISTINCT keyword_raw, json_extract(metadata,'$.brand_kor') brand
+    FROM signal_raw
+    WHERE channel='commerce_rank' AND json_extract(metadata,'$.sold_out')=1
+    LIMIT 15;
+
+metadata 안을 들여다보기
+
+    SELECT json_extract(metadata,'$.brand_kor') brand,
+           json_extract(metadata,'$.category3') cat,
+           json_extract(metadata,'$.sale_price') price,
+           keyword_raw
+    FROM signal_raw WHERE channel='commerce_rank' AND metric_type='rank'
+    ORDER BY metric_value LIMIT 15;
+
+20대 남성만 따로 보기
+
+    SELECT substr(observed_at,1,10) d, channel, round(metric_value,1) v
+    FROM signal_raw WHERE entity LIKE '%ages=%' AND entity LIKE 'gender=m%'
+    ORDER BY d DESC LIMIT 20;
+
+한 상품의 리뷰가 늘어나는 것
+
+    SELECT substr(observed_at,1,10) d, metric_value reviews
+    FROM signal_raw
+    WHERE channel='commerce_rank' AND metric_type='review_count'
+      AND keyword_raw LIKE '%LAUNDRY SHIRT%' ORDER BY d;
+
+---
+
+## 5. DB 구조
 
     sqlite3 data/signals.sqlite ".tables"
     sqlite3 data/signals.sqlite ".schema signal_raw"
 
 ---
 
-## 5. 무엇이 얼마나 쌓였나
+## 6. 무엇이 얼마나 쌓였나
 
     sqlite3 -header -column data/signals.sqlite "
       SELECT channel, COUNT(*) rows, COUNT(DISTINCT keyword_raw) keywords,
@@ -66,7 +157,7 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
 
 ---
 
-## 6. 시점을 두 개로 나눈 이유
+## 7. 시점을 두 개로 나눈 이유
 
     sqlite3 -header -column data/signals.sqlite "
       SELECT substr(observed_at,1,10) observed, substr(collected_at,1,10) collected,
@@ -77,7 +168,7 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
 
 ---
 
-## 7. entity 하나로 모든 세그먼트를 담는다
+## 8. entity 하나로 모든 세그먼트를 담는다
 
     sqlite3 -header -column data/signals.sqlite "
       SELECT DISTINCT entity FROM signal_raw
@@ -92,7 +183,7 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
 
 ---
 
-## 8. 수집 원본 상품명 — 날 것
+## 9. 수집 원본 상품명 — 날 것
 
     sqlite3 data/signals.sqlite "
       SELECT DISTINCT keyword_raw FROM signal_raw
@@ -102,7 +193,7 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
 
 ---
 
-## 9. 정제 — 정규화 전후
+## 10. 정제 — 정규화 전후
 
     .venv/bin/python -c "
     import sys; sys.path.insert(0,'src')
@@ -114,7 +205,7 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
 
 ---
 
-## 10. 정제 — 동의어 클러스터링
+## 11. 정제 — 동의어 클러스터링
 
     .venv/bin/python scripts/build_index.py --cluster 2>/dev/null | tail -30
 
@@ -122,7 +213,7 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
 
 ---
 
-## 11. 누수 차단 — 실제로 막는가
+## 12. 누수 차단 — 실제로 막는가
 
     sqlite3 -header -column data/signals.sqlite "SELECT case_id, keyword, t_peak, t_cut, label FROM trend_case;"
 
@@ -147,7 +238,7 @@ label 과 t_peak 이 없다.
 
 ---
 
-## 12. 인구통계 — 기준선 대비로 읽는다
+## 13. 인구통계 — 기준선 대비로 읽는다
 
 분야 전체의 연령 분포. 어떤 키워드를 봐도 40 대가 최다다.
 
@@ -169,7 +260,7 @@ label 과 t_peak 이 없다.
 
 ---
 
-## 13. 해외 선행 — 가설을 자료로 확인
+## 14. 해외 선행 — 가설을 자료로 확인
 
     .venv/bin/python -c "
     import sys; sys.path.insert(0,'src')
@@ -184,7 +275,7 @@ label 과 t_peak 이 없다.
 
 ---
 
-## 14. 후보 → 실제 상품 연결
+## 15. 후보 → 실제 상품 연결
 
     .venv/bin/python -c "
     import sys; sys.path.insert(0,'src')
@@ -200,7 +291,7 @@ label 과 t_peak 이 없다.
 
 ---
 
-## 15. 검증 파트에 넘기는 것
+## 16. 검증 파트에 넘기는 것
 
     ls -la cases/case_pilot_rugby/
     head -3 cases/case_pilot_rugby/naver_shopping.csv | cut -c1-150
@@ -208,12 +299,12 @@ label 과 t_peak 이 없다.
 
 ---
 
-## 16. 테스트
+## 17. 테스트
 
     .venv/bin/python -m pytest tests -q
 
 ---
 
-## 17. 화면 (시간 남으면)
+## 18. 화면 (시간 남으면)
 
     bash scripts/serve.sh

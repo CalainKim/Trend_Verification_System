@@ -46,6 +46,8 @@ def daily_shares(
     keyword_raw: str,
     prefix: str,
     channel: str = "naver_shopping",
+    start: Optional[str] = None,
+    end: Optional[str] = None,
 ) -> Dict[str, float]:
     """그룹별 평균 점유율. 합이 1 이 되도록 맞춘다.
 
@@ -59,15 +61,20 @@ def daily_shares(
     """
     # 'gender=%' 로 매칭하면 교차셀('gender=m;ages=20')까지 걸려 같은 클릭이
     # 이중 계상된다. 주변분포만 봐야 하므로 구분자가 없는 entity 로 제한한다.
-    rows = conn.execute(
-        """
+    sql = """
         SELECT observed_at, entity, metric_value
         FROM signal_raw
         WHERE channel = ? AND keyword_raw = ?
           AND entity LIKE ? AND entity NOT LIKE '%;%'
-        """,
-        (channel, keyword_raw, f"{prefix}=%"),
-    ).fetchall()
+    """
+    params = [channel, keyword_raw, f"{prefix}=%"]
+    if start:
+        sql += " AND observed_at >= ?"
+        params.append(start)
+    if end:
+        sql += " AND observed_at < ?"
+        params.append(end)
+    rows = conn.execute(sql, params).fetchall()
     if not rows:
         return {}
 
@@ -105,16 +112,48 @@ def compare(
     return out
 
 
+def overlap_window(
+    conn: sqlite3.Connection, keyword_raw: str, category_code: str,
+    prefix: str, channel: str = "naver_shopping",
+) -> Optional[tuple]:
+    """키워드와 기준선이 둘 다 존재하는 기간."""
+    def span(name):
+        r = conn.execute(
+            "SELECT MIN(observed_at) a, MAX(observed_at) b FROM signal_raw "
+            "WHERE channel=? AND keyword_raw=? AND entity LIKE ? AND entity NOT LIKE '%;%'",
+            (channel, name, f"{prefix}=%")).fetchone()
+        return (r["a"], r["b"]) if r and r["a"] else None
+
+    a, b = span(keyword_raw), span(f"category:{category_code}")
+    if not a or not b:
+        return None
+    start, end = max(a[0], b[0]), min(a[1], b[1])
+    return (start, end) if start <= end else None
+
+
 def profile(
     conn: sqlite3.Connection,
     keyword_raw: str,
     category_code: str,
     prefix: str = "age",
     channel: str = "naver_shopping",
+    start: Optional[str] = None,
+    end: Optional[str] = None,
 ) -> List[Skew]:
-    """키워드의 쏠림을 분야 기준선 대비로 계산한다."""
-    observed = daily_shares(conn, keyword_raw, prefix, channel)
-    baseline = daily_shares(conn, f"category:{category_code}", prefix, channel)
+    """키워드의 쏠림을 분야 기준선 대비로 계산한다.
+
+    기준선과 관측치는 반드시 같은 기간에서 구한다. 기간이 다르면 비율이
+    무의미해진다. 계절 상품은 시기만 달라도 분포가 크게 움직이기 때문이다.
+    명시하지 않으면 둘 다 존재하는 구간으로 자동 제한한다.
+    """
+    if start is None and end is None:
+        window = overlap_window(conn, keyword_raw, category_code, prefix, channel)
+        if window is None:
+            return []
+        start, end = window[0], window[1] + "~"   # 마지막 날을 포함시키기 위한 상한
+
+    observed = daily_shares(conn, keyword_raw, prefix, channel, start, end)
+    baseline = daily_shares(conn, f"category:{category_code}", prefix, channel, start, end)
     if not observed or not baseline:
         return []
     return compare(observed, baseline)

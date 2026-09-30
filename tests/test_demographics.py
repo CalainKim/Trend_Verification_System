@@ -102,3 +102,30 @@ def test_cross_cells_excluded_from_marginals(conn):
     assert set(shares) == {"m", "f"}
     assert shares["m"] == pytest.approx(0.6)
     assert shares["f"] == pytest.approx(0.4)
+
+
+def test_baseline_and_observed_use_same_period(conn):
+    """기준선과 관측치의 기간이 다르면 비율이 무의미해진다.
+
+    계절 상품은 시기만 달라도 분포가 크게 움직인다. 기준선을 넓은 기간에서
+    구하고 키워드를 좁은 기간에서 구하면, 실제로는 없는 쏠림이 만들어진다.
+    """
+    # 기준선은 두 기간에 걸쳐 있고 분포가 서로 다르다
+    _rows(conn, "category:50000169", {
+        "2026-01-01": {"20": 90.0, "40": 10.0},   # 겨울에는 20대 우세
+        "2026-07-01": {"20": 10.0, "40": 90.0},   # 여름에는 40대 우세
+    })
+    # 키워드는 여름 자료만 있다
+    _rows(conn, "kw", {"2026-07-01": {"20": 10.0, "40": 90.0}})
+
+    skews = {s.group: s for s in dg.profile(conn, "kw", "50000169")}
+    # 같은 기간(여름)끼리 비교하므로 분야 평균과 동일해야 한다
+    assert skews["20"].lift == pytest.approx(1.0)
+    assert skews["40"].lift == pytest.approx(1.0)
+
+
+def test_overlap_window_detected(conn):
+    _rows(conn, "category:50000169", {"2026-01-01": {"20": 50.0}, "2026-07-01": {"20": 50.0}})
+    _rows(conn, "kw", {"2026-05-01": {"20": 50.0}, "2026-09-01": {"20": 50.0}})
+    w = dg.overlap_window(conn, "kw", "50000169", "age")
+    assert w == ("2026-05-01", "2026-07-01")

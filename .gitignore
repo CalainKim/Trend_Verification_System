@@ -1,6 +1,11 @@
 # data
 data/*.sqlite
+# WAL 모드가 만드는 보조 파일. 실행 중에만 쓰이는 임시 상태이므로
+# 저장소에 들어가면 안 된다. 커밋될 때마다 무의미한 변경이 생기고,
+# 다른 사람이 받아 쓰면 DB 가 깨질 수 있다.
 data/*.sqlite-journal
+data/*.sqlite-wal
+data/*.sqlite-shm
 data/*.db
 data/raw/
 data/*.log

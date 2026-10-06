@@ -1,0 +1,6 @@
+# Small historical API PoC. No embedding model, GPU, or Streamlit required.
+requests>=2.32,<3
+anthropic==1.7.0
+httpx2>=2.0,<3
+tzdata>=2025.1
+pytest>=8,<10

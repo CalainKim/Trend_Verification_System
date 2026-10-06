@@ -1,0 +1,68 @@
+{
+  "year": 2025,
+  "selection_note": "2025년 플랫폼 기록에서 확인되는 상의 스타일 세 개를 고른 설명용 사례. 성공·실패를 미리 배정하지 않으며 네이버 결과에 맞춰 키워드를 교체하지 않는다.",
+  "cases": [
+    {
+      "keyword": "헨리넥",
+      "definition": "목 아래 단추 여밈이 있는 헨리넥 상의. 네이버 쇼핑은 남성 티셔츠 분야의 '헨리넥' 단일 검색어, 검색은 같은 단어 전체 검색이며 니트 등 다른 품목을 포함할 수 있다. 동의어를 합산하지 않는다.",
+      "references": [
+        {
+          "id": "henley-musinsa-20250613",
+          "title": "꺾임 없는 빈티지 상승세, 피그먼트 티셔츠",
+          "url": "https://www.musinsa.com/content/1382658395047287505",
+          "published_at": "2025-06-13",
+          "observed_start": null,
+          "observed_end": null,
+          "kind": "editorial_rank",
+          "population": "무신사 피그먼트 신상품 큐레이션. 구매자 성별·연령 미공개",
+          "summary": "판매량이 높은 피그먼트 신상품 10종 중 파브레가 헨리넥을 5위로 소개했다. 전체 헨리넥 시장 순위가 아니며 집계 기간과 판매량은 공개하지 않았다."
+        },
+        {
+          "id": "henley-musinsa-20250715",
+          "title": "페스티벌의 시작과 끝을 함께할 트렌드 아이템",
+          "url": "https://www.musinsa.com/content/1394143956153358629",
+          "published_at": "2025-07-15",
+          "observed_start": null,
+          "observed_end": null,
+          "kind": "editorial",
+          "population": "남성 상품 추천. 실제 구매자의 성별·연령 통계 없음",
+          "summary": "여름 페스티벌을 위한 남성 슬리브리스 항목에서 트릴리온 헨리넥 제품을 추천했다. 상품 소개 기록이며 판매 증가 수치는 없다."
+        }
+      ]
+    },
+    {
+      "keyword": "럭비티",
+      "definition": "럭비 셔츠에서 유래한 칼라·스포티한 배색의 티셔츠 스타일. 네이버 쇼핑 남성 티셔츠 분야의 '럭비티' 단일 검색어만 조회한다. '럭비 셔츠' 등은 자동 합산하지 않는다.",
+      "references": [
+        {
+          "id": "rugby-musinsa-20250910",
+          "title": "25 FW 트렌드 컬러로 완성한 #수요출근룩",
+          "url": "https://www.musinsa.com/content/1415175907041817098",
+          "published_at": "2025-09-10",
+          "observed_start": null,
+          "observed_end": null,
+          "kind": "editorial",
+          "population": "무신사 직원 개인 코디. 20대 남성 고객 통계 아님",
+          "summary": "직원 한 명이 스트라이프 럭비 티셔츠를 활용한 가을 출근룩을 소개했다. 편집 콘텐츠 등장 기록이며 구매 확산이나 집단 유행의 증거는 아니다."
+        }
+      ]
+    },
+    {
+      "keyword": "링거티",
+      "definition": "목둘레와 소매 끝에 배색이 들어간 링거 티셔츠. 네이버 쇼핑 남성 티셔츠 분야의 '링거티' 단일 검색어만 조회한다. '링거 톱' 등은 외부 기록 연결에만 사용하고 지수를 합산하지 않는다.",
+      "references": [
+        {
+          "id": "ringer-musinsa-20250522",
+          "title": "MZ가 꽂힌 아캄, 고객과 함께 성장한 비밀",
+          "url": "https://www.musinsa.com/content/1365169848206423558",
+          "published_at": "2025-05-22",
+          "observed_start": null,
+          "observed_end": null,
+          "kind": "editorial_interview",
+          "population": "아캄 브랜드 인터뷰. 링거티 구매자 성별·연령 통계 없음",
+          "summary": "4월 23일 발매한 아캄×송이송이 컬렉션의 링거 톱을 소개했다. 발매일은 수요 집계 기간이 아니며 브랜드 전체 성장률을 링거티 판매 증가로 해석할 수 없다."
+        }
+      ]
+    }
+  ]
+}

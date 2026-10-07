@@ -28,3 +28,8 @@ venv/
 
 # 스냅샷은 소급 수집이 불가능한 원본이므로 반드시 커밋한다
 !data/snapshots/
+
+# Local monthly PoC responses and API credentials
+private/
+.env.*
+!.env.example

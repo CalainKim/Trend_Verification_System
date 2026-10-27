@@ -34,3 +34,6 @@ private/
 .env.*
 !.env.example
 .vscode/
+
+# 보고서 빌드 중간 산출물
+build/html/

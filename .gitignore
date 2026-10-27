@@ -33,3 +33,12 @@ venv/
 private/
 .env.*
 !.env.example
+.vscode/
+
+# 보고서 빌드 중간 산출물
+build/html/
+
+# 보고서 산출물은 로컬에만 둔다
+build/
+docs/images/figures/
+docs/report-figures.html

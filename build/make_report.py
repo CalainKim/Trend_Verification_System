@@ -122,48 +122,43 @@ def build():
     style_doc(doc)
 
     # ---------- 표지 ----------
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_before = Pt(40)
-    p.paragraph_format.space_after = Pt(4)
-    set_font(p.add_run("2026학년도 2학기 자기주도프로젝트"), size=11, color=(0x6B, 0x70, 0x76))
+    def center(text, size, bold=False, before=0, after=0, color=None, spacing=None):
+        pp = doc.add_paragraph()
+        pp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        pp.paragraph_format.space_before = Pt(before)
+        pp.paragraph_format.space_after = Pt(after)
+        pp.paragraph_format.line_spacing = 1.3
+        r = pp.add_run(text)
+        set_font(r, size=size, bold=bold, color=color)
+        if spacing:
+            sp = OxmlElement("w:spacing")
+            sp.set(qn("w:val"), str(int(spacing * 20)))
+            r._element.get_or_add_rPr().append(sp)
+        return pp
 
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_after = Pt(6)
-    set_font(p.add_run("중 간 보 고 서"), size=22, bold=True)
+    center("2026학년도 2학기  자기주도프로젝트", 11, before=86, after=52,
+           color=(0x6B, 0x70, 0x76))
+    center("중 간 보 고 서", 30, bold=True, after=30, spacing=2)
+    center("발견한 트렌드 후보를", 14, after=4, color=(0x2A, 0x2D, 0x33))
+    center("확정하거나 기각하는 검증 시스템", 14, after=18, color=(0x2A, 0x2D, 0x33))
+    center("연계 산업체    무신사", 11, after=150, color=(0x6B, 0x70, 0x76))
 
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_after = Pt(34)
-    set_font(p.add_run("발견한 트렌드 후보를 확정하거나 기각하는 검증 시스템"), size=13)
-
-    t = doc.add_table(rows=0, cols=2)
-    t.style = "Table Grid"
-    t.alignment = WD_TABLE_ALIGNMENT.CENTER
-    for k, v in [
-        ("연계 산업체", "무신사"),
-        ("학과", "소프트웨어학과"),
-        ("학번", "202220697"),
-        ("성명", "김도은"),
-        ("팀원", "이응도"),
-        ("지도교수", ""),
-        ("보고 범위", "2026년 9월 1일 ~ 10월 27일 (1주차 ~ 8주차)"),
-        ("작성일", "2026년 10월 27일"),
+    for label, value in [
+        ("학      과", "소프트웨어학과"),
+        ("학      번", "202220697"),
+        ("성      명", "김도은"),
+        ("팀      원", "이응도"),
+        ("지 도 교 수", ""),
     ]:
-        cells = t.add_row().cells
-        cells[0].text = ""
-        cells[1].text = ""
-        pr = cells[0].paragraphs[0]
-        pr.paragraph_format.space_after = Pt(0)
-        set_font(pr.add_run(k), size=10, bold=True)
-        pr2 = cells[1].paragraphs[0]
-        pr2.paragraph_format.space_after = Pt(0)
-        set_font(pr2.add_run(v), size=10)
-        cells[0].width, cells[1].width = Cm(3.6), Cm(10.4)
-        shd = OxmlElement("w:shd")
-        shd.set(qn("w:fill"), "F2F1EE")
-        cells[0]._tc.get_or_add_tcPr().append(shd)
+        pp = doc.add_paragraph()
+        pp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        pp.paragraph_format.space_after = Pt(5)
+        pp.paragraph_format.line_spacing = 1.3
+        set_font(pp.add_run(label), size=11, color=(0x6B, 0x70, 0x76))
+        set_font(pp.add_run("        "), size=11)
+        set_font(pp.add_run(value), size=11, bold=True)
+
+    center("2026.  10.  27.", 11, before=56, color=(0x45, 0x49, 0x4F))
 
     doc.add_page_break()
 
@@ -203,10 +198,12 @@ def build():
         "7. 참고자료 및 출처",
     ]
     for line in toc:
+        top = not line.startswith(" ")
         p = doc.add_paragraph()
-        p.paragraph_format.space_after = Pt(1)
-        p.paragraph_format.line_spacing = 1.35
-        set_font(p.add_run(line), size=10, bold=not line.startswith(" "))
+        p.paragraph_format.space_before = Pt(5 if top else 0)
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.line_spacing = 1.15
+        set_font(p.add_run(line), size=9.5, bold=top)
     doc.add_page_break()
 
     # ---------- 1 요약 ----------

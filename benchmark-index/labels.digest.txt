@@ -1,0 +1,3 @@
+sha256  c9e4a1b5cc3cde6741e81ca1577a45b8b5e1a8eb20d370a5bcdf2c152da8fad5
+n       15
+base    0.800000

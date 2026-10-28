@@ -48,3 +48,5 @@ benchmark/labels.sealed.json
 
 # 속성 매핑은 DB 와 사전에서 다시 만들 수 있다
 data/attribute_map.csv
+
+benchmark-index/labels.sealed.json

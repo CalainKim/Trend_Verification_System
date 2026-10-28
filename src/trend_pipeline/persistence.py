@@ -235,6 +235,173 @@ def label_events(series: Dict[str, Dict[str, dict]], w: Window,
     return out
 
 
+# --------------------------------------------------------------- 지수 시계열
+#
+# 커머스 랭킹은 수집을 시작한 날부터만 있다. 29일로는 독립 표본이 하나뿐이라
+# 통계적 주장을 할 수 없었다. 검색 지수는 과거를 소급 조회할 수 있어 같은
+# 질문을 몇 년치로 물을 수 있다.
+#
+# 묻는 것은 같다. 올랐는가가 아니라 오른 것이 버티는가이다. 다만 순위는
+# 계단 수로 재고 지수는 비율로 잰다. 지수는 요청 창 안에서 최댓값이 100 이
+# 되도록 정규화된 상대값이라 차이의 절대 크기에 뜻이 없기 때문이다.
+
+#: 기준 구간 대비 이 비율 이상 오르면 상승으로 본다.
+MIN_RISE_RATIO = 1.2
+
+
+@dataclass
+class IndexRiseEvent:
+    key: str                     # 키워드
+    entity: str
+    t_cut: str
+    base_mean: float
+    detect_mean: float
+    rise_ratio: float
+    yoy_ratio: Optional[float]   # 작년 같은 기간 대비. 계절성 반증용
+    coverage: float              # 창 안에서 실제로 관측된 비율
+
+    def features(self) -> Dict[str, object]:
+        return {
+            "base_mean": round(self.base_mean, 2),
+            "detect_mean": round(self.detect_mean, 2),
+            "rise_ratio": round(self.rise_ratio, 3),
+            "rise_pct": round((self.rise_ratio - 1) * 100, 1),
+            "yoy_ratio": round(self.yoy_ratio, 3) if self.yoy_ratio is not None else None,
+            "coverage": round(self.coverage, 3),
+        }
+
+    def evidence(self, w: "Window", channel: str) -> List[dict]:
+        out = [
+            {"id": "index_change", "channel": channel,
+             "observation": f"지수 평균이 기준 구간 {self.base_mean:.1f} 에서 "
+                            f"관측 구간 {self.detect_mean:.1f} 로 "
+                            f"{(self.rise_ratio - 1) * 100:+.1f}% 변했다"},
+            {"id": "coverage", "channel": channel,
+             "observation": f"창 안에서 관측된 비율이 {self.coverage:.0%} 다. "
+                            f"결측이 많으면 추세를 읽을 수 없다"},
+        ]
+        if self.yoy_ratio is not None:
+            out.append({
+                "id": "seasonality", "channel": channel,
+                "observation": f"작년 같은 기간 대비 {self.yoy_ratio:.2f} 배다. "
+                               f"1 에 가까우면 해마다 반복되는 움직임이고, "
+                               f"그렇다면 계절성으로 설명된다"})
+        else:
+            out.append({
+                "id": "seasonality", "channel": channel,
+                "observation": "작년 같은 기간 자료가 없어 계절성을 확인할 수 없다"})
+        return out
+
+
+def load_index_series(conn: sqlite3.Connection, channel: str, entity: str = "",
+                      metric_type: str = "search_index",
+                      require_single_window: bool = True
+                      ) -> Dict[str, Dict[str, float]]:
+    """키워드별 지수 시계열.
+
+    정규화 창이 섞인 키워드는 빼는 것이 기본이다. 구글 트렌드와 네이버 두
+    API 는 요청 창 안에서 최댓값을 100 으로 맞추므로, 창이 다른 값을 한
+    시계열로 이으면 이음새에 없던 계단이 생긴다. 그 계단을 상승으로 읽으면
+    케이스가 통째로 거짓이 된다.
+    """
+    rows = conn.execute(
+        """
+        SELECT keyword_raw, observed_at, metric_value,
+               json_extract(metadata,'$.query_start') || ' ~ '
+            || json_extract(metadata,'$.query_end') w
+        FROM signal_raw
+        WHERE channel=? AND entity=? AND metric_type=?
+        ORDER BY keyword_raw, observed_at
+        """, (channel, entity, metric_type)).fetchall()
+
+    out: Dict[str, Dict[str, float]] = {}
+    windows: Dict[str, set] = {}
+    for r in rows:
+        kw = r["keyword_raw"]
+        out.setdefault(kw, {})[r["observed_at"][:10]] = r["metric_value"]
+        if r["w"]:
+            windows.setdefault(kw, set()).add(r["w"])
+    if require_single_window:
+        for kw, ws in windows.items():
+            if len(ws) > 1:
+                out.pop(kw, None)
+    return out
+
+
+def _mean(item: Dict[str, float], days: Sequence[str]) -> Tuple[Optional[float], float]:
+    vals = [item[d] for d in days if d in item]
+    if not vals:
+        return None, 0.0
+    return sum(vals) / len(vals), len(vals) / len(days)
+
+
+def yoy_ratio(item: Dict[str, float], days: Sequence[str],
+              years_back: int = 1, tol_days: int = 10) -> Optional[float]:
+    """작년 같은 기간 대비 비율.
+
+    계절성 반증에 쓴다. 해마다 같은 시기에 오르는 것이라면 이 값이 1 에
+    가깝고, 올해만 오른 것이라면 1 보다 크다.
+
+    주간 자료라 날짜가 정확히 맞지 않으므로 tol_days 안에서 가장 가까운
+    관측을 쓴다. 맞는 날이 없으면 None 을 돌려준다. 억지로 메우면 계절성이
+    없다고 잘못 읽는다.
+    """
+    from datetime import date, timedelta
+    cur, past = [], []
+    keys = sorted(item)
+    for d in days:
+        if d not in item:
+            continue
+        target = (date.fromisoformat(d) - timedelta(days=365 * years_back))
+        best = min(keys, key=lambda k: abs((date.fromisoformat(k) - target).days))
+        if abs((date.fromisoformat(best) - target).days) > tol_days:
+            continue
+        cur.append(item[d])
+        past.append(item[best])
+    if len(cur) < 2 or sum(past) == 0:
+        return None
+    return (sum(cur) / len(cur)) / (sum(past) / len(past))
+
+
+def index_rise_events(series: Dict[str, Dict[str, float]], w: Window,
+                      min_ratio: float = MIN_RISE_RATIO,
+                      min_coverage: float = 0.5,
+                      entity: str = "") -> List[IndexRiseEvent]:
+    """관측 구간에서 지수가 오른 키워드. 확인 구간은 쳐다보지 않는다."""
+    found = []
+    for kw, item in series.items():
+        bm, bc = _mean(item, w.base)
+        dm, dc = _mean(item, w.detect)
+        if bm is None or dm is None or bm <= 0:
+            continue
+        cov = min(bc, dc)
+        if cov < min_coverage:
+            continue                  # 결측이 많으면 추세를 읽을 수 없다
+        ratio = dm / bm
+        if ratio < min_ratio:
+            continue
+        found.append(IndexRiseEvent(
+            key=kw, entity=entity, t_cut=w.t_cut,
+            base_mean=bm, detect_mean=dm, rise_ratio=ratio,
+            yoy_ratio=yoy_ratio(item, w.base + w.detect), coverage=cov))
+    return found
+
+
+def label_index_events(series: Dict[str, Dict[str, float]], w: Window,
+                       events: Sequence[IndexRiseEvent],
+                       keep_ratio: float = KEEP_RATIO) -> Dict[str, str]:
+    """확인 구간에서 상승분의 절반이 남았는지. 정답은 여기서만 만들어진다."""
+    out: Dict[str, str] = {}
+    for e in events:
+        hm, hc = _mean(series[e.key], w.hold)
+        if hm is None or hc < 0.5:
+            continue
+        kept = hm / e.base_mean
+        threshold = 1 + (e.rise_ratio - 1) * keep_ratio
+        out[e.key] = PERSIST if kept >= threshold else FADE
+    return out
+
+
 def base_rate(labels: Sequence[str]) -> Optional[float]:
     """아무 생각 없이 '지속' 이라고 찍었을 때의 정확도.
 

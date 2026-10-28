@@ -43,6 +43,52 @@ def required_n(p: float, delta: float, z_a: float = 1.96, z_b: float = 0.8416) -
     return math.ceil((z_a + z_b) ** 2 * p * (1 - p) / (delta ** 2))
 
 
+def _index_cases(series, w, wi, args):
+    """검색 지수에서 뽑은 케이스. 커머스와 번들 형식을 맞춘다.
+
+    묻는 것이 같으므로 채점기와 성적표를 그대로 쓴다. 다른 것은 상승을
+    계단 수가 아니라 비율로 잰다는 점뿐이다. 지수는 요청 창 안에서
+    정규화된 상대값이라 차이의 절대 크기에 뜻이 없다.
+    """
+    events = ps.index_rise_events(series, w, args.min_ratio, entity=args.entity)
+    got = ps.label_index_events(series, w, events)
+    cases, labels = [], {}
+    for e in events:
+        if e.key not in got:
+            continue
+        cid = f"idx_{args.channel}_{w.t_cut}_{e.key}"
+        cases.append({
+            "case_id": cid,
+            "window_id": wi,
+            "experiment_type": "persistence-index-v1",
+            "candidate": {
+                "keyword": e.key,
+                "definition": f"{args.channel} 의 '{e.key}' 검색 지수다 "
+                              f"(entity {e.entity}). 요청 창 안에서 최댓값이 100 이 "
+                              f"되도록 정규화된 상대값이므로 다른 키워드의 값과 "
+                              f"크기를 견줄 수 없다.",
+            },
+            "claim": f"{w.t_cut} 까지의 자료로 볼 때, 이 키워드의 검색 상승이 "
+                     f"이후 {len(w.hold)}개 관측 구간 동안 상승분의 절반 이상 "
+                     f"유지되겠는가?",
+            "simulated_cutoff": w.t_cut,
+            "t_cut": w.t_cut,
+            "horizon_points": len(w.hold),
+            "historical_available_at": None,
+            "item": {"key": e.key, "name": e.key, "brand": ""},
+            "features": e.features(),
+            "evidence": e.evidence(w, args.channel),
+            "limitations": ps.LIMITATIONS[:1] + [
+                "검색 지수는 상대값이다. 같은 요청 안의 값끼리만 비교가 성립한다.",
+                "검색은 구매가 아니다. 찾아본 것과 산 것은 다르다.",
+                "작년 같은 기간 대비(yoy_ratio)가 1 에 가까우면 계절성으로 "
+                "설명되는 움직임이다. 이 값이 없으면 계절성을 확인할 수 없다.",
+            ],
+        })
+        labels[cid] = got[e.key]
+    return cases, labels
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="지속성 케이스 생성")
     p.add_argument("--db", default=None)
@@ -52,14 +98,27 @@ def main(argv=None) -> int:
     p.add_argument("--step", type=int, default=1, help="창을 미는 간격")
     p.add_argument("--min-rise", type=float, default=ps.MIN_RISE)
     p.add_argument("--since", default="2026-09-29", help="연속 수집 시작일")
+    p.add_argument("--source", default="commerce", choices=("commerce", "index"),
+                   help="commerce 는 29CM 순위, index 는 검색 지수")
+    p.add_argument("--channel", default="gtrends", help="index 일 때 채널")
+    p.add_argument("--entity", default="geo=KR", help="index 일 때 entity")
+    p.add_argument("--min-ratio", type=float, default=ps.MIN_RISE_RATIO,
+                   help="index 일 때 상승으로 볼 최소 비율")
     p.add_argument("--out", default=None, help="케이스를 저장할 경로")
     p.add_argument("--stats", action="store_true", help="통계만 출력")
     args = p.parse_args(argv)
 
     conn = storage.connect(Path(args.db) if args.db else None)
     conn.row_factory = sqlite3.Row
-    series = ps.load_series(conn)
-    days = [d for d in ps.observed_days(series) if d >= args.since]
+    if args.source == "index":
+        series = ps.load_index_series(conn, args.channel, args.entity)
+        since = "0000-00-00" if args.since == "2026-09-29" else args.since
+        print(f"채널 {args.channel} / entity {args.entity} / "
+              f"정규화 창이 단일한 키워드 {len(series)}개")
+    else:
+        series = ps.load_series(conn)
+        since = args.since
+    days = [d for d in ps.observed_days(series) if d >= since]
     span = args.base + args.detect + args.hold
     if len(days) < span:
         print(f"연속 구간이 {len(days)}일뿐이라 {span}일 창을 만들 수 없다.")
@@ -67,12 +126,21 @@ def main(argv=None) -> int:
 
     wins = ps.windows(days, args.base, args.detect, args.hold, args.step)
     indep = ps.windows(days, args.base, args.detect, args.hold, span)
-    print(f"연속 수집 {len(days)}일: {days[0]} ~ {days[-1]}")
-    print(f"창 구성 {args.base}+{args.detect}+{args.hold}일, 간격 {args.step}일")
+    # 커머스는 일별, 검색 지수는 주별이라 단위가 다르다. 둘을 같은 말로
+    # 적으면 84주 확인을 84일로 읽는다.
+    unit = "관측점" if args.source == "index" else "일"
+    print(f"연속 수집 {len(days)}{unit}: {days[0]} ~ {days[-1]}")
+    print(f"창 구성 {args.base}+{args.detect}+{args.hold}{unit}, "
+          f"간격 {args.step}{unit}")
     print(f"  겹친 창 {len(wins)}개 / 독립 창 {len(indep)}개\n")
 
     cases, labels = [], {}
     for wi, w in enumerate(wins):
+        if args.source == "index":
+            cases_w, labels_w = _index_cases(series, w, wi, args)
+            cases += cases_w
+            labels.update(labels_w)
+            continue
         events = ps.rise_events(series, w, args.min_rise)
         got = ps.label_events(series, w, events)
         for e in events:
@@ -95,9 +163,9 @@ def main(argv=None) -> int:
                 },
                 "claim": f"{w.t_cut} 까지의 자료로 볼 때, 이 상품의 순위 상승이 "
                          f"이후 {args.hold}일 동안 절반 이상 유지되겠는가?",
+                "horizon_days": args.hold,
                 "simulated_cutoff": w.t_cut,
                 "t_cut": w.t_cut,
-                "horizon_days": args.hold,
                 "historical_available_at": None,
                 "item": {"key": e.item_key, "name": e.name, "brand": e.brand},
                 "features": e.features(),

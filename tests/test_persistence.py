@@ -138,3 +138,109 @@ def test_features_contain_no_label(win):
     blob = json.dumps(f, ensure_ascii=False)
     assert ps.PERSIST not in blob and ps.FADE not in blob
     assert "label" not in blob
+
+
+# ------------------------------------------------------------ 지수 시계열
+
+def mkindex(spec):
+    """{키워드: [(일자, 값)]} 를 load_index_series 와 같은 모양으로 만든다."""
+    return {k: {d: float(v) for d, v in pts} for k, pts in spec.items()}
+
+
+@pytest.fixture()
+def iwin():
+    d = days_from("2026-01-01", 9)
+    return ps.Window(base=d[:3], detect=d[3:6], hold=d[6:]), d
+
+
+def test_index_rise_is_measured_as_ratio(iwin):
+    """지수는 정규화된 상대값이라 차이의 절대 크기에 뜻이 없다."""
+    w, d = iwin
+    small = mkindex({"a": [(d[i], 10 if i < 3 else 13) for i in range(9)]})
+    big = mkindex({"b": [(d[i], 80 if i < 3 else 83) for i in range(9)]})
+    assert len(ps.index_rise_events(small, w)) == 1     # 1.3배
+    assert ps.index_rise_events(big, w) == []           # 같은 +3 이지만 1.04배
+
+
+def test_index_rise_events_ignore_hold(iwin):
+    w, d = iwin
+    a = mkindex({"a": [(d[i], 10 if i < 3 else 15) for i in range(9)]})
+    b = mkindex({"a": [(d[i], 10 if i < 3 else 15) for i in range(6)]
+                       + [(d[i], 1) for i in range(6, 9)]})
+    ea, eb = ps.index_rise_events(a, w), ps.index_rise_events(b, w)
+    assert ea[0].features() == eb[0].features()
+
+
+def test_index_label_uses_hold(iwin):
+    w, d = iwin
+    kept = mkindex({"a": [(d[i], 10 if i < 3 else 15) for i in range(9)]})
+    lost = mkindex({"a": [(d[i], 10 if i < 3 else 15) for i in range(6)]
+                          + [(d[i], 10) for i in range(6, 9)]})
+    assert ps.label_index_events(kept, w, ps.index_rise_events(kept, w))["a"] == ps.PERSIST
+    assert ps.label_index_events(lost, w, ps.index_rise_events(lost, w))["a"] == ps.FADE
+
+
+def test_low_coverage_is_skipped(iwin):
+    """결측이 많은 구간에서 추세를 읽으면 안 된다."""
+    w, d = iwin
+    sparse = mkindex({"a": [(d[0], 10), (d[3], 15)]})
+    assert ps.index_rise_events(sparse, w) == []
+
+
+def test_mixed_normalization_window_series_is_dropped(tmp_path):
+    """창이 다른 값을 이으면 이음새의 계단을 상승으로 읽는다."""
+    from trend_pipeline import storage
+    from trend_pipeline.models import RawRecord
+    c = storage.connect(tmp_path / "i.sqlite")
+    storage.init_db(c)
+    d0 = date.fromisoformat("2026-01-01")
+    recs = []
+    for i in range(10):
+        w = "2026-01-01 ~ 2026-06-01" if i < 5 else "2026-01-01 ~ 2026-09-01"
+        recs.append(RawRecord(channel="gtrends", keyword_raw="mixed",
+                              entity="geo=KR", metric_type="search_index",
+                              metric_value=50.0,
+                              observed_at=(d0 + timedelta(days=i)).isoformat(),
+                              metadata={"query_start": w.split(" ~ ")[0],
+                                        "query_end": w.split(" ~ ")[1]}))
+    for i in range(10):
+        recs.append(RawRecord(channel="gtrends", keyword_raw="clean",
+                              entity="geo=KR", metric_type="search_index",
+                              metric_value=50.0,
+                              observed_at=(d0 + timedelta(days=i)).isoformat(),
+                              metadata={"query_start": "2026-01-01",
+                                        "query_end": "2026-06-01"}))
+    storage.insert_raw(c, recs)
+    s = ps.load_index_series(c, "gtrends", "geo=KR")
+    assert "clean" in s and "mixed" not in s
+    c.close()
+
+
+def test_yoy_ratio_detects_repeating_season():
+    """해마다 같은 시기에 오르면 전년 대비가 1 에 가깝다."""
+    d0 = date.fromisoformat("2024-01-01")
+    item = {}
+    for i in range(800):
+        day = (d0 + timedelta(days=i)).isoformat()
+        item[day] = 100.0 if (i % 365) < 30 else 20.0
+    this_year = [(d0 + timedelta(days=i + 730)).isoformat() for i in range(20)]
+    r = ps.yoy_ratio(item, this_year)
+    assert r is not None and 0.9 <= r <= 1.1
+
+
+def test_yoy_ratio_detects_new_rise():
+    d0 = date.fromisoformat("2024-01-01")
+    item = {}
+    for i in range(800):
+        day = (d0 + timedelta(days=i)).isoformat()
+        item[day] = 80.0 if i >= 730 else 20.0
+    this_year = [(d0 + timedelta(days=i + 730)).isoformat() for i in range(20)]
+    assert ps.yoy_ratio(item, this_year) == pytest.approx(4.0)
+
+
+def test_yoy_ratio_is_none_without_prior_year():
+    """자료가 없으면 억지로 메우지 않는다. 메우면 계절성이 없다고 잘못 읽는다."""
+    d0 = date.fromisoformat("2026-01-01")
+    item = {(d0 + timedelta(days=i)).isoformat(): 50.0 for i in range(30)}
+    days = [(d0 + timedelta(days=i)).isoformat() for i in range(10)]
+    assert ps.yoy_ratio(item, days) is None

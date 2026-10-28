@@ -30,16 +30,16 @@ sys.path.insert(0, str(ROOT / "src"))
 from trend_pipeline import scoring as sc  # noqa: E402
 from trend_pipeline.persistence import FADE, PERSIST  # noqa: E402
 
-SEALED = ROOT / "benchmark" / "labels.sealed.json"
-DIGEST = ROOT / "benchmark" / "labels.digest.txt"
+DEFAULT_BENCH = ROOT / "benchmark"
 
 
-def load_labels(sealed: Path = SEALED, digest: Path = DIGEST) -> Dict[str, str]:
+def load_labels(bench: Path = DEFAULT_BENCH) -> Dict[str, str]:
     """정답을 읽고 봉인 해시를 확인한다.
 
     채점이 끝난 뒤 정답을 고치면 어떤 점수든 만들 수 있다. 해시가 맞지
     않으면 채점을 진행하지 않는다.
     """
+    sealed, digest = bench / "labels.sealed.json", bench / "labels.digest.txt"
     if not sealed.exists():
         raise SystemExit(f"정답 파일이 없다: {sealed}\n"
                          f"scripts/build_persistence_cases.py 로 먼저 만든다.")
@@ -146,12 +146,14 @@ def baselines(labels: Dict[str, str]) -> str:
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="판정 채점")
     p.add_argument("--verdicts", default=None, help="판정 파일이나 디렉터리")
+    p.add_argument("--benchmark", default=str(DEFAULT_BENCH),
+                   help="정답이 있는 벤치마크 경로")
     p.add_argument("--label", default="판정 결과", help="성적표 제목")
     p.add_argument("--baselines", action="store_true", help="기준 전략만 출력")
     p.add_argument("--out", default=None, help="성적표를 쓸 경로")
     args = p.parse_args(argv)
 
-    labels = load_labels()
+    labels = load_labels(Path(args.benchmark))
     parts = [baselines(labels)]
 
     if args.verdicts:

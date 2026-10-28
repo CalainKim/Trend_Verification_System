@@ -47,6 +47,18 @@ GEOS = ("KR", "US", "")
 PROP_ALIASES = {"web": "", "youtube": "youtube"}
 
 
+def already_have(conn, channel: str, gprop: str) -> set:
+    """이미 받은 키워드. 되풀이 수집은 한도만 쓰고 새 자료를 주지 않는다."""
+    ent = "%;prop=" + gprop if gprop else "geo=%"
+    rows = conn.execute(
+        """
+        SELECT DISTINCT keyword_raw FROM signal_raw
+        WHERE channel=? AND entity LIKE ?
+          AND (? <> '' OR entity NOT LIKE '%;prop=%')
+        """, (channel, ent, gprop)).fetchall()
+    return {r[0] for r in rows}
+
+
 def load_terms(limit: Optional[int]) -> List[Dict[str, str]]:
     """해외 질의어가 있는 속성을 커머스 노출이 많은 순으로 고른다.
 
@@ -89,6 +101,15 @@ def main(argv=None) -> int:
     p.add_argument("--geos", nargs="*", default=list(GEOS))
     p.add_argument("--db", default=None)
     p.add_argument("--plan", action="store_true", help="질의 계획만 출력하고 끝낸다")
+    p.add_argument("--missing-only", action="store_true",
+                   help="이미 받은 속성은 건너뛴다. 되풀이 수집은 한도만 쓴다")
+    p.add_argument("--max-new", type=int, default=None,
+                   help="이번 실행에서 새로 받을 속성 수 상한. --limit 과 달리 "
+                        "이미 받은 것을 뺀 뒤에 센다")
+    p.add_argument("--max-attempts", type=int, default=None,
+                   help="한 요청의 재시도 횟수. 1 이면 막혔을 때 바로 포기한다")
+    p.add_argument("--stop-on-block", action="store_true",
+                   help="429 를 만나면 남은 속성을 건너뛰고 끝낸다")
     p.add_argument("--skip", nargs="*", default=[],
                    help="건너뛸 속성. 기존 자료와 정규화 창이 달라질 때 쓴다")
     p.add_argument("--replace", action="store_true",
@@ -107,16 +128,35 @@ def main(argv=None) -> int:
 
     conn = storage.connect(Path(args.db) if args.db else None)
     storage.init_db(conn)
-    collector = GoogleTrendsCollector()
+    collector = (GoogleTrendsCollector(max_attempts=args.max_attempts)
+                 if args.max_attempts else GoogleTrendsCollector())
     run_id = f"gtrends-{utcnow_iso()}"
     total, failed = 0, []
 
+    have = {alias: (already_have(conn, "gtrends", PROP_ALIASES[alias])
+                    if args.missing_only else set())
+            for alias in args.props}
+    blocked = False
+    started = 0          # 이번 실행에서 실제로 손댄 속성 수
+
     for t in terms:
+        if blocked:
+            break
+        todo = [a for a in args.props if t["ko"] not in have[a]]
+        if not todo:
+            continue
+        if args.max_new is not None and started >= args.max_new:
+            print(f"\n이번 실행 상한 {args.max_new}개에 도달했다. "
+                  f"다음 실행에서 이어 받는다.")
+            break
+        started += 1
         # 지역마다 다른 단어를 묻되, 저장되는 이름은 한국어 표준어 하나로 통일한다.
         by_geo = {g: [t["en"]] for g in args.geos if g != "KR"}
         by_geo["KR"] = [t["ko"]]
         for alias in args.props:
             gprop = PROP_ALIASES[alias]
+            if t["ko"] in have[alias]:
+                continue
             # 이어 붙이면 안 된다. 구글 트렌드는 요청 창 안에서 최댓값을 100 으로
             # 맞추므로, 창이 다른 자료를 같은 시계열에 넣으면 이음새에 없던
             # 계단이 생긴다. 다시 받을 때는 그 키워드의 기존 자료를 지운다.
@@ -137,11 +177,18 @@ def main(argv=None) -> int:
                     run_id=run_id, gprop=gprop))
             except GoogleTrendsUnavailable as exc:
                 failed.append(f"{t['ko']}/{alias}: {exc}")
+                if args.stop_on_block and "429" in str(exc):
+                    # 한도에 걸렸으면 남은 속성도 막힌다. 계속 두드리면
+                    # 풀리는 시점만 늦춘다.
+                    blocked = True
+                    break
                 continue
             n = storage.insert_raw(conn, recs) if recs else 0
             total += len(recs)
             print(f"  {t['ko']:<10} {alias:<8} {len(recs):>5}행 수집, {n}행 저장")
 
+    if blocked:
+        print("\n한도에 걸려 남은 속성을 건너뛴다. 다음 실행에서 이어 받는다.")
     print(f"\n합계 {total}행. 실패 {len(failed)}건")
     for f in failed:
         print(f"  {f}")

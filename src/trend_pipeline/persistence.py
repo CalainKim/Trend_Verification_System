@@ -32,6 +32,17 @@ KEEP_RATIO = 0.5
 
 PERSIST, FADE = "persist", "fade"
 
+#: 번들에 함께 싣는 해석의 제한. 모델이 이것을 넘어선 주장을 하면 안 된다.
+LIMITATIONS = [
+    "순위가 오른 원인은 관측할 수 없다. 광고 집행과 노출 알고리즘은 쇼핑몰 "
+    "내부에만 있어 외부에서 볼 수 없다. 원인을 지목하지 말고 관측된 사실과 "
+    "배제되는 설명만 쓴다.",
+    "리뷰와 좋아요는 플랫폼 내부 지표다. 쇼핑몰 밖의 수요를 직접 재지 않는다.",
+    "관측 구간이 짧아 계절성을 분리할 수 없다. 작년 같은 시기와 비교한 자료가 "
+    "번들에 없다.",
+    "순위는 같은 카테고리 안의 상대 위치다. 판매량의 절대 크기가 아니다.",
+]
+
 
 @dataclass
 class Window:
@@ -61,6 +72,35 @@ class RiseEvent:
     is_new: bool
     sold_out: bool
     brand_risers: int = 1          # 같은 창에서 동시 상승한 같은 브랜드 상품 수
+
+    def evidence(self, w: "Window") -> List[dict]:
+        """검증 파트가 인용할 근거 항목.
+
+        review.py 의 validate_result 가 모델의 인용 ID 를 이 목록에 있는 id 로
+        검증한다. id 가 없으면 모델이 무엇을 보고 말했는지 확인할 수 없다.
+        """
+        base, det = f"{w.base[0]}~{w.base[-1]}", f"{w.detect[0]}~{w.detect[-1]}"
+        out = [
+            {"id": "rank_change", "channel": "commerce_rank",
+             "observation": f"순위 평균이 {base} 구간 {self.rank_base:.1f}위에서 "
+                            f"{det} 구간 {self.rank_detect:.1f}위로 "
+                            f"{self.rise:.1f}계단 올랐다"},
+            {"id": "review_change", "channel": "commerce_rank",
+             "observation": f"같은 기간 리뷰 수가 {self.review_delta:+.1f}건 변했다. "
+                            f"리뷰는 구매를 거쳐야 쌓이므로 조작 여지가 적다"},
+            {"id": "heart_change", "channel": "commerce_rank",
+             "observation": f"좋아요가 {self.heart_delta:+.1f} 변했다. "
+                            f"구매 없이도 늘 수 있는 지표다"},
+            {"id": "sale_change", "channel": "commerce_rank",
+             "observation": f"할인율이 {self.sale_delta:+.1f}%p 변했다. "
+                            f"할인이 늘었다면 순위 상승의 대체 설명이 된다"},
+            {"id": "item_flags", "channel": "commerce_rank",
+             "observation": f"신상품 표시 {self.is_new}, 품절 {self.sold_out}"},
+            {"id": "brand_context", "channel": "commerce_rank",
+             "observation": f"같은 창에서 브랜드 '{self.brand}' 의 상품 "
+                            f"{self.brand_risers}개가 함께 올랐다"},
+        ]
+        return out
 
     def features(self) -> Dict[str, object]:
         """검증 단계로 넘길 특징. T_cut 이전 자료만 들어 있다."""

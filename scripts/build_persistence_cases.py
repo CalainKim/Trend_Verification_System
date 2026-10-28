@@ -79,15 +79,30 @@ def main(argv=None) -> int:
             if e.item_key not in got:
                 continue
             cid = f"rise_{w.t_cut}_{e.item_key.replace(':', '_')}"
+            # 키 이름은 검증 파트 파이프라인(src/trend_poc/review.py)의
+            # build_payload 화이트리스트에 맞춘다. simulated_cutoff, evidence,
+            # candidate, limitations 가 없으면 그 파이프라인에 넣을 수 없다.
             cases.append({
                 "case_id": cid,
                 "window_id": wi,                 # 겹친 창을 묶어 보려면 필요하다
+                "experiment_type": "persistence-v1",
+                "candidate": {
+                    "keyword": e.name,
+                    "definition": f"29CM 상의 카테고리 랭킹에 오른 개별 상품이다. "
+                                  f"브랜드는 '{e.brand}' 다. 품목 키워드가 아니라 "
+                                  f"상품 하나이므로, 같은 속성을 가진 다른 상품의 "
+                                  f"움직임은 이 번들에 들어 있지 않다.",
+                },
                 "claim": f"{w.t_cut} 까지의 자료로 볼 때, 이 상품의 순위 상승이 "
                          f"이후 {args.hold}일 동안 절반 이상 유지되겠는가?",
+                "simulated_cutoff": w.t_cut,
                 "t_cut": w.t_cut,
                 "horizon_days": args.hold,
+                "historical_available_at": None,
                 "item": {"key": e.item_key, "name": e.name, "brand": e.brand},
                 "features": e.features(),
+                "evidence": e.evidence(w),
+                "limitations": ps.LIMITATIONS,
             })
             labels[cid] = got[e.item_key]
 

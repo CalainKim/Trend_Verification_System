@@ -1,4 +1,4 @@
-"""NAVER API HUB 공통 계층 (데이터랩 검색어 트렌드 · 쇼핑인사이트).
+"""NAVER API HUB 공통 계층 (데이터랩 검색어 트렌드와 쇼핑인사이트).
 
 데이터랩 API 는 developers.naver.com 이 아니라 네이버 클라우드 플랫폼의
 NAVER API HUB 를 통해 제공된다. 그래서 인증 헤더가 X-Naver-Client-* 가 아니라
@@ -15,7 +15,7 @@ X-NCP-APIGW-* 이고 호스트도 openapi.naver.com 이 아니다. 예전 방식
   조회 구간의 최댓값이 100 이 되도록 스케일된 값이므로,
   요청이 다르면 값을 직접 비교할 수 없다. 서로 다른 케이스의 지수를 그대로
   비교하면 잘못된 결론이 나온다. 비교가 필요하면 같은 요청 안에 함께 넣거나,
-  변화율·기울기처럼 스케일에 영향받지 않는 형태로 바꿔서 써야 한다.
+  변화율과 기울기처럼 스케일에 영향받지 않는 형태로 바꿔서 써야 한다.
 """
 
 from __future__ import annotations
@@ -57,7 +57,7 @@ class NaverApiError(RuntimeError):
 
 
 class NaverCollector(Collector):
-    """인증·요청·오류 처리를 담당하는 기반 클래스."""
+    """인증, 요청, 오류 처리를 담당하는 기반 클래스."""
 
     #: 조회 가능한 가장 이른 날짜. API 가 실제로 거절하는 경계는
     #: scripts/verify_naver_key.py 가 실측해서 확인한다.

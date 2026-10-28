@@ -72,10 +72,10 @@ def render_coverage(conn, color: bool) -> None:
         else:
             bar = paint("●" * r.n_snapshots, "good", color)
             print(f"  {r.day}  {pad(bar, 3 + (len(C['good']) + len(C['reset'])) * color)}"
-                  f"  정상  스냅샷 {r.n_snapshots}개 · {r.n_rows:,}행")
+                  f"  정상  스냅샷 {r.n_snapshots}개 / {r.n_rows:,}행")
     total = len(rows)
     ok = total - len(missing)
-    line = f"  누적 {total}일 중 수집 {ok}일 · 결측 {len(missing)}일"
+    line = f"  누적 {total}일 중 수집 {ok}일 / 결측 {len(missing)}일"
     print(paint(line, "warn" if missing else "dim", color))
 
 

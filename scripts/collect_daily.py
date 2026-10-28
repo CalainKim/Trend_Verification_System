@@ -75,7 +75,7 @@ def main(argv=None) -> int:
     )
 
     print(f"run_id={run_id}")
-    print(f"카테고리 {len(codes)}개 · 수집 {len(records)}행 · 신규 저장 {inserted}행 "
+    print(f"카테고리 {len(codes)}개 / 수집 {len(records)}행 / 신규 저장 {inserted}행 "
           f"(중복 {len(records) - inserted}행은 무시)")
     for path in written:
         print(f"스냅샷: {path.relative_to(ROOT)}")

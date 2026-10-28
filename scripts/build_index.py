@@ -55,7 +55,7 @@ def main(argv=None) -> int:
     rows = collect_texts(conn, args.channel)
     print(f"색인 대상 {len(rows)}건 (이미 색인된 것은 건너뛴다)")
     added = vectorstore.index_texts(conn, rows, model_name=args.model)
-    print(f"신규 색인 {added}건 · 누적 {vectorstore.count(conn)}건")
+    print(f"신규 색인 {added}건 / 누적 {vectorstore.count(conn)}건")
 
     if not args.cluster:
         return 0
@@ -64,7 +64,7 @@ def main(argv=None) -> int:
     clusters = clustering.cluster_texts(conn, threshold=args.threshold, channel=args.channel,
                                         model_name=args.model)
     multi = [c for c in clusters if c.size > 1]
-    print(f"후보 {len(clusters)}개 · 그중 둘 이상이 묶인 것 {len(multi)}개")
+    print(f"후보 {len(clusters)}개 / 그중 둘 이상이 묶인 것 {len(multi)}개")
     for c in multi[:15]:
         print(f"  [{c.size}] {c.canonical}")
         for m in c.members:

@@ -142,7 +142,7 @@ def build(args) -> int:
                 args.shopping_category, args.keyword,
                 start.isoformat(), end.isoformat(), run_id=run_id))
             total += storage.insert_raw(conn, recs)
-            print(f"  쇼핑 성별·연령 분해(주변분포) {len(recs):>5}행")
+            print(f"  쇼핑 성별과 연령 분해(주변분포) {len(recs):>5}행")
 
             if args.segment:
                 g, ages = SEGMENTS[args.segment]
@@ -198,7 +198,7 @@ def build(args) -> int:
                 who = "해외 선행" if ll.lead_days > 0 else "한국 선행"
                 flag = ("  경계에 걸림, 근거 불가" if ll.at_boundary
                         else ("" if ll.reliable else "  상관 낮음, 근거 불가"))
-                print(f"    {geo:<6} {who} {abs(ll.lead_days)}일 · "
+                print(f"    {geo:<6} {who} {abs(ll.lead_days)}일 / "
                       f"상관 {ll.correlation}{flag}")
         except GoogleTrendsUnavailable as exc:
             print(f"  Google Trends 실패: {exc}")
@@ -251,7 +251,7 @@ def main(argv=None) -> int:
     if missing:
         p.error(f"필수 인자 누락: {', '.join('--' + m.replace('_', '-') for m in missing)}")
     if not args.reason:
-        p.error("--reason 은 비워둘 수 없다. 라벨 근거가 없으면 케이스를 재현·검토할 수 없다")
+        p.error("--reason 은 비워둘 수 없다. 라벨 근거가 없으면 케이스를 재현과 검토할 수 없다")
     return build(args)
 
 

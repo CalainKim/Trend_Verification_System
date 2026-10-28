@@ -86,7 +86,7 @@ def test_no_data_returns_empty(conn):
 def test_cross_cells_excluded_from_marginals(conn):
     """교차셀이 주변분포 계산에 섞이면 같은 클릭이 이중 계상된다.
 
-    entity 한 컬럼에 전체·주변분포·교차셀이 모두 들어가므로 접두사 매칭이
+    entity 한 컬럼에 전체, 주변분포, 교차셀이 모두 들어가므로 접두사 매칭이
     정밀하지 않으면 'gender=m' 을 고르려다 'gender=m;ages=20' 까지 잡는다.
     """
     recs = []

@@ -78,7 +78,7 @@ def rank_chart(days, items, highlights, max_rank: int = 100) -> str:
         for i, d in enumerate(days):
             if d not in it.ranks:
                 continue
-            tip = f"{it.brand} · {it.name} — {d} {it.ranks[d]}위"
+            tip = f"{it.brand} / {it.name} — {d} {it.ranks[d]}위"
             parts.append(f'<circle cx="{round(x(i),1)}" cy="{round(y(it.ranks[d]),1)}" r="4.5" '
                          f'fill="{color}" stroke="var(--surface)" stroke-width="2" '
                          f'data-tip="{esc(tip)}"/>')
@@ -105,7 +105,7 @@ def rank_chart(days, items, highlights, max_rank: int = 100) -> str:
     legend = ['<div class="legend">']
     for n, it in enumerate(highlights[:3]):
         legend.append(f'<span><i class="swatch" style="background:var(--series-{n+1})"></i>'
-                      f'{esc(it.brand)} · {esc(it.name[:22])}</span>')
+                      f'{esc(it.brand)} / {esc(it.name[:22])}</span>')
     legend.append('<span><i class="swatch" style="background:var(--axis)"></i>'
                   '그 외 추적 상품</span></div>')
     return "".join(legend) + '<div class="scroll">' + "".join(parts) + "</div>"
@@ -176,7 +176,7 @@ def build(conn, top: int = 10) -> str:
         span = (date.fromisoformat(last) - date.fromisoformat(first)).days
         risers, fallers, new = analytics.movers(items, first, last, top=top)
         body.append(f'<section><h2>순위 추이</h2><p class="sub">{esc(first)} → {esc(last)} '
-                    f'· 급상승 상위 3개를 강조했다. 선에 마우스를 올리면 상품명이 나온다.</p>'
+                    f'급상승 상위 3개를 강조했다. 선에 마우스를 올리면 상품명이 나온다.</p>'
                     f'<div class="card">{rank_chart(days, items, risers)}</div></section>')
         body.append(f'<section><h2>순위 급상승</h2><div class="card">'
                     f'{mover_table(risers, first, last, "up")}</div></section>')
@@ -193,7 +193,7 @@ def build(conn, top: int = 10) -> str:
                     f'관측 구간이 {span}일뿐이라 리뷰가 거의 움직이지 않는다. 급상승 상품 '
                     f'대부분이 자동으로 걸리므로 {analytics.MIN_REVIEW_WINDOW_DAYS}일 이상 '
                     f'쌓인 뒤에 봐야 한다.</div>')
-        body.append('<section><h2>반증 신호 · 순위는 올랐는데 리뷰가 늘지 않음</h2>'
+        body.append('<section><h2>반증 신호 (순위는 올랐는데 리뷰가 늘지 않음)</h2>'
                     '<p class="sub">리뷰는 실제 구매를 거쳐야 쌓이므로 조작 여지가 적다. '
                     '순위만 오르고 리뷰가 붙지 않으면 광고 노출이나 프로모션 효과를 의심할 '
                     '근거가 된다.</p>'
@@ -210,13 +210,13 @@ def build(conn, top: int = 10) -> str:
 <style>{webtheme.CSS}</style></head>
 <body><div class="wrap">
 <h1>트렌드 시그널 수집 현황</h1>
-<p class="sub">29CM 상의 카테고리 랭킹 · 트랙 B 실시간 축적분</p>
+<p class="sub">29CM 상의 카테고리 랭킹 (트랙 B 실시간 축적분)</p>
 {webtheme.nav("index.html")}
 <p class="note">생성 {esc(now)}</p>
 {"".join(body)}
 <footer>
 데이터 출처 29CM 베스트 랭킹 (여성의류&gt;상의, 남성의류&gt;상의 각 100위)<br>
-이 페이지는 관측된 사실만 보여준다. 트렌드 후보의 확정·보류·기각 판정은 별도 검증 단계의 몫이다.<br>
+이 페이지는 관측된 사실만 보여준다. 트렌드 후보의 확정, 보류, 기각 판정은 별도 검증 단계의 몫이다.<br>
 하루에 여러 번 수집하더라도 일 단위 집계에는 그날의 마지막 스냅샷 하나만 쓴다.<br>
 <a href="https://github.com/CalainKim/Trend_Verification_System">저장소</a>
 </footer>

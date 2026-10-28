@@ -50,3 +50,4 @@ benchmark/labels.sealed.json
 data/attribute_map.csv
 
 benchmark-index/labels.sealed.json
+benchmark-index-long/labels.sealed.json

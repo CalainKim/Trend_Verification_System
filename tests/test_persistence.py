@@ -211,8 +211,9 @@ def test_mixed_normalization_window_series_is_dropped(tmp_path):
                               metadata={"query_start": "2026-01-01",
                                         "query_end": "2026-06-01"}))
     storage.insert_raw(c, recs)
-    s = ps.load_index_series(c, "gtrends", "geo=KR")
-    assert "clean" in s and "mixed" not in s
+    s = ps.load_index_series(c, "gtrends", ["geo=KR"])
+    assert "clean@geo=KR" in s
+    assert "mixed@geo=KR" not in s
     c.close()
 
 
@@ -244,3 +245,103 @@ def test_yoy_ratio_is_none_without_prior_year():
     item = {(d0 + timedelta(days=i)).isoformat(): 50.0 for i in range(30)}
     days = [(d0 + timedelta(days=i)).isoformat() for i in range(10)]
     assert ps.yoy_ratio(item, days) is None
+
+
+# ------------------------------------------------------- 여러 entity
+
+def test_series_key_roundtrip():
+    assert ps.split_series_key(ps.series_key("헨리넥", "geo=KR")) == ("헨리넥", "geo=KR")
+    assert ps.split_series_key(ps.series_key("헨리넥", "")) == ("헨리넥", "")
+
+
+def _seed_index(conn, keyword, entity, values, start="2026-01-01",
+                window=("2026-01-01", "2026-12-31")):
+    from trend_pipeline import storage
+    from trend_pipeline.models import RawRecord
+    d0 = date.fromisoformat(start)
+    storage.insert_raw(conn, [
+        RawRecord(channel="gtrends", keyword_raw=keyword, entity=entity,
+                  metric_type="search_index", metric_value=float(v),
+                  observed_at=(d0 + timedelta(days=i)).isoformat(),
+                  metadata={"query_start": window[0], "query_end": window[1]})
+        for i, v in enumerate(values)])
+
+
+@pytest.fixture()
+def idx_conn(tmp_path):
+    from trend_pipeline import storage
+    c = storage.connect(tmp_path / "x.sqlite")
+    storage.init_db(c)
+    yield c
+    c.close()
+
+
+def test_entities_make_separate_series(idx_conn):
+    """같은 키워드라도 지역이 다르면 다른 사건이다."""
+    _seed_index(idx_conn, "kw", "geo=KR", [10] * 9)
+    _seed_index(idx_conn, "kw", "geo=US", [20] * 9)
+    s = ps.load_index_series(idx_conn, "gtrends", ["geo=KR", "geo=US"])
+    assert set(s) == {"kw@geo=KR", "kw@geo=US"}
+    assert s["kw@geo=KR"][list(s["kw@geo=KR"])[0]] == 10.0
+
+
+def test_single_entity_still_works(idx_conn):
+    _seed_index(idx_conn, "kw", "geo=KR", [10] * 9)
+    s = ps.load_index_series(idx_conn, "gtrends", ["geo=KR"])
+    assert set(s) == {"kw@geo=KR"}
+
+
+def test_mixed_window_drops_only_that_entity(idx_conn):
+    """한 지역의 창이 섞였다고 다른 지역까지 버리면 안 된다."""
+    _seed_index(idx_conn, "kw", "geo=KR", [10] * 5)
+    _seed_index(idx_conn, "kw", "geo=KR", [10] * 4, start="2026-01-06",
+                window=("2026-01-01", "2026-09-01"))
+    _seed_index(idx_conn, "kw", "geo=US", [20] * 9)
+    s = ps.load_index_series(idx_conn, "gtrends", ["geo=KR", "geo=US"])
+    assert "kw@geo=KR" not in s
+    assert "kw@geo=US" in s
+
+
+def test_event_keeps_keyword_and_entity(idx_conn):
+    """번들에는 지역을 뺀 키워드를 싣는다. 모델이 읽을 이름이기 때문이다."""
+    _seed_index(idx_conn, "헨리넥", "geo=KR", [10, 10, 10, 15, 15, 15, 15, 15, 15])
+    s = ps.load_index_series(idx_conn, "gtrends", ["geo=KR"])
+    d = sorted(list(s.values())[0])
+    w = ps.Window(base=d[:3], detect=d[3:6], hold=d[6:])
+    ev = ps.index_rise_events(s, w)
+    assert len(ev) == 1
+    assert ev[0].keyword == "헨리넥"
+    assert ev[0].entity == "geo=KR"
+    assert ev[0].key == "헨리넥@geo=KR"
+
+
+# ------------------------------------------------------- 옛 케이스 정리
+
+def test_rebuild_removes_cases_from_old_window_config(idx_conn, tmp_path):
+    """창 구성을 바꾸면 케이스 id 가 달라진다. 옛 파일을 남기면 문제지가
+    정답보다 많아지고, 검증 파트는 채점할 수 없는 케이스를 돌리게 된다."""
+    import json
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "scripts"))
+    import build_persistence_cases as bpc
+
+    vals = [10, 10, 10, 10, 20, 20, 20, 20, 20, 20, 20, 20,
+            20, 20, 20, 20, 20, 20, 20, 20]
+    _seed_index(idx_conn, "kw", "geo=KR", vals)
+    out = tmp_path / "bench"
+    db = str(tmp_path / "x.sqlite")
+
+    bpc.main(["--source", "index", "--db", db, "--entities", "geo=KR",
+              "--base", "3", "--detect", "2", "--hold", "3", "--step", "8",
+              "--out", str(out)])
+    first = {f.stem for f in (out / "cases").glob("*.json")}
+
+    bpc.main(["--source", "index", "--db", db, "--entities", "geo=KR",
+              "--base", "4", "--detect", "2", "--hold", "4", "--step", "10",
+              "--out", str(out)])
+    second = {f.stem for f in (out / "cases").glob("*.json")}
+    labels = set(json.loads((out / "labels.sealed.json").read_text(
+        encoding="utf-8"))["labels"])
+
+    assert second == labels            # 문제지와 정답이 어긋나지 않는다
+    assert not (first - second) or first != second

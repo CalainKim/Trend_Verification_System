@@ -251,7 +251,8 @@ MIN_RISE_RATIO = 1.2
 
 @dataclass
 class IndexRiseEvent:
-    key: str                     # 키워드
+    key: str                     # 키워드와 entity 를 합친 시계열 키
+    keyword: str
     entity: str
     t_cut: str
     base_mean: float
@@ -293,38 +294,60 @@ class IndexRiseEvent:
         return out
 
 
-def load_index_series(conn: sqlite3.Connection, channel: str, entity: str = "",
+#: 시계열 키를 만들 때 키워드와 entity 를 잇는 구분자.
+#: 키워드에 '@' 가 들어가지 않으므로 되돌릴 수 있다.
+SERIES_SEP = "@"
+
+
+def series_key(keyword: str, entity: str) -> str:
+    return f"{keyword}{SERIES_SEP}{entity}" if entity else keyword
+
+
+def split_series_key(key: str) -> Tuple[str, str]:
+    kw, _, ent = key.partition(SERIES_SEP)
+    return kw, ent
+
+
+def load_index_series(conn: sqlite3.Connection, channel: str,
+                      entities: Sequence[str] = ("",),
                       metric_type: str = "search_index",
                       require_single_window: bool = True
                       ) -> Dict[str, Dict[str, float]]:
-    """키워드별 지수 시계열.
+    """키워드와 entity 조합별 지수 시계열.
 
-    정규화 창이 섞인 키워드는 빼는 것이 기본이다. 구글 트렌드와 네이버 두
+    entity 를 여러 개 받으면 조합마다 별도 시계열이 된다. 같은 키워드라도
+    지역이 다르면 다른 사건이기 때문이다. '헨리넥' 한국 검색의 상승과
+    'henley shirt' 미국 검색의 상승은 각각 세는 것이 맞다. 다만 같은 유행이
+    양쪽에 걸칠 수 있으므로 완전히 독립은 아니고, 그 사실을 성적표에 남긴다.
+
+    정규화 창이 섞인 시계열은 빼는 것이 기본이다. 구글 트렌드와 네이버 두
     API 는 요청 창 안에서 최댓값을 100 으로 맞추므로, 창이 다른 값을 한
     시계열로 이으면 이음새에 없던 계단이 생긴다. 그 계단을 상승으로 읽으면
     케이스가 통째로 거짓이 된다.
     """
-    rows = conn.execute(
-        """
-        SELECT keyword_raw, observed_at, metric_value,
-               json_extract(metadata,'$.query_start') || ' ~ '
-            || json_extract(metadata,'$.query_end') w
-        FROM signal_raw
-        WHERE channel=? AND entity=? AND metric_type=?
-        ORDER BY keyword_raw, observed_at
-        """, (channel, entity, metric_type)).fetchall()
-
+    if isinstance(entities, str):
+        entities = (entities,)
     out: Dict[str, Dict[str, float]] = {}
     windows: Dict[str, set] = {}
-    for r in rows:
-        kw = r["keyword_raw"]
-        out.setdefault(kw, {})[r["observed_at"][:10]] = r["metric_value"]
-        if r["w"]:
-            windows.setdefault(kw, set()).add(r["w"])
+    for entity in entities:
+        rows = conn.execute(
+            """
+            SELECT keyword_raw, observed_at, metric_value,
+                   json_extract(metadata,'$.query_start') || ' ~ '
+                || json_extract(metadata,'$.query_end') w
+            FROM signal_raw
+            WHERE channel=? AND entity=? AND metric_type=?
+            ORDER BY keyword_raw, observed_at
+            """, (channel, entity, metric_type)).fetchall()
+        for r in rows:
+            key = series_key(r["keyword_raw"], entity)
+            out.setdefault(key, {})[r["observed_at"][:10]] = r["metric_value"]
+            if r["w"]:
+                windows.setdefault(key, set()).add(r["w"])
     if require_single_window:
-        for kw, ws in windows.items():
+        for key, ws in windows.items():
             if len(ws) > 1:
-                out.pop(kw, None)
+                out.pop(key, None)
     return out
 
 
@@ -365,11 +388,11 @@ def yoy_ratio(item: Dict[str, float], days: Sequence[str],
 
 def index_rise_events(series: Dict[str, Dict[str, float]], w: Window,
                       min_ratio: float = MIN_RISE_RATIO,
-                      min_coverage: float = 0.5,
-                      entity: str = "") -> List[IndexRiseEvent]:
-    """관측 구간에서 지수가 오른 키워드. 확인 구간은 쳐다보지 않는다."""
+                      min_coverage: float = 0.5) -> List[IndexRiseEvent]:
+    """관측 구간에서 지수가 오른 시계열. 확인 구간은 쳐다보지 않는다."""
     found = []
-    for kw, item in series.items():
+    for key, item in series.items():
+        kw, entity = split_series_key(key)
         bm, bc = _mean(item, w.base)
         dm, dc = _mean(item, w.detect)
         if bm is None or dm is None or bm <= 0:
@@ -381,7 +404,7 @@ def index_rise_events(series: Dict[str, Dict[str, float]], w: Window,
         if ratio < min_ratio:
             continue
         found.append(IndexRiseEvent(
-            key=kw, entity=entity, t_cut=w.t_cut,
+            key=key, keyword=kw, entity=entity, t_cut=w.t_cut,
             base_mean=bm, detect_mean=dm, rise_ratio=ratio,
             yoy_ratio=yoy_ratio(item, w.base + w.detect), coverage=cov))
     return found

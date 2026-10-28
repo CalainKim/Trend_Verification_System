@@ -50,20 +50,20 @@ def _index_cases(series, w, wi, args):
     계단 수가 아니라 비율로 잰다는 점뿐이다. 지수는 요청 창 안에서
     정규화된 상대값이라 차이의 절대 크기에 뜻이 없다.
     """
-    events = ps.index_rise_events(series, w, args.min_ratio, entity=args.entity)
+    events = ps.index_rise_events(series, w, args.min_ratio)
     got = ps.label_index_events(series, w, events)
     cases, labels = [], {}
     for e in events:
         if e.key not in got:
             continue
-        cid = f"idx_{args.channel}_{w.t_cut}_{e.key}"
+        cid = f"idx_{args.channel}_{w.t_cut}_{e.key.replace('=', '')}"
         cases.append({
             "case_id": cid,
             "window_id": wi,
             "experiment_type": "persistence-index-v1",
             "candidate": {
-                "keyword": e.key,
-                "definition": f"{args.channel} 의 '{e.key}' 검색 지수다 "
+                "keyword": e.keyword,
+                "definition": f"{args.channel} 의 '{e.keyword}' 검색 지수다 "
                               f"(entity {e.entity}). 요청 창 안에서 최댓값이 100 이 "
                               f"되도록 정규화된 상대값이므로 다른 키워드의 값과 "
                               f"크기를 견줄 수 없다.",
@@ -75,7 +75,8 @@ def _index_cases(series, w, wi, args):
             "t_cut": w.t_cut,
             "horizon_points": len(w.hold),
             "historical_available_at": None,
-            "item": {"key": e.key, "name": e.key, "brand": ""},
+            "item": {"key": e.key, "name": e.keyword, "brand": "",
+                     "entity": e.entity},
             "features": e.features(),
             "evidence": e.evidence(w, args.channel),
             "limitations": ps.LIMITATIONS[:1] + [
@@ -101,20 +102,27 @@ def main(argv=None) -> int:
     p.add_argument("--source", default="commerce", choices=("commerce", "index"),
                    help="commerce 는 29CM 순위, index 는 검색 지수")
     p.add_argument("--channel", default="gtrends", help="index 일 때 채널")
-    p.add_argument("--entity", default="geo=KR", help="index 일 때 entity")
+    p.add_argument("--entities", nargs="*", default=["geo=KR"],
+                   help="index 일 때 entity 목록. 여러 개면 조합마다 별도 시계열")
     p.add_argument("--min-ratio", type=float, default=ps.MIN_RISE_RATIO,
                    help="index 일 때 상승으로 볼 최소 비율")
     p.add_argument("--out", default=None, help="케이스를 저장할 경로")
     p.add_argument("--stats", action="store_true", help="통계만 출력")
+    p.add_argument("--keep-stale", action="store_true",
+                   help="이전 설정으로 만든 케이스 파일을 지우지 않는다")
     args = p.parse_args(argv)
 
     conn = storage.connect(Path(args.db) if args.db else None)
     conn.row_factory = sqlite3.Row
     if args.source == "index":
-        series = ps.load_index_series(conn, args.channel, args.entity)
+        series = ps.load_index_series(conn, args.channel, args.entities)
         since = "0000-00-00" if args.since == "2026-09-29" else args.since
-        print(f"채널 {args.channel} / entity {args.entity} / "
-              f"정규화 창이 단일한 키워드 {len(series)}개")
+        kws = {ps.split_series_key(k)[0] for k in series}
+        print(f"채널 {args.channel} / entity {', '.join(args.entities)}")
+        print(f"정규화 창이 단일한 시계열 {len(series)}개 (키워드 {len(kws)}개)")
+        if len(args.entities) > 1:
+            print("주의. 같은 키워드의 다른 지역은 완전히 독립이 아니다. "
+                  "같은 유행이 양쪽에 걸칠 수 있다")
     else:
         series = ps.load_series(conn)
         since = args.since
@@ -201,7 +209,23 @@ def main(argv=None) -> int:
         return 0
 
     out = Path(args.out)
-    (out / "cases").mkdir(parents=True, exist_ok=True)
+    cdir = out / "cases"
+    cdir.mkdir(parents=True, exist_ok=True)
+
+    # 창 구성을 바꿔 다시 만들면 케이스 id 가 달라진다. 옛 파일을 남겨 두면
+    # 문제지는 38건인데 정답은 23건인 상태가 되고, 검증 파트는 채점할 수
+    # 없는 케이스를 15건 돌리게 된다. 기본값은 지우는 것이다.
+    current = {c["case_id"] for c in cases}
+    stale = [f for f in cdir.glob("*.json") if f.stem not in current]
+    if stale and args.keep_stale:
+        print(f"\n경고. 이전 설정으로 만든 케이스 {len(stale)}건이 남아 있다. "
+              f"정답이 없으므로 채점할 수 없다.")
+    elif stale:
+        for f in stale:
+            f.unlink()
+        print(f"\n이전 설정의 케이스 {len(stale)}건을 지웠다 "
+              f"(창 구성이 바뀌어 정답이 없다).")
+
     for c in cases:
         (out / "cases" / f"{c['case_id']}.json").write_text(
             json.dumps(c, ensure_ascii=False, indent=2), encoding="utf-8")

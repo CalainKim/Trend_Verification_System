@@ -224,6 +224,8 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
     analytics.py         수집 데이터 요약 집계 (리포트와 대시보드가 공유)
     demographics.py      인구통계 쏠림 (분야 기준선 대비 리프트)
     features.py          후보별 특징 추출 (as_of 이전 자료만)
+    persistence.py       지속성 케이스 생성 (상승이 버티는지)
+    scoring.py           판정 채점 (기저율 대비, 기권 처리)
     webtheme.py          대시보드 공통 테마
     embeddings.py        텍스트 임베딩 (로컬 다국어 모델)
     vectorstore.py       sqlite-vec 벡터 색인 및 유사도 검색
@@ -237,17 +239,82 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
     build_index.py       벡터 색인 생성, 동의어 클러스터링
     search_items.py      수집 아이템 유사도 검색
     build_case.py        역추적 케이스 번들 생성
+    extract_attributes.py    상품명에서 속성 키워드 추출
+    collect_gtrends.py       구글 트렌드 수집 (지역별 질의어)
+    collect_gtrends_hourly.sh    시간별 증분 수집 (launchd 가 호출)
+    install_gtrends_schedule.sh  시간별 수집 등록
+    build_persistence_cases.py   지속성 케이스와 기저율 생성
+    build_all_benchmarks.sh      벤치마크 셋을 한 번에 생성
+    score_verdicts.py            판정 채점과 성적표
     build_case_dashboard.py  케이스 분석 화면 생성
     serve.sh             대시보드를 로컬에서 띄운다
     collect_and_push.sh  로컬 일일 수집 (launchd 가 호출)
     install_local_schedule.sh  일일 수집 등록
   data/snapshots/        수집 원본 CSV (커밋 대상)
+  data/attributes.yml    속성 키워드 사전 (사람이 검수한다)
   cases/                 역추적 케이스 산출물 (검증팀 전달용)
+  benchmark/             커머스 지속성 벤치마크 (정답은 저장소에 없다)
+  benchmark-index/       검색 지수 벤치마크 (한국, 확인 28일)
+  benchmark-index-long/  검색 지수 벤치마크 (3개 지역, 확인 84일)
   verification/          검증 파트 인터페이스 (판정 결과 스키마)
   docs/                  GitHub Pages 대시보드와 근거 문서
                          verification-handoff.md 는 검증 파트 인수인계 문서
   tests/                 저장 및 누수 차단 계약 테스트
 ```
+
+
+## 7-1. 지속성 벤치마크
+
+이 저장소의 주 산출물이다. 트렌드를 맞히는 것이 아니라 **맞히는 모델을
+채점하는 시험지**다.
+
+### 묻는 것
+
+원인은 외부에서 관측할 수 없다. 광고 집행과 노출 알고리즘은 쇼핑몰 안에만
+있다. 그래서 "왜 올랐나" 대신 **"얼마나 버티나"** 를 묻는다. 광고로 올린
+순위는 광고가 끝나면 떨어지고 그 떨어짐은 밖에서도 보인다. 질문을 바꾸면
+관측 불가능한 문제가 관측 가능한 문제가 된다.
+
+정답은 사람이 정하지 않는다. 관측 구간에서 오른 것을 찾고, 확인 구간에서
+상승분의 절반이 남았는지를 자료가 답한다. 그래서 케이스가 자동으로 쌓인다.
+
+### 셋으로 나눈다
+
+    benchmark/              29CM 순위     확인  7일   61건   기저율 54.1%
+    benchmark-index/        검색 한국     확인 28일   23건   기저율 73.9%
+    benchmark-index-long/   검색 3개 지역  확인 84일   53건   기저율 47.2%
+
+기저율이 47% 에서 74% 까지 벌어진다. 지표의 성질과 확인 기간이 다르기
+때문이다. **셋을 합쳐 하나의 점수로 내면 안 된다.**
+
+### 채점
+
+    ./scripts/build_all_benchmarks.sh                       # 셋을 다시 만든다
+    python scripts/score_verdicts.py --benchmark benchmark --baselines
+    python scripts/score_verdicts.py --benchmark benchmark --verdicts <경로>
+
+정확도만 보고하면 찍은 것과 같은 점수를 성과로 읽는다. 전부 "지속" 이라고
+찍으면 기저율이 그대로 나오므로 항상 함께 낸다. 유의성은 정확도 신뢰구간의
+아래끝이 기저율을 넘는지로 본다.
+
+보류는 오답이 아니라 답하지 않은 것이다. 오답으로 세면 신중한 판정이 벌을
+받고, 채점에서 빼기만 하면 쉬운 것만 골라 답한 판정이 상을 받는다. 그래서
+커버리지와 정확도를 함께 내고 기저율도 답한 부분집합에서 다시 계산한다.
+
+### 정답은 저장소에 없다
+
+공개 저장소라 검증 파트가 정답을 보면 블라인드가 깨진다. labels.sealed.json
+은 제외하고 봉인 해시만 둔다. 채점이 끝난 뒤 정답을 고치지 않았음을 해시로
+확인한다.
+
+### 지금은 표본이 모자란다
+
+키워드가 9개뿐이라 +20%p 개선만 가려낼 수 있다. 사전에 74개가 있고 전부
+수집하면 주 벤치마크가 190건쯤 되어 +10%p 를 주장할 수 있다. 구글 트렌드는
+연속 24회쯤에서 IP 단위로 막히므로 시간별 증분 수집으로 모은다.
+
+    bash scripts/install_gtrends_schedule.sh    # 매시 17분 실행 등록
+    tail -f data/gtrends.log
 
 
 ## 8. 기술 스택

@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_3806784",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:3806784",
+    "name": "10.5 oz USA Cotton Tubular Gusset Tee Indigo",
+    "brand": "브론슨"
+  },
+  "features": {
+    "rank_base": 87.0,
+    "rank_at_cut": 36.0,
+    "rank_rise": 51.0,
+    "review_delta": 0.0,
+    "heart_delta": 1.0,
+    "sale_percent_delta": 0.0,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 9
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_2753432",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:2753432",
+    "name": "[토모토모, 오제 PICK] 에센셜 롱 슬리브 티셔츠 MDTS063_6 Colors",
+    "brand": "몽돌"
+  },
+  "features": {
+    "rank_base": 34.0,
+    "rank_at_cut": 10.29,
+    "rank_rise": 23.71,
+    "review_delta": 12.07,
+    "heart_delta": 600.07,
+    "sale_percent_delta": 3.64,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 2
+  }
+}

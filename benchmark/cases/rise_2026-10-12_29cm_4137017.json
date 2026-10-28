@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_4137017",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:4137017",
+    "name": "[1차 리오더] Sheer boatneck raglan t-shirt_4colors",
+    "brand": "유라고"
+  },
+  "features": {
+    "rank_base": 51.71,
+    "rank_at_cut": 38.86,
+    "rank_rise": 12.86,
+    "review_delta": 6.14,
+    "heart_delta": 417.0,
+    "sale_percent_delta": -0.71,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 1
+  }
+}

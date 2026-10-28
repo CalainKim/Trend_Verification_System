@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_3462452",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:3462452",
+    "name": "Lang Stripe Overfit T-shirt_Grey",
+    "brand": "더바넷"
+  },
+  "features": {
+    "rank_base": 68.4,
+    "rank_at_cut": 51.83,
+    "rank_rise": 16.57,
+    "review_delta": 7.73,
+    "heart_delta": 193.2,
+    "sale_percent_delta": 11.33,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 1
+  }
+}

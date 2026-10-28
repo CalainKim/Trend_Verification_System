@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_3041689",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:3041689",
+    "name": "All Weather T-Shirt (8color)",
+    "brand": "러프사이드"
+  },
+  "features": {
+    "rank_base": 64.25,
+    "rank_at_cut": 35.8,
+    "rank_rise": 28.45,
+    "review_delta": 3.4,
+    "heart_delta": 21.3,
+    "sale_percent_delta": -5.0,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 2
+  }
+}

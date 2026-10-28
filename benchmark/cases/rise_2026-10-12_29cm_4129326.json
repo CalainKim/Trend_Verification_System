@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_4129326",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:4129326",
+    "name": "레귤러핏 와플 롱 슬리브 (멜란지그레이)",
+    "brand": "쿠어"
+  },
+  "features": {
+    "rank_base": 45.71,
+    "rank_at_cut": 22.43,
+    "rank_rise": 23.29,
+    "review_delta": 1.29,
+    "heart_delta": 36.0,
+    "sale_percent_delta": 0.0,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 2
+  }
+}

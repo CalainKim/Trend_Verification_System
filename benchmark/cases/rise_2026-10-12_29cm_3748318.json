@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_3748318",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:3748318",
+    "name": "[13차] 오버 스트라이프 티셔츠_네이비",
+    "brand": "엽페"
+  },
+  "features": {
+    "rank_base": 30.0,
+    "rank_at_cut": 20.0,
+    "rank_rise": 10.0,
+    "review_delta": 31.71,
+    "heart_delta": 463.86,
+    "sale_percent_delta": 6.71,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 1
+  }
+}

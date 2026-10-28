@@ -1,0 +1,206 @@
+"""순위 상승이 지속되는지 판정할 케이스를 만든다.
+
+무신사가 겪는 문제는 "갑자기 잘 팔리는데 이유를 모르고, 매진까지 모른다" 이다.
+내부적으로 내린 결론은 노이즈 제거, 곧 어떤 것이 진짜 시그널이냐를 가리는 일이다.
+
+원인은 외부에서 관측할 수 없다. 광고 집행과 노출 알고리즘은 쇼핑몰 내부에만
+있다. 그래서 원인 대신 수명을 본다. 광고로 올린 순위는 광고가 끝나면 떨어지고,
+그 떨어짐은 밖에서도 보인다. 질문을 "왜 올랐나" 에서 "얼마나 버티나" 로 바꾸면
+관측 불가능한 문제가 관측 가능한 문제가 된다.
+
+정답을 사람이 정하지 않는 것이 이 모듈의 핵심이다. 역추적 케이스는 연구자가
+T_peak 을 지정해야 해서 1건에서 멈춰 있었다. 지속 여부는 자료가 답하므로
+케이스가 자동으로 쌓인다.
+
+누수 차단은 함수를 쪼개는 방식으로 강제한다. rise_events 는 관측 구간만 받고
+label_events 는 확인 구간만 받는다. 한 함수가 양쪽을 다 보면 특징 계산이
+정답을 엿볼 수 있고, 그래도 오류는 나지 않는다.
+"""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+from dataclasses import dataclass, field
+from typing import Dict, Iterator, List, Optional, Sequence, Tuple
+
+#: 상승으로 볼 최소 순위 변화. 랭킹 100위 안에서 10계단은 눈에 띄는 변화다.
+MIN_RISE = 10.0
+
+#: 확인 구간에서 상승폭의 이만큼이 남아 있으면 지속으로 본다.
+KEEP_RATIO = 0.5
+
+PERSIST, FADE = "persist", "fade"
+
+
+@dataclass
+class Window:
+    """기준, 관측, 확인 세 구간. T_cut 이후 자료는 특징에 들어가면 안 된다."""
+    base: List[str]
+    detect: List[str]
+    hold: List[str]
+
+    @property
+    def t_cut(self) -> str:
+        """판정 기준 시점. 이 날짜까지만 알 수 있었다고 가정한다."""
+        return self.detect[-1]
+
+
+@dataclass
+class RiseEvent:
+    item_key: str
+    name: str
+    brand: str
+    t_cut: str
+    rank_base: float
+    rank_detect: float
+    rise: float
+    review_delta: float
+    heart_delta: float
+    sale_delta: float
+    is_new: bool
+    sold_out: bool
+    brand_risers: int = 1          # 같은 창에서 동시 상승한 같은 브랜드 상품 수
+
+    def features(self) -> Dict[str, object]:
+        """검증 단계로 넘길 특징. T_cut 이전 자료만 들어 있다."""
+        return {
+            "rank_base": round(self.rank_base, 2),
+            "rank_at_cut": round(self.rank_detect, 2),
+            "rank_rise": round(self.rise, 2),
+            "review_delta": round(self.review_delta, 2),
+            "heart_delta": round(self.heart_delta, 2),
+            "sale_percent_delta": round(self.sale_delta, 2),
+            "is_new": self.is_new,
+            "sold_out": self.sold_out,
+            "brand_simultaneous_risers": self.brand_risers,
+        }
+
+
+def load_series(
+    conn: sqlite3.Connection, channel: str = "commerce_rank"
+) -> Dict[str, Dict[str, dict]]:
+    """상품별 일자별 지표. 랭킹 entity 의 카테고리 접미사는 떼어 묶는다."""
+    out: Dict[str, Dict[str, dict]] = {}
+    rows = conn.execute(
+        """
+        SELECT observed_at, entity, keyword_raw, metric_type, metric_value, metadata
+        FROM signal_raw WHERE channel = ?
+          AND metric_type IN ('rank', 'review_count', 'heart_count')
+        ORDER BY observed_at
+        """, (channel,)).fetchall()
+    for r in rows:
+        key = r["entity"].split("@", 1)[0]
+        day = r["observed_at"][:10]
+        slot = out.setdefault(key, {}).setdefault(day, {})
+        slot[r["metric_type"]] = r["metric_value"]
+        if r["metric_type"] == "rank":
+            meta = json.loads(r["metadata"] or "{}")
+            slot["name"] = r["keyword_raw"]
+            slot["brand"] = meta.get("brand_kor") or meta.get("brand_eng") or ""
+            slot["sale"] = meta.get("sale_percent") or 0.0
+            slot["is_new"] = bool(meta.get("is_new"))
+            slot["sold_out"] = bool(meta.get("sold_out"))
+    return out
+
+
+def observed_days(series: Dict[str, Dict[str, dict]]) -> List[str]:
+    return sorted({d for v in series.values() for d in v})
+
+
+def windows(days: Sequence[str], base: int, detect: int, hold: int,
+            step: int = 1) -> List[Window]:
+    """창을 밀면서 구간을 만든다.
+
+    step 을 1 로 두면 창이 겹친다. 겹친 창에서 나온 케이스는 서로 독립이
+    아니므로 표본 수를 그대로 통계에 쓰면 안 된다. 독립 표본만 필요하면
+    step 을 base+detect+hold 로 준다.
+    """
+    span = base + detect + hold
+    out = []
+    for i in range(0, len(days) - span + 1, step):
+        out.append(Window(base=list(days[i:i + base]),
+                          detect=list(days[i + base:i + base + detect]),
+                          hold=list(days[i + base + detect:i + span])))
+    return out
+
+
+def _avg(item: Dict[str, dict], days: Sequence[str], key: str) -> Optional[float]:
+    vals = [item[d][key] for d in days if d in item and key in item[d]]
+    return sum(vals) / len(vals) if vals else None
+
+
+def _latest(item: Dict[str, dict], days: Sequence[str], key: str, default=None):
+    for d in reversed(days):
+        if d in item and key in item[d]:
+            return item[d][key]
+    return default
+
+
+def rise_events(series: Dict[str, Dict[str, dict]], w: Window,
+                min_rise: float = MIN_RISE) -> List[RiseEvent]:
+    """관측 구간에서 순위가 오른 상품. 확인 구간은 쳐다보지 않는다.
+
+    이 함수에 w.hold 를 쓰는 코드를 넣으면 안 된다. 특징이 정답을 보게 되고
+    모델 성적이 실제보다 좋게 나오는데 오류는 나지 않아 발견하기 어렵다.
+    """
+    seen = w.base + w.detect
+    found: List[RiseEvent] = []
+    for key, item in series.items():
+        rb, rd = _avg(item, w.base, "rank"), _avg(item, w.detect, "rank")
+        if rb is None or rd is None:
+            continue
+        rise = rb - rd                      # 순위는 숫자가 작아질수록 상승이다
+        if rise < min_rise:
+            continue
+        rev_b, rev_d = _avg(item, w.base, "review_count"), _avg(item, w.detect, "review_count")
+        hb, hd = _avg(item, w.base, "heart_count"), _avg(item, w.detect, "heart_count")
+        sb, sd = _avg(item, w.base, "sale"), _avg(item, w.detect, "sale")
+        found.append(RiseEvent(
+            item_key=key,
+            name=_latest(item, seen, "name", "") or "",
+            brand=_latest(item, seen, "brand", "") or "",
+            t_cut=w.t_cut,
+            rank_base=rb, rank_detect=rd, rise=rise,
+            review_delta=(rev_d - rev_b) if None not in (rev_b, rev_d) else 0.0,
+            heart_delta=(hd - hb) if None not in (hb, hd) else 0.0,
+            sale_delta=(sd - sb) if None not in (sb, sd) else 0.0,
+            is_new=bool(_latest(item, seen, "is_new", False)),
+            sold_out=bool(_latest(item, seen, "sold_out", False)),
+        ))
+
+    # 같은 브랜드가 한 창에서 몇 개나 함께 올랐는지. 브랜드 단위 효과를
+    # 상품 단위 신호와 구분하려면 필요하다.
+    counts: Dict[str, int] = {}
+    for e in found:
+        if e.brand:
+            counts[e.brand] = counts.get(e.brand, 0) + 1
+    for e in found:
+        e.brand_risers = counts.get(e.brand, 1)
+    return found
+
+
+def label_events(series: Dict[str, Dict[str, dict]], w: Window,
+                 events: Sequence[RiseEvent],
+                 keep_ratio: float = KEEP_RATIO) -> Dict[str, str]:
+    """확인 구간을 보고 지속 여부를 정한다. 정답은 여기서만 만들어진다."""
+    out: Dict[str, str] = {}
+    for e in events:
+        item = series[e.item_key]
+        rh = _avg(item, w.hold, "rank")
+        if rh is None:
+            continue                       # 확인 구간에 자료가 없으면 채점 불가
+        kept = e.rank_base - rh
+        out[e.item_key] = PERSIST if kept >= e.rise * keep_ratio else FADE
+    return out
+
+
+def base_rate(labels: Sequence[str]) -> Optional[float]:
+    """아무 생각 없이 '지속' 이라고 찍었을 때의 정확도.
+
+    모델 성적은 이 값과 비교해야 뜻이 생긴다. 기저율을 빼고 정확도만 보고하면
+    찍은 것과 같은 점수를 성과로 읽게 된다.
+    """
+    if not labels:
+        return None
+    return sum(1 for x in labels if x == PERSIST) / len(labels)

@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_4134050",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:4134050",
+    "name": "V Layered Tee Purple",
+    "brand": "렌세"
+  },
+  "features": {
+    "rank_base": 87.67,
+    "rank_at_cut": 72.0,
+    "rank_rise": 15.67,
+    "review_delta": 4.05,
+    "heart_delta": 208.57,
+    "sale_percent_delta": 0.0,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 1
+  }
+}

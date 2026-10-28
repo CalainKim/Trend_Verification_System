@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_3678736",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:3678736",
+    "name": "[13th]Tie Blouse T shirt (Gray)",
+    "brand": "가더"
+  },
+  "features": {
+    "rank_base": 87.75,
+    "rank_at_cut": 59.5,
+    "rank_rise": 28.25,
+    "review_delta": 15.25,
+    "heart_delta": 305.75,
+    "sale_percent_delta": -4.0,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 1
+  }
+}

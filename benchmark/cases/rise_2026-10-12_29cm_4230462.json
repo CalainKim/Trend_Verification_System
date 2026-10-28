@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_4230462",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:4230462",
+    "name": "소프트 울 크롭 티셔츠 [블랙]",
+    "brand": "빠쎄"
+  },
+  "features": {
+    "rank_base": 73.0,
+    "rank_at_cut": 62.5,
+    "rank_rise": 10.5,
+    "review_delta": 0.5,
+    "heart_delta": 11.0,
+    "sale_percent_delta": 0.0,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 1
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "rise_2026-10-12_29cm_4170796",
+  "window_id": 0,
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "t_cut": "2026-10-12",
+  "horizon_days": 7,
+  "item": {
+    "key": "29cm:4170796",
+    "name": "[2차]Frill Pintuck Blouse _Cream",
+    "brand": "슬리"
+  },
+  "features": {
+    "rank_base": 63.2,
+    "rank_at_cut": 32.5,
+    "rank_rise": 30.7,
+    "review_delta": 2.0,
+    "heart_delta": 800.3,
+    "sale_percent_delta": 3.03,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 1
+  }
+}

@@ -20,6 +20,7 @@ from datetime import date, timedelta
 from typing import Dict, List, Optional
 
 from . import demographics as dg, vectorstore
+from .models import geo_entity
 
 #: 급상승을 재는 기본 창. 최근 RECENT 일을 직전 BASE 일과 비교한다.
 RECENT_DAYS = 7
@@ -55,13 +56,25 @@ class ChannelTrend:
     last_value: Optional[float]
 
 
-#: 선행 여부를 볼 때 밀어보는 최대 일수. 한 계절을 넘기면 다른 유행을 겹쳐
-#: 보게 되므로 6주로 제한한다.
-MAX_LEAD_DAYS = 42
+#: 선행 여부를 볼 때 밀어보는 최대 일수.
+#:
+#: 처음에는 6주(42일)로 뒀다. 한 계절을 넘기면 다른 유행을 겹쳐 보게 된다는
+#: 이유였고 그 자체는 맞다. 그런데 실제로 돌려 보니 후드티가 경계에 걸려
+#: (at_boundary=True) 실제 시차를 알 수 없었다. 재고 확보와 발주 결정이
+#: 8주에서 12주 앞에 일어나므로, 탐색 범위가 그보다 좁으면 정작 실무에
+#: 필요한 구간을 보지 못한다. 12주로 넓히되 한 계절(약 90일)은 넘지 않는다.
+MAX_LEAD_DAYS = 84
 
 #: 상관이 이 값보다 낮으면 어긋난 두 시계열을 억지로 맞춘 것이라 보고
 #: 선행 일수를 보고하지 않는다.
-MIN_LEAD_CORRELATION = 0.3
+#:
+#: 처음에는 0.3 이었다. 실제로 8개 속성을 돌려 보니 0.3 은 너무 느슨했다.
+#: 체크(0.347)와 블라우스 WORLD(0.340)가 통과했는데, 이 정도 상관은 두 나라
+#: 시계열이 같은 현상을 보고 있다고 말하기 어렵다. 선행 일수는 두 곡선이
+#: 같은 것을 가리킬 때만 뜻이 있으므로, 그 전제를 더 엄하게 요구한다.
+#: 와플은 상관이 음수(-0.054)로 나왔다. 한국어 단어와 영어 단어가 같은
+#: 개념이 아닐 수 있다는 신호이고, 문턱이 낮으면 이런 것을 걸러내지 못한다.
+MIN_LEAD_CORRELATION = 0.5
 
 
 @dataclass
@@ -198,7 +211,7 @@ def seasonality(
 
 
 def _tokens(text: str) -> set:
-    """비교용 토큰. 정규화로 프로모션 태그·품번·색상을 걷어낸 뒤 나눈다."""
+    """비교용 토큰. 정규화로 프로모션 태그와 품번과 색상을 걷어낸 뒤 나눈다."""
     from . import embeddings
 
     cleaned = embeddings.normalize_for_embedding(text).lower()
@@ -220,7 +233,7 @@ def _flat(text: str) -> str:
 
 
 #: 한영 표기 대응. 임베딩이 '후드티'와 'HOODIE' 를 가깝게 두지 않고 글자도
-#: 겹치지 않아 두 경로 모두 놓친다. 1차 분석 범위(티셔츠·후드·맨투맨)에
+#: 겹치지 않아 두 경로 모두 놓친다. 1차 분석 범위(티셔츠, 후드, 맨투맨)에
 #: 해당하는 것만 손으로 적는다. 범위를 넓힐 때 함께 늘린다.
 BILINGUAL = {
     "후드": ("hood", "hoodie", "hooded"),
@@ -303,6 +316,34 @@ def match_products(
     return out[:limit]
 
 
+def available_windows(conn: sqlite3.Connection, keyword: str, geo: str,
+                      gprop: str = "", start: str = "0000-00-00",
+                      end: str = "9999-99-99") -> List[str]:
+    """이 키워드와 지역에 쌓인 정규화 창 목록. 행이 많은 순으로 준다.
+
+    창이 섞였을 때 어느 쪽을 쓸지 사람이 고르려면 먼저 무엇이 있는지 봐야 한다.
+    """
+    rows = conn.execute(
+        """
+        SELECT json_extract(metadata,'$.query_start') || ' ~ '
+            || json_extract(metadata,'$.query_end') w, COUNT(*) n
+        FROM signal_raw
+        WHERE channel='gtrends' AND keyword_raw=? AND entity=?
+          AND observed_at>=? AND observed_at<?
+        GROUP BY w ORDER BY n DESC
+        """, (keyword, geo_entity(geo, gprop), start, end)).fetchall()
+    return [r[0] for r in rows if r[0]]
+
+
+class MixedQueryWindow(RuntimeError):
+    """정규화 창이 다른 자료가 한 시계열에 섞였을 때.
+
+    구글 트렌드와 네이버 두 API 는 요청 창 안에서 최댓값이 100 이 되도록
+    정규화한 값을 준다. 창이 다르면 분모가 달라서, 이어 붙이면 이음새에
+    없던 계단이 생긴다. 값이 그럴듯해 보여서 눈으로는 알아채기 어렵다.
+    """
+
+
 def _pearson(xs: List[float], ys: List[float]) -> Optional[float]:
     if len(xs) < 5:
         return None
@@ -323,6 +364,8 @@ def lead_lag(
     home_geo: str = "KR",
     window_days: int = 365,
     max_shift: int = MAX_LEAD_DAYS,
+    gprop: str = "",
+    query_window: Optional[str] = None,
 ) -> Optional[LeadLag]:
     """해외 시계열을 며칠 밀었을 때 한국과 가장 잘 겹치는지 찾는다.
 
@@ -331,18 +374,53 @@ def lead_lag(
 
     양수 lead_days 는 해외가 그만큼 앞섰다는 뜻이다. 다만 상관이 낮으면
     어긋난 두 곡선을 억지로 맞춘 것이므로 신뢰할 수 없다고 표시한다.
+
+    gprop 으로 구글 트렌드 속성을 고른다. 빈 값은 웹 검색이고 "youtube" 는
+    유튜브 검색이다. 양쪽을 같은 키로 저장하면 서로 섞이므로 entity 로 나눈다.
+
+    주의. 지역마다 질의어가 달랐다면 그 사실이 결과에 드러나지 않는다.
+    한국어 단어를 해외에 그대로 물으면 현지 유행이 아니라 한국어 사용자의
+    검색을 재게 되고, 그래도 숫자는 멀쩡하게 나온다. 질의어 매핑은
+    scripts/collect_gtrends.py 가 사전에서 만들어 준다.
+
+    query_window 로 정규화 창 하나를 골라 쓸 수 있다. 창이 섞여 있을 때
+    자료를 지우지 않고 분석하는 길이다. 'YYYY-MM-DD ~ YYYY-MM-DD' 형태이고
+    available_windows 로 무엇이 있는지 먼저 본다. 지정하지 않았는데 창이
+    둘 이상이면 MixedQueryWindow 로 멈춘다. 어느 쪽을 쓸지는 사람이 정할
+    문제이지 함수가 조용히 고를 문제가 아니다.
     """
     cut = date.fromisoformat(as_of[:10])
     start = (cut - timedelta(days=window_days)).isoformat()
 
     def load(g):
-        rows = conn.execute(
-            """
+        entity = geo_entity(g, gprop)
+        args = (keyword, entity, start, cut.isoformat())
+
+        # 창 혼합은 날짜 하나 안이 아니라 날짜들 사이에서 생긴다.
+        # 구간 전체에서 서로 다른 질의 창이 몇 개인지를 세야 한다.
+        found = available_windows(conn, keyword, g, gprop, start, cut.isoformat())
+        if query_window is None and len(found) > 1:
+            raise MixedQueryWindow(
+                f"{keyword} / geo={g or 'WORLD'} 에 정규화 창이 다른 자료가 "
+                f"{len(found)}종 섞여 있다: {', '.join(found)}. "
+                f"구글 트렌드는 요청 창 안에서 최댓값을 100 으로 맞추므로 창이 다르면 "
+                f"분모가 다르다. query_window 로 하나를 고르거나 한 창으로 다시 "
+                f"수집해야 한다")
+        if query_window is not None and found and query_window not in found:
+            return {}
+
+        sql = """
             SELECT observed_at, AVG(metric_value) v FROM signal_raw
             WHERE channel='gtrends' AND keyword_raw=? AND entity=?
               AND observed_at>=? AND observed_at<?
-            GROUP BY observed_at ORDER BY observed_at
-            """, (keyword, f"geo={g}", start, cut.isoformat())).fetchall()
+            """
+        params = list(args)
+        if query_window is not None:
+            sql += (" AND json_extract(metadata,'$.query_start') || ' ~ ' "
+                    "|| json_extract(metadata,'$.query_end') = ?")
+            params.append(query_window)
+        sql += " GROUP BY observed_at ORDER BY observed_at"
+        rows = conn.execute(sql, params).fetchall()
         return {r["observed_at"][:10]: r["v"] for r in rows}
 
     home, away = load(home_geo), load(geo)
@@ -381,7 +459,7 @@ def commerce_signals(
     as_of: str,
     window_days: int = RECENT_DAYS + BASE_DAYS,
 ) -> Optional[CommerceSignal]:
-    """후보에 해당하는 실제 상품을 찾아 순위·리뷰 변화를 낸다.
+    """후보에 해당하는 실제 상품을 찾아 순위와 리뷰 변화를 낸다.
 
     후보는 검색어이고 커머스 자료는 상품명이라 문자열로는 이어지지 않는다.
     벡터 검색으로 잇는다. 하한선 미만은 버린다. 잘못 이어진 상품의 변동을
@@ -518,7 +596,7 @@ def extract(
         t = channel_trend(conn, keyword, "naver_datalab", segment_entity,
                           cut.isoformat(), metric_type="search_index")
         if t:
-            feats.channels[f"검색·{segment_entity}"] = t
+            feats.channels[f"검색({segment_entity})"] = t
             feats.segment_change_ratio = t.change_ratio
             if t.coverage < 0.5:
                 feats.notes.append(

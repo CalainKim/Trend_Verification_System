@@ -42,3 +42,9 @@ build/html/
 build/
 docs/images/figures/
 docs/report-figures.html
+
+# 벤치마크 정답. 검증 파트가 보면 블라인드가 깨진다. 해시만 저장소에 둔다.
+benchmark/labels.sealed.json
+
+# 속성 매핑은 DB 와 사전에서 다시 만들 수 있다
+data/attribute_map.csv

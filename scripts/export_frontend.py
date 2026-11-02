@@ -4,6 +4,7 @@
 화면(Claude Design 의 Trend Monitor v8)은 세 상수를 쓴다. 이 스크립트는 같은
 모양을 실제 수집분으로 채워 준다. 화면 구조는 건드리지 않는다.
 
+    CASES   판정할 문제지      [{case_id, candidate, claim, evidence, features, ...}]
     TRACK   유형 다주 궤적     {weeks, tops, rises, brands, score, parts, ...}
     SCORE   판정 성적표        {accuracy, coverage, precision, recall, ...}
     G       속성별 검색 추이   {d0, last, k4, kp, kr[26], us[26], lead}
@@ -291,6 +292,38 @@ def build_ledger(base: Dict[str, dict], detect: Dict[str, dict],
     return out
 
 
+# 판정기가 읽는 키만 내보낸다. 정답(labels.sealed.json)은 절대 넣지 않는다.
+# 넣으면 파일을 받은 사람이 문제지를 보고 답을 맞출 수 있어 채점이 뜻을 잃는다.
+CASE_KEYS = ("case_id", "candidate", "claim", "simulated_cutoff", "evidence",
+             "features", "limitations", "historical_available_at",
+             "experiment_type")
+
+
+def _walk_values(obj):
+    """중첩된 자료에서 잎 값만 꺼낸다. 정답 누출 검사에 쓴다."""
+    if isinstance(obj, dict):
+        for v in obj.values():
+            yield from _walk_values(v)
+    elif isinstance(obj, (list, tuple)):
+        for v in obj:
+            yield from _walk_values(v)
+    else:
+        yield obj
+
+
+def build_cases(benchmark: Path) -> list:
+    """검증 파트가 파일 하나로 판정할 수 있게 문제지를 싣는다.
+
+    화면의 급상승 목록은 이번 주 상품이고 벤치마크는 다른 주의 케이스다. 둘은
+    겹치지 않으므로, 판정을 받으려면 케이스를 따로 실어야 한다.
+    """
+    out = []
+    for f in sorted((benchmark / "cases").glob("*.json")):
+        d = json.loads(f.read_text(encoding="utf-8"))
+        out.append({k: d[k] for k in CASE_KEYS if k in d})
+    return out
+
+
 def build_track(conn: sqlite3.Connection, weeks: int = 6) -> Optional[dict]:
     """유형 다주 궤적과 점수. 화면이 "계속 지켜본다" 에 답하는 자리다.
 
@@ -317,6 +350,11 @@ def build_track(conn: sqlite3.Connection, weeks: int = 6) -> Optional[dict]:
             "tops": [g.get("n_top", 0) for g in got],
             "rises": [g.get("n_rise", 0) for g in got],
             "brands": [g.get("n_brand", 0) for g in got],
+            # 판정은 브랜드 개수가 아니라 1위 쏠림을 본다. 화면이 근거를
+            # 보여 주려면 이 값이 있어야 한다.
+            "top_brand": got[-1].get("top_brand"),
+            "top_brand_n": got[-1].get("top_brand_n", 0),
+            "top_brand_share": got[-1].get("top_brand_share", 0.0),
         }
         streak = best = 0
         for v in rec["verdicts"]:
@@ -440,18 +478,20 @@ def main(argv=None) -> int:
         "nextISO": (date.fromisoformat(hold_d) + timedelta(days=7)).isoformat(),
     }
     track = build_track(conn) or {}
+    cases = build_cases(args.benchmark_dir)
     score = build_score(args.benchmark_dir, args.verdicts)
     args.out.write_text(
         head + js_literal("G", g) + js_literal("P", p) + js_literal("LEDGER", ledger)
         + js_literal("TYPE_SKIP", type_skip) + js_literal("WEEK", week)
-        + js_literal("TRACK", track) + js_literal("SCORE", score),
+        + js_literal("TRACK", track) + js_literal("SCORE", score)
+        + js_literal("CASES", cases),
         encoding="utf-8",
     )
     if args.json:
         args.out.with_suffix(".json").write_text(
             json.dumps({"weeks": [base_d, detect_d, hold_d], "G": g, "P": p,
                         "LEDGER": ledger, "TYPE_SKIP": type_skip, "WEEK": week,
-                        "TRACK": track, "SCORE": score},
+                        "TRACK": track, "SCORE": score, "CASES": cases},
                        ensure_ascii=False, indent=1),
             encoding="utf-8",
         )
@@ -477,6 +517,24 @@ def main(argv=None) -> int:
     withimg = {r[3] for rows in p.values() for r in rows if r[8]}
     print(f"        사진이 있는 상품 {len(withimg)}개 / {len(names)}개")
     print("TYPE_SKIP  " + ", ".join(f"{k}:{v}" for k, v in type_skip.items() if v))
+    # 정답 누출 검사. 문자열에 'persist' 가 있는지로 보면 experiment_type 의
+    # "persistence-v1" 에 걸린다. 실제로 막아야 하는 것은 정답 파일에 적힌 값이
+    # 케이스 안에 값으로 들어가는 경우다. 정답 파일을 읽어 그 값과 대조한다.
+    sealed = args.benchmark_dir / "labels.sealed.json"
+    if sealed.exists():
+        answers = json.loads(sealed.read_text(encoding="utf-8"))["labels"]
+        leaked = []
+        for c in cases:
+            want = answers.get(c["case_id"])
+            if want is None:
+                continue
+            flat = [v for v in _walk_values(c)]
+            if want in flat:
+                leaked.append(c["case_id"])
+        if leaked:
+            raise SystemExit(f"케이스에 정답이 값으로 들어 있다: {leaked[:3]}")
+        print(f"  정답 누출 검사 통과 ({len(answers)}건 대조)")
+    print(f"CASES   문제지 {len(cases)}건 ({len(json.dumps(cases, ensure_ascii=False).encode()) // 1024}KB), 정답은 넣지 않았다")
     if track:
         top = list(track.items())[:3]
         print(f"TRACK   유형 {len(track)}개 {len(next(iter(track.values()))['weeks'])}주, "

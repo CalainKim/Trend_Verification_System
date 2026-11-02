@@ -68,15 +68,29 @@ def weekly_chain(days: List[str], weeks: int, span: int = 7,
     return chain[::-1]
 
 
+def brand_mix(risen: List[dict]) -> dict:
+    """브랜드 쏠림. 판정이 실제로 보는 값이다.
+
+    브랜드가 몇 곳인지보다 1위가 얼마나 가져가는지가 중요하다. 스물여덟 곳이어도
+    한 곳이 절반을 넘으면 브랜드 단독이다. 개수만 보여 주면 판정 근거가 화면에
+    안 드러난다.
+    """
+    if not risen:
+        return {"n_brand": 0, "top": None, "top_n": 0, "top_share": 0.0}
+    c = Counter(p["brand"] for p in risen)
+    name, n = c.most_common(1)[0]
+    return {"n_brand": len(c), "top": name, "top_n": n,
+            "top_share": round(n / len(risen), 3)}
+
+
 def verdict(risen: List[dict]) -> str:
     """화면과 같은 판정식."""
     if not risen:
         return NONE
-    brands = Counter(p["brand"] for p in risen)
-    top_share = brands.most_common(1)[0][1] / len(risen)
-    if len(risen) >= 3 and len(brands) >= 3 and top_share <= 0.5:
+    mix = brand_mix(risen)
+    if len(risen) >= 3 and mix["n_brand"] >= 3 and mix["top_share"] <= 0.5:
         return CAND
-    if len(risen) >= 2 and top_share > 0.5:
+    if len(risen) >= 2 and mix["top_share"] > 0.5:
         return SOLO
     return WATCH
 
@@ -95,10 +109,14 @@ def week_snapshot(conn, prev_day: str, day: str) -> Dict[str, dict]:
     out = {}
     for t, prods in by_type.items():
         risen = risen_by_type.get(t, [])
+        mix = brand_mix(risen)
         out[t] = {
             "n_top": len(prods),
             "n_rise": len(risen),
-            "n_brand": len({p["brand"] for p in risen}),
+            "n_brand": mix["n_brand"],
+            "top_brand": mix["top"],
+            "top_brand_n": mix["top_n"],
+            "top_brand_share": mix["top_share"],
             "verdict": verdict(risen),
         }
     return out

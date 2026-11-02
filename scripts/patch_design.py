@@ -99,7 +99,14 @@ def swap_data(src: str) -> str:
         at = next(i for i, l in enumerate(lines) if l.startswith("const UP = "))
     except StopIteration:
         raise SystemExit("상수 블록의 경계(const UP)를 찾지 못했다")
-    return "\n".join(lines[:at] + data_lines + lines[at:])
+    # x-dc 스크립트 블록은 런타임이 자체 스코프에서 평가한다. 거기 선언한 const 는
+    # 전역이 아니라, 번들 단계에서 붙이는 판정 패널이 볼 수 없다. 데이터를 다시
+    # 넣으면 178KB 가 중복되므로 한 줄로 내보낸다.
+    names = sorted(mine)
+    bridge = ["", "// 번들의 판정 패널이 읽을 수 있게 전역으로 내보낸다.",
+              "try { " + " ".join(f"window.{n} = {n};" for n in names)
+              + " } catch (e) {}"]
+    return "\n".join(lines[:at] + data_lines + bridge + lines[at:])
 
 
 def wire_stages(src: str) -> str:

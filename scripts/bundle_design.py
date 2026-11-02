@@ -118,6 +118,102 @@ def inline_fonts(css: str, css_dir: Path) -> tuple[str, int]:
     return re.sub(r"url\(([^)]+)\)", swap, css), n
 
 
+# 검증 파트가 파일 하나로 판정을 만들어 보낼 수 있게 하는 패널. 화면 오른쪽
+# 아래에 작은 버튼으로 붙는다. 디자인을 건드리지 않으려고 번들 단계에서 넣는다.
+#
+# 왜 필요한가. 화면의 급상승 목록은 이번 주 상품이고 벤치마크는 다른 주의
+# 케이스다. 둘이 겹치지 않아 화면을 눌러서는 판정이 안 나온다. 그리고 화면의
+# 사람 피드백은 그 브라우저에만 쌓여서 보낸 사람에게 돌아오지 않는다.
+REVIEW_PANEL = r"""
+<script>
+(function () {
+  var CASES = window.CASES;
+  if (!CASES || !CASES.length) return;
+  var KEY = 'trendcheck-verdicts';
+  var SYS = [
+    '너는 패션 후보의 관측 근거를 검토한다. 제공한 evidence 만 사실 근거로 쓴다.',
+    '질문은 입력의 claim 에 적힌 것이다. 그 질문에만 답한다.',
+    'WATCH 는 claim 이 묻는 일이 일어나겠다는 판단, NOT_SUPPORTED 는 일어나지',
+    '않겠다는 판단, HOLD 는 어느 쪽도 고를 자료가 없다는 뜻이다. 관찰할 가치는',
+    '있으나 유지 여부는 모르겠다는 WATCH 가 아니라 HOLD 다.',
+    't_cut 이후 자료는 입력에 없다. 없는 기간을 추측하지 않는다.',
+    '다른 말 없이 아래 JSON 만 출력한다.',
+    '{"verdict":"WATCH 또는 HOLD 또는 NOT_SUPPORTED","summary":"한 문장"}'
+  ].join(String.fromCharCode(10));
+
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } }
+  function save(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
+
+  var box = document.createElement('div');
+  box.style.cssText = 'position:fixed;right:16px;bottom:44px;z-index:9999;' +
+    'font-family:var(--font-sans),sans-serif;font-size:12px';
+  function render() {
+    var got = load(), n = Object.keys(got).length;
+    box.innerHTML =
+      '<div style="background:var(--color-surface-card,#fff);border:1px solid ' +
+      'var(--color-hairline-strong,#ccc);border-radius:8px;padding:10px 12px;' +
+      'box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;gap:8px;align-items:center">' +
+      '<span>판정 ' + n + '/' + CASES.length + '</span>' +
+      '<button data-go style="border:1px solid var(--color-ink,#222);border-radius:6px;' +
+      'background:var(--color-ink,#222);color:#fff;padding:4px 10px;cursor:pointer;' +
+      'font:inherit">' + (n ? '이어서' : '판정 시작') + '</button>' +
+      '<button data-dl style="border:1px solid var(--color-hairline-strong,#ccc);' +
+      'border-radius:6px;background:transparent;padding:4px 10px;cursor:pointer;' +
+      'font:inherit" ' + (n ? '' : 'disabled') + '>내려받기</button></div>';
+    box.querySelector('[data-go]').onclick = run;
+    box.querySelector('[data-dl]').onclick = download;
+  }
+
+  function download() {
+    var blob = new Blob([JSON.stringify(load(), null, 1)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'verdicts.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  async function run() {
+    var got = load();
+    var todo = CASES.filter(function (c) { return !got[c.case_id]; });
+    if (!todo.length) { alert('모든 케이스를 판정했습니다. 내려받아 보내 주세요.'); return; }
+    var btn = box.querySelector('[data-go]');
+    btn.disabled = true;
+    for (var i = 0; i < todo.length; i++) {
+      var c = todo[i];
+      btn.textContent = (i + 1) + '/' + todo.length;
+      try {
+        var text = await window.claude.complete({
+          model: 'claude-opus-5-5', max_tokens: 1000, system: SYS,
+          messages: [{ role: 'user', content: JSON.stringify(c) }]
+        });
+        var m = text.match(/[{][^]*[}]/);
+        var v = m ? JSON.parse(m[0]).verdict : null;
+        if (['WATCH', 'HOLD', 'NOT_SUPPORTED'].indexOf(v) >= 0) {
+          got[c.case_id] = v;
+          save(got);
+          render();
+          btn = box.querySelector('[data-go]');
+          btn.disabled = true;
+          btn.textContent = (i + 1) + '/' + todo.length;
+        }
+      } catch (e) {
+        alert('판정이 멈췄습니다: ' + e.message + String.fromCharCode(10) +
+              '받은 만큼은 저장됐습니다. 다시 누르면 이어서 합니다.');
+        break;
+      }
+    }
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(box); render(); });
+  } else { document.body.appendChild(box); render(); }
+})();
+</script>
+"""
+
+
 def inline_remote_images(html: str, timeout: float = 15.0) -> int:
     """화면에 박힌 29CM 사진 주소를 base64 로 바꾼다.
 
@@ -198,6 +294,10 @@ def soften_llm(html: str) -> tuple[str, int]:
     if "</head>" not in html:
         raise SystemExit("head 닫는 태그를 찾지 못했다. shim 을 넣을 자리가 없다")
     html = html.replace("</head>", BROWSER_SHIM + "</head>", 1)
+    # 판정 패널은 CASES 와 window.claude 가 준비된 뒤에 돌아야 하므로 body 끝에 둔다.
+    if "</body>" not in html:
+        raise SystemExit("body 닫는 태그를 찾지 못했다. 판정 패널을 넣을 자리가 없다")
+    html = html.replace("</body>", REVIEW_PANEL + "</body>", 1)
 
     n = sum(html.count(e) for e in GENERIC_ERRORS)
     if n == 0:
@@ -235,6 +335,7 @@ def main(argv=None) -> int:
     print(f"CSS {stats['css']}개, JS {stats['js']}개, 폰트 {stats['font']}개를 넣었다")
     print(f"심층 검증 오류 문구 {n_err}곳을 사본용 설명으로 교체")
     print("브라우저에서 API 를 직접 부르는 shim 을 넣었다 (키는 보는 사람이 입력)")
+    print("판정 패널을 넣었다 (문제지를 돌리고 verdicts.json 으로 내려받기)")
     print(f"상품 사진 {n_img}장을 파일 안에 넣었다")
     print(f"{before / 1024:.0f}KB -> {size / 1024 / 1024:.1f}MB")
     print(f"\n{args.out}")

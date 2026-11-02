@@ -18,10 +18,22 @@ WORK=build/.viewer
 mkdir -p "$WORK"
 
 WEEK="${1:-}"
-if [ -n "$WEEK" ]; then
-    $PY scripts/export_frontend.py --json --week "$WEEK"
+# 판정 파일이 있으면 성적표도 함께 낸다. 없으면 검증 기록 타일이 빈 채로
+# 남는다. 화면이 최종 산출물이라 채점 결과가 여기 없으면 채점한 적이 없는
+# 것과 같아 보인다.
+VERDICTS="${VERDICTS:-runs/benchmark-model-v4/verdicts.json}"
+SCORE_ARG=""
+if [ -f "$VERDICTS" ]; then
+    SCORE_ARG="--verdicts $VERDICTS"
+    echo "판정 파일 $VERDICTS 로 성적표를 함께 낸다"
 else
-    $PY scripts/export_frontend.py --json
+    echo "판정 파일이 없어 검증 기록 타일은 빈 채로 둔다 ($VERDICTS)"
+fi
+
+if [ -n "$WEEK" ]; then
+    $PY scripts/export_frontend.py --json --week "$WEEK" $SCORE_ARG
+else
+    $PY scripts/export_frontend.py --json $SCORE_ARG
 fi
 
 # 내보내기가 기준으로 삼은 확인 날짜를 그대로 파일 이름에 쓴다. 손으로 적으면

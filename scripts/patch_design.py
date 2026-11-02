@@ -239,6 +239,70 @@ def fix_llm_prompt(src: str) -> tuple[str, int]:
     return src, n
 
 
+def wire_score(src: str) -> str:
+    """검증 기록의 타일 네 개에 실제 채점 결과를 넣는다.
+
+    화면이 최종 산출물이므로 여기가 비어 있으면 "채점을 했다" 는 말이 화면에
+    없는 것과 같다. 원래는 value 가 '–' 로 박혀 있고 tip 에 "11/08 첫 채점"
+    이라고 적혀 있었다.
+
+    숫자만 넣으면 표본이 몇인지 안 보인다. SCORE.note 가 "답한 24건 기준,
+    찍기보다 낫다고 하기엔 표본 부족" 을 담고 있어 tip 에 함께 넣는다.
+    24건으로 70.8% 를 단정하면 과장이다.
+    """
+    old = ("{ label: '짚은 상품 중 실제로 남은 비율', value: '–', c: MUTED, "
+           "tip: '11/08 첫 채점. 기준 비율 54.1%와 비교합니다' }, "
+           "{ label: '실제 급등 중 미리 잡은 비율', value: '–', c: MUTED, "
+           "tip: '놓친 급등까지 세야 계산됩니다' }, "
+           "{ label: '기준 비율', value: '54.1%', c: INK, "
+           "tip: '전부 남는다고 했을 때의 비율' }")
+    new = ("{ label: '짚은 상품 중 실제로 남은 비율', "
+           "value: SCORE && SCORE.precision != null ? "
+           "Math.round(SCORE.precision * 1000) / 10 + '%' : '–', "
+           "c: SCORE && SCORE.precision != null ? INK : MUTED, "
+           "tip: SCORE ? '지속이라 말한 것 가운데 실제로 지속한 비율. ' + SCORE.note "
+           ": '아직 채점하지 않았습니다' }, "
+           "{ label: '실제 급등 중 미리 잡은 비율', "
+           "value: SCORE && SCORE.recall != null ? "
+           "Math.round(SCORE.recall * 1000) / 10 + '%' : '–', "
+           "c: SCORE && SCORE.recall != null ? INK : MUTED, "
+           "tip: SCORE ? '실제로 지속한 것 가운데 미리 짚은 비율. ' + SCORE.note "
+           ": '놓친 급등까지 세야 계산됩니다' }, "
+           "{ label: '기준 비율', "
+           "value: SCORE ? Math.round(SCORE.base_rate * 1000) / 10 + '%' : '54.1%', "
+           "c: INK, tip: '전부 남는다고 했을 때의 비율. 모델 성적은 이 값을 "
+           "넘어야 뜻이 있습니다' }")
+    if src.count(old) != 1:
+        raise SystemExit("검증 기록 타일을 찾지 못했다")
+    src = src.replace(old, new)
+
+    # 맞힌 비율과 답한 비율은 타일에 자리가 없다. 머리글 옆 문구에 넣는다.
+    old = ("<span style=\"font-size:26px;font-weight:400;"
+           "letter-spacing:-0.325px\">검증 기록</span>")
+    if src.count(old) != 1:
+        raise SystemExit("검증 기록 제목을 찾지 못했다")
+    # 제목 바로 아래에 한 줄을 붙인다. 다른 화면의 제목도 같은 모양이라
+    # 제목 문구까지 포함해서 찾아야 한 곳만 바뀐다.
+    src = src.replace(
+        old,
+        "<div style=\"display:flex;flex-direction:column;gap:6px\">" + old
+        + "<span style=\"font-size:13px;color:var(--color-muted)\">"
+          # 검증 기록 화면의 값은 pn 아래가 아니라 뷰모델 최상위에 있다.
+          # 타일이 {{ ledgerTiles }} 로 닿으므로 여기도 접두사 없이 쓴다.
+          "{{ scoreLine }}</span></div>")
+
+    old = "      ledgerTiles: ["
+    new = ("      scoreLine: SCORE ? `모델 판정 ${SCORE.n_answered}건 채점, "
+           "맞힌 비율 ${Math.round(SCORE.accuracy * 1000) / 10}%, "
+           "답한 비율 ${Math.round(SCORE.coverage * 1000) / 10}% "
+           "(95% 구간 ${Math.round(SCORE.ci[0] * 1000) / 10}~"
+           "${Math.round(SCORE.ci[1] * 1000) / 10}%)` : '아직 채점하지 않았습니다',\n"
+           "      ledgerTiles: [")
+    if src.count(old) != 1:
+        raise SystemExit("ledgerTiles 선언을 찾지 못했다")
+    return src.replace(old, new)
+
+
 def wire_week(src: str) -> tuple[str, int]:
     # 신선도 문턱. 주가 바뀌면 같이 움직여야 한다.
     src, n = re.subn(r"'2026-10-18'", "WEEK.baseISO", src)
@@ -269,6 +333,8 @@ def main(argv=None) -> int:
     print("할인 효과와 해외 선행 단계 연결 (측정만, 거르지 않음)")
     src = wire_images(src)
     print("상품 사진 연결")
+    src = wire_score(src)
+    print("검증 기록 타일에 채점 결과 연결")
     src, n = wire_week(src)
     print(f"신선도 문턱 {n}곳과 검증 기록 CSV 를 WEEK 로 교체")
     src, n = fix_pending_text(src)

@@ -4,6 +4,7 @@
 화면(Claude Design 의 Trend Monitor v8)은 세 상수를 쓴다. 이 스크립트는 같은
 모양을 실제 수집분으로 채워 준다. 화면 구조는 건드리지 않는다.
 
+    SCORE   판정 성적표        {accuracy, coverage, precision, recall, ...}
     G       속성별 검색 추이   {d0, last, k4, kp, kr[26], us[26], lead}
     P       속성별 상품 목록   [순위, 지난주순위, 브랜드, 상품명, 판매가, 성별,
                               할인율, 지난주할인율, 사진주소]
@@ -289,6 +290,55 @@ def build_ledger(base: Dict[str, dict], detect: Dict[str, dict],
     return out
 
 
+def build_score(benchmark: Path, verdicts: Optional[Path]) -> Optional[dict]:
+    """판정 성적표. 화면의 검증 기록 타일 네 개가 읽는다.
+
+    정답 파일을 읽지만 내보내는 것은 합계뿐이다. 케이스별 정답은 나가지 않는다.
+    나가면 화면을 받은 사람이 문제지를 보고 답을 맞출 수 있게 된다.
+
+    정확도와 두 비율은 서로 다른 것을 잰다.
+      정확도   답한 전체 가운데 맞힌 비율
+      정밀도   지속이라 말한 것 가운데 실제로 지속한 비율
+      재현율   실제로 지속한 것 가운데 미리 짚은 비율
+    """
+    if verdicts is None:
+        return None
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import score_verdicts as sv
+    import trend_pipeline.scoring as sc
+
+    try:
+        labels = sv.load_labels(benchmark)
+        got = sv.load_verdicts(verdicts)
+    except SystemExit as exc:
+        print(f"  성적표를 낼 수 없다: {exc}")
+        return None
+    card = sc.score(labels, got)
+    if card.accuracy is None:
+        print("  답한 케이스가 없어 성적표가 비어 있다")
+        return None
+    c = card.confusion
+    tp = c.get("persist->persist", 0)
+    fp = c.get("fade->persist", 0)
+    fn = c.get("persist->fade", 0)
+    return {
+        "n_cases": card.n_cases,
+        "n_answered": card.n_answered,
+        "coverage": round(card.coverage, 3),
+        "accuracy": round(card.accuracy, 3),
+        "precision": round(tp / (tp + fp), 3) if tp + fp else None,
+        "recall": round(tp / (tp + fn), 3) if tp + fn else None,
+        "base_rate": round(card.base_rate_all, 3) if card.base_rate_all else None,
+        "base_rate_answered": (round(card.base_rate_answered, 3)
+                               if card.base_rate_answered else None),
+        "ci": [round(card.ci[0], 3), round(card.ci[1], 3)],
+        "beats_base_rate": card.beats_base_rate,
+        # 화면이 숫자만 보여 주면 표본이 몇인지 안 보인다. 단서를 같이 낸다.
+        "note": (f"답한 {card.n_answered}건 기준"
+                 + ("" if card.beats_base_rate else ", 찍기보다 낫다고 하기엔 표본 부족")),
+    }
+
+
 def js_literal(name: str, value) -> str:
     return f"const {name} = {json.dumps(value, ensure_ascii=False)};\n"
 
@@ -297,8 +347,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--week", default=None, help="확인 시점 날짜 (기본: 최신 수집일)")
     ap.add_argument("--db", type=Path, default=None)
+    ap.add_argument("--benchmark-dir", type=Path, default=ROOT / "benchmark",
+                    help="성적표를 낼 때 쓸 벤치마크 경로")
     ap.add_argument("--out", type=Path, default=ROOT / "build" / "frontend_data.js")
     ap.add_argument("--json", action="store_true", help="JSON 으로도 저장")
+    ap.add_argument("--verdicts", type=Path, default=None,
+                    help="판정 파일. 주면 성적표를 함께 낸다")
     ap.add_argument("--no-lead", action="store_true",
                     help="해외 선행 계산을 건너뛴다. 속성마다 5년치를 훑어서 느리다")
     args = ap.parse_args(argv)
@@ -346,16 +400,18 @@ def main(argv=None) -> int:
         # 다음 채점일. 화면이 LLM 에게 "오늘과 다음 채점일" 을 알려 줄 때 쓴다.
         "nextISO": (date.fromisoformat(hold_d) + timedelta(days=7)).isoformat(),
     }
+    score = build_score(args.benchmark_dir, args.verdicts)
     args.out.write_text(
         head + js_literal("G", g) + js_literal("P", p) + js_literal("LEDGER", ledger)
-        + js_literal("TYPE_SKIP", type_skip) + js_literal("WEEK", week),
+        + js_literal("TYPE_SKIP", type_skip) + js_literal("WEEK", week)
+        + js_literal("SCORE", score),
         encoding="utf-8",
     )
     if args.json:
         args.out.with_suffix(".json").write_text(
             json.dumps({"weeks": [base_d, detect_d, hold_d], "G": g, "P": p,
-                        "LEDGER": ledger, "TYPE_SKIP": type_skip, "WEEK": week},
-                       ensure_ascii=False, indent=1),
+                        "LEDGER": ledger, "TYPE_SKIP": type_skip, "WEEK": week,
+                        "SCORE": score}, ensure_ascii=False, indent=1),
             encoding="utf-8",
         )
 

@@ -374,13 +374,21 @@ DB 는 저장소에 올리지 않는다. 90MB 짜리 바이너리라서 수집�
   python3.12 -m venv .venv && source .venv/bin/activate
   pip install -r requirements.txt
 
-  python scripts/load_snapshots.py      CSV 에서 DB 복원 (127,667행, 1분쯤)
+  python scripts/load_snapshots.py      CSV 에서 DB 복원 (127,667행, 2초)
   ./scripts/build_all_benchmarks.sh      벤치마크 세 종 재생성
 ```
 
-복원이 제대로 됐는지는 봉인 해시로 확인한다. `benchmark-index/labels.digest.txt`
-가 저장소에 들어 있는 값과 같으면 같은 자료로 같은 문제지가 만들어진 것이다.
-2026-11-02 기준 `3d876642a5b0d03a` 로 시작한다.
+복원이 제대로 됐는지는 봉인 해시로 확인한다. 재생성한
+`<벤치마크>/labels.digest.txt` 가 저장소에 들어 있는 값과 같으면 같은 자료로
+같은 문제지가 만들어진 것이다. 2026-11-02 에 빈 디렉터리로 clone 해서 확인한
+값은 아래와 같다.
+
+    benchmark              61건    9cef9adadd3a4b3c
+    benchmark-index       207건    3d876642a5b0d03a
+    benchmark-index-long  352건    74ae744852957960
+
+정답 파일 자체는 저장소에 없고 해시만 들어 있다. 받는 쪽에서 다시 만들어도
+같은 해시가 나오는 것이 정답이 자료에서 기계적으로 나온다는 증거다.
 
 경로에 대괄호가 들어 있으면 pytest 가 돈다. 저장소를 `[자주프]` 같은 이름의
 디렉터리 안에 두면 테스트 ID 파싱이 실패하므로 clone 위치를 그렇게 잡지 않는다.

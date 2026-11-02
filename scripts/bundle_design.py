@@ -117,7 +117,9 @@ def main(argv=None) -> int:
     html, stats = bundle(html, args.assets)
     html, n_err = soften_llm(html)
 
-    left = re.findall(r'(?:src|href)="(?!data:|http|#)([^"]+)"', html)
+    # {{ }} 는 화면이 그릴 때 채우는 자리표시자지 바깥 파일이 아니다.
+    left = [u for u in re.findall(r'(?:src|href)="(?!data:|http|#)([^"]+)"', html)
+            if "{{" not in u]
     if left:
         print(f"  주의. 아직 바깥 파일을 가리킨다: {sorted(set(left))[:5]}")
 

@@ -1,0 +1,6 @@
+html,body{margin:0;background:var(--color-canvas);color:var(--color-body);font:var(--type-body-md);-webkit-font-smoothing:antialiased;}
+*,*::before,*::after{box-sizing:border-box;}
+a{color:var(--color-ink);text-decoration:underline;text-decoration-color:var(--color-hairline-strong);text-underline-offset:3px;}
+a:hover{color:var(--color-primary);text-decoration-color:currentColor;}
+code,pre,kbd{font-family:var(--font-mono);}
+::selection{background:var(--color-timeline-thinking);color:var(--color-ink);}

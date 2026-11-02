@@ -1,0 +1,9 @@
+/* CursorGothic-style editorial sans is licensed; substitutes loaded from CDN.
+   Pretendard (Latin glyphs are Inter-derived) covers Korean + Latin. JetBrains Mono for code. */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@font-face{font-family:"Pretendard Variable";src:url("../assets/fonts/PretendardVariable.woff2") format("woff2-variations");font-weight:45 920;font-style:normal;font-display:swap;}
+:root{
+--font-sans:"Pretendard Variable",Pretendard,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+--font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}

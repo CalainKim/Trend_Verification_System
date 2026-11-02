@@ -127,8 +127,10 @@ def inline_fonts(css: str, css_dir: Path) -> tuple[str, int]:
 REVIEW_PANEL = r"""
 <script>
 (function () {
-  var CASES = window.CASES;
-  if (!CASES || !CASES.length) return;
+  // window.CASES 는 x-dc 스크립트가 런타임에 의해 비동기로 평가된 뒤에 생긴다.
+  // body 끝에서 바로 읽으면 아직 없어서 패널이 설치되지 않는다. 생길 때까지
+  // 기다린다. 30초 안에 안 생기면 Claude Design 쪽이거나 문제지가 없는 것이다.
+  var CASES = null;
   var KEY = 'trendcheck-verdicts';
   var SYS = [
     '너는 패션 후보의 관측 근거를 검토한다. 제공한 evidence 만 사실 근거로 쓴다.',
@@ -206,9 +208,30 @@ REVIEW_PANEL = r"""
     render();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(box); render(); });
-  } else { document.body.appendChild(box); render(); }
+  // 런타임이 마운트하면서 body 를 갈아끼우면 붙여 둔 패널이 날아간다. 순서를
+  // 맞추려 하기보다 떨어졌는지 보고 다시 붙인다. 상대가 언제 무엇을 바꿀지
+  // 모르므로 이쪽이 단단하다. documentElement 에 붙여 body 교체를 피한다.
+  // 런타임이 마운트하면서 body 를 갈아끼우면 붙여 둔 패널이 날아간다. 순서를
+  // 맞추려 하기보다 떨어졌는지 보고 다시 붙인다. 상대가 언제 무엇을 바꿀지
+  // 모르므로 이쪽이 단단하다. documentElement 에 붙여 body 교체를 피한다.
+  function attach() {
+    if (!box.isConnected) {
+      document.documentElement.appendChild(box);
+      render();
+    }
+  }
+  var waited = 0;
+  var timer = setInterval(function () {
+    if (!CASES) {
+      CASES = (window.CASES && window.CASES.length) ? window.CASES : null;
+      waited += 300;
+      if (!CASES) {
+        if (waited > 30000) clearInterval(timer);
+        return;
+      }
+    }
+    attach();
+  }, 300);
 })();
 </script>
 """

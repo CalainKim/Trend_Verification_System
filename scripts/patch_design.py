@@ -60,19 +60,46 @@ COMPUTE = """    const dUp = p.prevDisc == null ? null : (p.disc || 0) - p.prevD
 
 def swap_data(src: str) -> str:
     lines = src.split("\n")
-    skip = [i for i, l in enumerate(lines) if l.startswith("const TYPE_SKIP = ")]
-    if len(skip) != 1:
-        raise SystemExit(f"원본의 TYPE_SKIP 선언을 {len(skip)}개 찾았다. 1개여야 한다")
-    del lines[skip[0]]
-    try:
-        g0 = next(i for i, l in enumerate(lines) if l.startswith("const G = {"))
-        end = next(i for i, l in enumerate(lines) if l.startswith("const UP = "))
-    except StopIteration:
-        raise SystemExit("G 선언이나 그 뒤 경계를 찾지 못했다")
     if not DATA.exists():
         raise SystemExit(f"{DATA} 가 없다. ./scripts/export_frontend.py 를 먼저 돌려라")
-    data = DATA.read_text(encoding="utf-8").rstrip("\n").split("\n")
-    return "\n".join(lines[:g0] + data + lines[end:])
+    data_lines = DATA.read_text(encoding="utf-8").rstrip("\n").split("\n")
+
+    # 생성 파일이 선언하는 이름을 모두 찾아, 화면 쪽의 같은 이름 선언을 지운다.
+    # 둘 다 두면 const 중복 선언으로 스크립트가 통째로 죽는다. 화면이 새 상수를
+    # 자리표시자로 먼저 선언해 두는 일이 잦아서, 이름을 손으로 관리하면
+    # 빠뜨린다. 실제로 TYPE_SKIP 에 이어 TRACK 에서 같은 일이 났다.
+    #
+    # 선언이 여러 줄일 수 있다. 한 줄만 지우면 나머지가 고아로 남아 문법이
+    # 깨진다. 여는 괄호와 닫는 괄호를 세어 선언 전체를 지운다.
+    mine = {l.split()[1] for l in data_lines if l.startswith("const ")}
+    removed = []
+    for name in sorted(mine):
+        hit = [i for i, l in enumerate(lines) if l.startswith(f"const {name} = ")]
+        if len(hit) > 1:
+            raise SystemExit(f"화면 쪽 {name} 선언이 {len(hit)}개다. 1개여야 한다")
+        if not hit:
+            continue
+        start = hit[0]
+        depth, end_i = 0, None
+        for j in range(start, len(lines)):
+            depth += lines[j].count("{") + lines[j].count("[")
+            depth -= lines[j].count("}") + lines[j].count("]")
+            if depth <= 0 and lines[j].rstrip().endswith(";"):
+                end_i = j
+                break
+        if end_i is None:
+            raise SystemExit(f"화면 쪽 {name} 선언의 끝을 찾지 못했다")
+        removed.append(f"{name}({end_i - start + 1}줄)")
+        del lines[start:end_i + 1]
+    if removed:
+        print(f"  화면 쪽 선언 제거: {', '.join(removed)}")
+    # 선언을 지웠으니 넣을 자리를 다시 찾는다. 상수들이 모여 있던 블록의
+    # 끝(const UP)을 기준으로 그 앞에 넣는다.
+    try:
+        at = next(i for i, l in enumerate(lines) if l.startswith("const UP = "))
+    except StopIteration:
+        raise SystemExit("상수 블록의 경계(const UP)를 찾지 못했다")
+    return "\n".join(lines[:at] + data_lines + lines[at:])
 
 
 def wire_stages(src: str) -> str:

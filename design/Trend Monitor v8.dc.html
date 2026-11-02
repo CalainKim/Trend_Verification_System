@@ -24,21 +24,21 @@
       <div data-tip="TrendCheck" style="font-size:14px;font-weight:600;letter-spacing:-0.4px;text-align:center;padding:2px 0 14px">TC</div>
       <sc-for list="{{ acts }}" as="a" hint-placeholder-count="6">
         <button onClick="{{ a.go }}" data-tip="{{ a.tip }}" aria-pressed="{{ a.on }}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;border-radius:8px;padding:10px 2px;cursor:pointer;font-family:var(--font-sans);font-size:11px;font-weight:600;transition:background 120ms ease, color 120ms ease;background:{{ a.bg }};color:{{ a.fg }}" style-hover="background:var(--color-surface-strong)">
-          <span style="position:absolute;left:-6px;top:8px;bottom:8px;width:3px;border-radius:0 2px 2px 0;background:{{ a.bar }}"></span>
+          <span style="position:absolute;left:-6px;top:8px;bottom:8px;width:3px;border-radius:0 2px 2px 0;transition:transform 240ms cubic-bezier(.2,.7,.2,1), background 160ms ease;background:{{ a.bar }};transform:scaleY({{ a.bs }})"></span>
           <span>{{ a.label }}</span>
           <sc-if value="{{ a.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="min-width:18px;height:16px;padding:0 5px;box-sizing:border-box;border-radius:8px;background:var(--color-ink);color:var(--color-canvas);font-size:10px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;margin-top:2px">{{ a.badge }}</span></sc-if>
         </button>
       </sc-for>
       <span style="flex:1"></span>
       <button onClick="{{ openCmd }}" data-tip="명령 창 (Ctrl+K)" style="border:1px solid var(--color-hairline-strong);border-radius:8px;background:var(--color-surface-card);padding:8px 2px;cursor:pointer;font-family:var(--font-mono);font-size:11px;color:var(--color-body)" style-hover="border-color:var(--color-ink)">⌘K</button>
-      <button onClick="{{ openGuide }}" data-tip="처음 안내 다시 보기" style="border:0;background:transparent;padding:8px 2px;cursor:pointer;font-size:12px;color:var(--color-muted)">?</button>
+      <button onClick="{{ openGuide }}" data-tip="도움말" aria-label="도움말" style="border:0;background:transparent;padding:8px 2px;cursor:pointer;font-size:12px;color:var(--color-muted)">?</button>
     </nav>
 
     <sc-if value="{{ sideOpen }}" hint-placeholder-val="{{ true }}">
-      <aside style="flex:none;border-right:1px solid var(--color-hairline);width:{{ sideW }};display:flex;flex-direction:column;min-height:0;background:var(--color-canvas)">
+      <aside data-side="1" style="flex:none;border-right:1px solid var(--color-hairline);width:{{ sideW }};display:flex;flex-direction:column;min-height:0;background:var(--color-canvas)">
         <div style="display:flex;align-items:center;gap:8px;padding:14px 14px 8px">
           <span style="font:var(--type-caption-upper);letter-spacing:0.88px;color:var(--color-muted);flex:1">{{ sideTitle }}</span>
-          <sc-if value="{{ sideList }}" hint-placeholder-val="{{ false }}"><button onClick="{{ exportQueue }}" data-tip="감지된 상품 전체를 CSV로 내려받습니다" style="border:1px solid var(--color-hairline);border-radius:6px;background:transparent;padding:2px 8px;cursor:pointer;font-size:11px;color:var(--color-body)">CSV</button></sc-if>
+          <sc-if value="{{ sideList }}" hint-placeholder-val="{{ false }}"><button onClick="{{ exportQueue }}" data-tip="감지된 상품 전체를 CSV로 내려받습니다" style="border:1px solid var(--color-hairline);border-radius:6px;background:transparent;padding:2px 8px;cursor:pointer;font-size:11px;color:var(--color-body)"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path><path d="M12 15V3"></path></svg>CSV</span></button></sc-if>
           <button onClick="{{ toggleSide }}" aria-label="탐색 패널 닫기" data-tip="패널 닫기 (Ctrl+B)" style="border:0;background:transparent;width:22px;height:22px;border-radius:4px;cursor:pointer;color:var(--color-muted)" style-hover="background:var(--color-surface-strong)">‹</button>
         </div>
         <div style="padding:0 12px 10px"><input value="{{ treeQ }}" onChange="{{ onTreeQ }}" placeholder="{{ sidePh }}" aria-label="검색" style="width:100%;box-sizing:border-box;height:32px;padding:0 10px;border:1px solid var(--color-hairline-strong);border-radius:6px;background:var(--color-surface-card);font:inherit;font-size:12px;color:var(--color-ink)"></div>
@@ -75,10 +75,11 @@
           </sc-if>
           <sc-if value="{{ sideItems }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ sideRows }}" as="r" hint-placeholder-count="6">
-              <button onClick="{{ r.go }}" style="display:flex;flex-direction:column;gap:3px;width:100%;border:0;border-radius:6px;padding:8px 10px;cursor:pointer;text-align:left;background:transparent;font-family:var(--font-sans);transition:background 120ms ease" style-hover="background:var(--color-surface-strong)">
+              <sc-if value="{{ r.compact }}" hint-placeholder-val="{{ false }}"><button onClick="{{ r.go }}" data-tip="{{ r.tip }}" style="display:grid;grid-template-columns:10px minmax(0,1fr) auto 28px;gap:8px;align-items:center;width:100%;border:0;border-radius:6px;padding:8px 10px;cursor:pointer;text-align:left;background:transparent;font-family:var(--font-sans);transition:background 120ms ease" style-hover="background:var(--color-surface-strong)"><span style="width:8px;height:8px;border-radius:4px;box-sizing:border-box;background:{{ r.dot }};border:1.5px solid {{ r.dotBd }}"></span><span style="font-size:13px;color:var(--color-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}</span><span style="font-size:10px;padding:1px 5px;border-radius:4px;background:var(--color-surface-strong);color:var(--color-body)">{{ r.cat }}</span><span style="font-size:12px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;color:{{ r.nc }}">{{ r.n }}</span></button></sc-if>
+              <sc-if value="{{ r.full }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.go }}" style="display:flex;flex-direction:column;gap:3px;width:100%;border:0;border-radius:6px;padding:8px 10px;cursor:pointer;text-align:left;background:transparent;font-family:var(--font-sans);transition:background 120ms ease" style-hover="background:var(--color-surface-strong)">
                 <span style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--color-ink);min-width:0"><span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;flex:none;background:{{ r.tagBg }};color:{{ r.tagFg }}">{{ r.tag }}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}</span></span>
                 <span style="font-size:11px;color:var(--color-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.sub }}</span>
-              </button>
+              </button></sc-if>
             </sc-for>
             <sc-if value="{{ sideRowsEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:20px 10px;font-size:12px;color:var(--color-muted)">{{ sideEmptyTxt }}</div></sc-if>
           </sc-if>
@@ -101,9 +102,9 @@
           </sc-for>
         </div>
         <div style="display:flex;align-items:center;gap:4px;padding:0 10px;border-left:1px solid var(--color-hairline)">
-          <button onClick="{{ toggleSplit }}" data-tip="{{ splitTip }}" style="border:1px solid var(--color-hairline);border-radius:6px;padding:4px 9px;cursor:pointer;font:var(--type-nav-link);font-size:12px;color:var(--color-ink);transition:background 120ms ease;background:{{ splitBg }}">나란히</button>
-          <button onClick="{{ toggleBottom }}" data-tip="아래 패널 (Ctrl+J)" style="border:1px solid var(--color-hairline);border-radius:6px;padding:4px 9px;cursor:pointer;font:var(--type-nav-link);font-size:12px;color:var(--color-ink);transition:background 120ms ease;background:{{ bottomBg }}">로그</button>
-          <button onClick="{{ toggleInsp }}" data-tip="오른쪽 속성 패널" style="border:1px solid var(--color-hairline);border-radius:6px;padding:4px 9px;cursor:pointer;font:var(--type-nav-link);font-size:12px;color:var(--color-ink);transition:background 120ms ease;background:{{ inspBg }}">속성</button>
+          <button onClick="{{ toggleSplit }}" data-tip="{{ splitTip }}" aria-label="나란히 보기" style="border:1px solid var(--color-hairline);border-radius:6px;width:30px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-ink);transition:background 120ms ease;background:{{ splitBg }}" style-hover="background:var(--color-surface-strong)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M12 3v18"></path></svg></button>
+          <button onClick="{{ toggleBottom }}" data-tip="아래 로그 패널 (Ctrl+J)" aria-label="아래 로그 패널" style="border:1px solid var(--color-hairline);border-radius:6px;width:30px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-ink);transition:background 120ms ease;background:{{ bottomBg }}" style-hover="background:var(--color-surface-strong)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 15h18"></path></svg></button>
+          <button onClick="{{ toggleInsp }}" data-tip="오른쪽 속성 패널" aria-label="오른쪽 속성 패널" style="border:1px solid var(--color-hairline);border-radius:6px;width:30px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-ink);transition:background 120ms ease;background:{{ inspBg }}" style-hover="background:var(--color-surface-strong)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path></svg></button>
         </div>
       </div>
 
@@ -111,10 +112,35 @@
         <sc-for list="{{ panes }}" as="pn" hint-placeholder-count="1">
           <div onMouseDown="{{ pn.focus }}" style="flex:1;min-width:0;overflow:auto;background:var(--color-canvas);border-left:{{ pn.bl }}">
             <sc-if value="{{ pn.isSplit }}" hint-placeholder-val="{{ false }}"><div style="position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:8px;padding:6px 16px;background:var(--color-canvas-soft);border-bottom:1px solid var(--color-hairline);font-size:12px;color:var(--color-body)"><span style="width:6px;height:6px;border-radius:3px;background:{{ pn.focusDot }}"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pn.sideName }}: {{ pn.title }}</span><button onClick="{{ closeSplit }}" style="border:0;background:transparent;cursor:pointer;font-size:12px;color:var(--color-body);text-decoration:underline;text-underline-offset:3px">나란히 끄기</button></div></sc-if>
-            <div style="padding:24px 28px 48px;display:flex;flex-direction:column;gap:18px;max-width:1080px;margin:0 auto">
+            <div data-pane="1" style="padding:24px 28px 48px;display:flex;flex-direction:column;gap:18px;max-width:1080px;margin:0 auto">
 
               <sc-if value="{{ pn.isOv }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:26px;font-weight:400;letter-spacing:-0.325px">이번 주 개요</span><span style="font-size:13px;color:var(--color-muted)">29CM 상의 TOP100, 10/25에서 11/01</span></div>
+                <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
+                  <div style="display:flex;align-items:center;gap:8px;padding:14px 20px 12px;flex-wrap:wrap"><span style="font-size:17px;font-weight:600">유형 점수</span><span data-q="1" tabindex="0" role="button" aria-label="점수 도움말" data-tip="{{ scoreNote }}" onClick="{{ openGuide }}" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;border:1px solid var(--color-hairline-strong);font-size:11px;font-weight:600;color:var(--color-muted);cursor:help;flex:none">?</span></div>
+                  <div style="display:grid;grid-template-columns:minmax(64px,100px) minmax(90px,1fr) 128px 60px 44px 56px 14px;gap:10px;padding:8px 20px;border-top:1px solid var(--color-hairline);border-bottom:1px solid var(--color-hairline-soft);font-size:11px;color:var(--color-muted)"><span>유형</span><span>점수</span><span>TOP100 안, 5주</span><span style="text-align:right">변화</span><span style="text-align:right">연속</span><span style="text-align:right">브랜드</span><span></span></div>
+                  <sc-for list="{{ scoreRows }}" as="r" hint-placeholder-count="9">
+                    <div style="display:flex;flex-direction:column;border-bottom:1px solid var(--color-hairline-soft);background:{{ r.bg }};transition:background 120ms ease">
+                      <button onClick="{{ r.toggle }}" aria-expanded="{{ r.exp }}" style="display:grid;grid-template-columns:minmax(64px,100px) minmax(90px,1fr) 128px 60px 44px 56px 14px;gap:10px;align-items:center;padding:9px 20px;border:0;background:transparent;cursor:pointer;text-align:left;font-family:var(--font-sans);color:var(--color-ink)" style-hover="background:var(--color-canvas-soft)">
+                        <span style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</span>
+                        <span style="display:flex;align-items:center;gap:8px;min-width:0"><span data-count="{{ r.score }}" style="font-size:18px;font-variant-numeric:tabular-nums;width:26px;text-align:right;flex:none">{{ r.score }}</span><span style="flex:1;height:6px;border-radius:3px;background:var(--color-hairline-soft);overflow:hidden"><span data-anim="bar" style="display:block;height:100%;transform-origin:left;border-radius:3px;width:{{ r.sw }};background:{{ r.sc }}"></span></span></span>
+                        <span data-tip="{{ r.topsTip }}" style="display:flex;align-items:center;gap:6px"><svg width="72" height="28" viewBox="0 0 120 28" preserveAspectRatio="none" style="flex:none;overflow:visible"><path d="{{ r.spark }}" pathLength="1" data-anim="draw" fill="none" stroke="var(--color-ink)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg><span style="font-size:12px;color:var(--color-body);font-variant-numeric:tabular-nums;white-space:nowrap">{{ r.topsTxt }}</span></span>
+                        <span style="font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;color:{{ r.cc }}">{{ r.chg }}</span>
+                        <span style="font-size:13px;text-align:right;font-variant-numeric:tabular-nums">{{ r.streak }}</span>
+                        <span style="font-size:13px;text-align:right;font-variant-numeric:tabular-nums">{{ r.brandsTxt }}</span>
+                        <span style="font-size:11px;color:var(--color-muted)">{{ r.caret }}</span>
+                      </button>
+                      <sc-if value="{{ r.exp }}" hint-placeholder-val="{{ false }}">
+                        <div data-anim="rise" style="padding:4px 20px 16px;display:flex;flex-direction:column;gap:10px">
+                          <sc-for list="{{ r.parts }}" as="p" hint-placeholder-count="3"><div data-tip="{{ p.desc }}" style="display:grid;grid-template-columns:40px minmax(0,1fr) 34px 96px;gap:10px;align-items:center;font-size:13px"><span style="font-weight:600">{{ p.label }}</span><span style="height:8px;border-radius:4px;background:var(--color-hairline-soft);overflow:hidden"><span data-anim="bar" style="display:block;height:100%;transform-origin:left;background:var(--color-ink);width:{{ p.w }}"></span></span><span style="text-align:right;font-variant-numeric:tabular-nums">{{ p.v }}</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--color-body)">{{ p.contrib }}</span></div></sc-for>
+                          <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:12px;color:var(--color-body);padding-top:8px;border-top:1px solid var(--color-hairline-soft)"><span>주</span><span style="font-variant-numeric:tabular-nums">{{ r.weeksTxt }}</span><span>TOP100 안</span><span style="font-variant-numeric:tabular-nums;color:var(--color-ink)">{{ r.topsAll }}</span><sc-if value="{{ r.hasRises }}" hint-placeholder-val="{{ false }}"><span>그중 오른 수</span><span style="font-variant-numeric:tabular-nums;color:var(--color-ink)">{{ r.risesAll }}</span></sc-if><sc-if value="{{ r.hasBrandsAll }}" hint-placeholder-val="{{ false }}"><span>브랜드</span><span style="font-variant-numeric:tabular-nums;color:var(--color-ink)">{{ r.brandsAll }}</span></sc-if></div>
+                          <sc-if value="{{ r.inT }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.open }}" style="align-self:flex-start;border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:6px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink)">{{ r.name }} 유형 열기 →</button></sc-if>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                  
+                </section>
                 <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:18px 22px 14px;display:flex;flex-direction:column;gap:12px">
                   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:17px;font-weight:600">{{ ov.viewTitle }}</span><div style="display:flex;gap:2px;padding:3px;background:var(--color-surface-strong);border-radius:8px;margin-left:6px"><sc-for list="{{ ov.views }}" as="v" hint-placeholder-count="2"><button onClick="{{ v.go }}" style="border:0;border-radius:6px;padding:4px 10px;cursor:pointer;font:var(--type-nav-link);font-size:12px;transition:background 120ms ease;background:{{ v.bg }};color:{{ v.fg }}">{{ v.label }}</button></sc-for></div><span data-q="1" tabindex="0" role="button" aria-label="도움말" data-tip="오른쪽으로 갈수록 이번 주 오른 상품이 많고, 위로 갈수록 여러 브랜드에 고르게 퍼져 있습니다. 점이 클수록 TOP100 안 상품이 많습니다. 점을 누르면 유형 탭이 열립니다." style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;border:1px solid var(--color-hairline-strong);font-size:11px;font-weight:600;color:var(--color-muted);cursor:help;flex:none">?</span><span style="flex:1"></span><span style="display:flex;gap:14px;font-size:12px;color:var(--color-body)"><span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:5px;background:var(--color-semantic-success)"></span>트렌드 후보</span><span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:5px;border:1.5px solid var(--color-ink);box-sizing:border-box"></span>관찰</span><span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:5px;background:var(--color-body)"></span>브랜드 단독</span></span></div>
                   <sc-if value="{{ ov.isMap }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px">
@@ -138,7 +164,7 @@
                   </div>
                   </sc-if>
                   <sc-if value="{{ ov.isMind }}" hint-placeholder-val="{{ true }}">
-                    <div style="position:relative;height:440px;margin:12px 72px">
+                    <div data-ovview="1" style="position:relative;height:440px;margin:12px 72px">
                       <sc-for list="{{ ov.mm.links }}" as="l" hint-placeholder-count="12"><svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;overflow:visible;pointer-events:none"><path d="{{ l.d }}" pathLength="1" data-anim="draw" data-anim-i="{{ l.i }}" fill="none" stroke="{{ l.c }}" stroke-width="{{ l.w }}" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity="{{ l.op }}" style="transition:opacity 160ms ease"></path></svg></sc-for>
                       <div data-anim="pop" data-tip="{{ ov.mm.centerSub }}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;padding:9px 16px;border-radius:999px;background:var(--color-ink);color:var(--color-canvas);font-size:15px;font-weight:600;white-space:nowrap;cursor:help">{{ ov.mm.center }}</div>
                       <sc-for list="{{ ov.mm.leaves }}" as="f" hint-placeholder-count="10"><span data-anim="pop" data-anim-i="{{ f.i }}" data-tip="{{ f.tip }}" style="position:absolute;z-index:2;font-size:12px;white-space:nowrap;padding:2px 8px;border-radius:999px;border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);color:var(--color-body);transition:opacity 160ms ease;cursor:help;left:{{ f.x }};top:{{ f.y }};transform:{{ f.tf }};opacity:{{ f.op }}">{{ f.label }}</span></sc-for>
@@ -151,32 +177,40 @@
                 <sc-if value="{{ ov.hasCand }}" hint-placeholder-val="{{ true }}">
                   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
                     <sc-for list="{{ ov.cands }}" as="t" hint-placeholder-count="2">
-                      <div onClick="{{ t.open }}" onMouseEnter="{{ t.enter }}" onMouseLeave="{{ leave }}" data-tip="{{ t.line }}" data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:border-color 160ms ease, background 160ms ease, transform 160ms ease" style-hover="border-color:var(--color-ink);background:var(--color-canvas-soft);transform:translateY(-2px)">
-                        <div style="display:flex;align-items:center;gap:10px"><span style="width:18px;height:18px;flex:none;border-radius:9px;background:var(--color-semantic-success);color:#ffffff;font-size:10px;display:inline-flex;align-items:center;justify-content:center">▲</span><span style="font-size:22px;font-weight:600;flex:1">{{ t.name }}</span><span style="font-size:12px;font-weight:600;color:var(--color-semantic-success)">트렌드 후보</span></div>
-                        <div style="display:flex;align-items:baseline;gap:18px;flex-wrap:wrap"><span style="display:flex;align-items:baseline;gap:6px"><span data-count="{{ t.risen }}" style="font-size:40px;font-weight:400;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums">{{ t.risen }}</span><span style="font-size:13px;color:var(--color-body)">개 상품 상승</span></span><span style="display:flex;align-items:baseline;gap:6px"><span data-count="{{ t.brands }}" style="font-size:26px;line-height:1;font-variant-numeric:tabular-nums">{{ t.brands }}</span><span style="font-size:13px;color:var(--color-body)">개 브랜드</span></span></div>
-                        <div style="display:flex;gap:2px;height:10px;border-radius:5px;overflow:hidden;background:var(--color-hairline-soft)"><sc-for list="{{ t.segs }}" as="g" hint-placeholder-count="3"><span data-tip="{{ g.tip }}" data-anim="bar" data-anim-i="{{ $index }}" style="height:100%;transform-origin:left;width:{{ g.w }};background:{{ g.c }}"></span></sc-for></div>
-                                              </div>
+                      <div onClick="{{ t.open }}" onMouseEnter="{{ t.enter }}" onMouseLeave="{{ leave }}" data-tip="{{ t.line }}" data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:border-color 160ms ease, transform 160ms ease" style-hover="border-color:var(--color-ink);transform:translateY(-2px)">
+                        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px;font-weight:600;flex:1">{{ t.name }}</span><sc-if value="{{ t.hasSc }}" hint-placeholder-val="{{ false }}"><span data-tip="유형 점수 (관측 요약)" style="font-size:13px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--color-ink);color:var(--color-canvas);font-variant-numeric:tabular-nums">{{ t.score }}점</span></sc-if></div>
+                        <div style="display:flex;align-items:flex-end;gap:14px">
+                          <span style="display:flex;flex-direction:column;gap:2px"><span data-count="{{ t.risen }}" style="font-size:40px;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums;color:var(--color-semantic-success)">{{ t.risen }}</span><span style="font-size:11px;color:var(--color-muted)">상품 상승</span></span>
+                          <sc-if value="{{ t.hasSpark }}" hint-placeholder-val="{{ false }}"><span data-tip="{{ t.sparkTip }}" style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><svg width="100%" height="36" viewBox="0 0 120 28" preserveAspectRatio="none" style="overflow:visible"><path d="{{ t.spark }}" pathLength="1" data-anim="draw" fill="none" stroke="var(--color-ink)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg><span style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-muted)"><span>TOP100 5주</span><span style="font-variant-numeric:tabular-nums;color:var(--color-ink)">{{ t.topsTxt }}</span></span></span></sc-if>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;border-top:1px solid var(--color-hairline-soft);padding-top:12px"><span style="display:flex;align-items:center;gap:4px;flex:1;flex-wrap:wrap"><sc-for list="{{ t.bdots }}" as="d" hint-placeholder-count="3"><span data-tip="{{ d.tip }}" data-anim="pop" data-anim-i="{{ $index }}" style="border-radius:50%;background:var(--color-ink);width:{{ d.s }};height:{{ d.s }}"></span></sc-for></span><span style="font-size:12px;color:var(--color-body);white-space:nowrap">브랜드 {{ t.brands }}곳</span></div>
+                      </div>
                     </sc-for>
                   </div>
                 </sc-if>
                 <sc-if value="{{ ov.noCand }}" hint-placeholder-val="{{ false }}"><div style="padding:18px 22px;border:1px dashed var(--color-hairline-strong);border-radius:12px;font-size:14px;color:var(--color-body);text-wrap:pretty">{{ ov.noCandTxt }}</div></sc-if>
-                <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
-                  <div style="display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid var(--color-hairline)"><span style="font-size:15px;font-weight:600">나머지 유형</span></div>
-                  <sc-for list="{{ ov.rest }}" as="r" hint-placeholder-count="6">
-                    <div onClick="{{ r.open }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ leave }}" data-tip="{{ r.vTip }}" data-anim="rise" data-anim-i="{{ $index }}" style="display:grid;grid-template-columns:minmax(70px,110px) 92px minmax(60px,1fr) 52px 16px;gap:14px;align-items:center;padding:11px 20px;border-bottom:1px solid var(--color-hairline-soft);cursor:pointer;transition:background 120ms ease;background:{{ r.hbg }}" style-hover="background:var(--color-canvas-soft)">
-                      <span style="font-size:14px;font-weight:600">{{ r.name }}</span>
-                      <span><span style="display:inline-flex;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;color:{{ r.vc.fg }};background:{{ r.vc.bg }};border:1px {{ r.vc.bs }} {{ r.vc.bd }}">{{ r.vc.label }}</span></span>
-                      <span style="display:flex;align-items:center;gap:8px"><span style="flex:1;height:8px;border-radius:4px;background:var(--color-hairline-soft);overflow:hidden"><span data-anim="bar" style="display:block;height:100%;border-radius:4px;transform-origin:left;width:{{ r.rw }};background:{{ r.rc }}"></span></span><span style="font-family:var(--font-mono);font-size:12px;min-width:16px;text-align:right">{{ r.risen }}</span></span>
-                      <span style="font-family:var(--font-mono);font-size:12px;text-align:right">{{ r.brands }}곳</span>
-                      <span style="color:var(--color-muted)">›</span>
-                    </div>
-                  </sc-for>
+                <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:14px 20px 18px;display:flex;flex-direction:column;gap:12px">
+                  <span style="font-size:15px;font-weight:600">나머지 유형</span>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+                    <sc-for list="{{ ov.restGroups }}" as="g" hint-placeholder-count="3"><div data-tip="{{ g.tip }}" style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:var(--color-canvas)">
+                      <span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:5px;box-sizing:border-box;background:{{ g.dot }};border:1.5px solid {{ g.dotBd }}"></span><span style="font-size:13px;font-weight:600;flex:1">{{ g.label }}</span><span style="font-size:12px;color:var(--color-muted);font-variant-numeric:tabular-nums">{{ g.n }}</span></span>
+                      <sc-if value="{{ g.empty }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-muted)">없음</span></sc-if>
+                      <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="2"><button onClick="{{ r.open }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ leave }}" data-tip="{{ r.vTip }}" data-anim="rise" data-anim-i="{{ $index }}" style="display:flex;align-items:center;gap:8px;border:1px solid var(--color-hairline);border-radius:8px;padding:8px 10px;cursor:pointer;font-family:var(--font-sans);color:var(--color-ink);text-align:left;transition:border-color 120ms ease, background 120ms ease;background:{{ r.hbg }}" style-hover="border-color:var(--color-ink)"><span style="font-size:14px;font-weight:500;flex:1">{{ r.name }}</span><span style="font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ r.nc }}">{{ r.nTxt }}</span></button></sc-for>
+                    </div></sc-for>
+                  </div>
                 </section>
               </sc-if>
 
               <sc-if value="{{ pn.isType }}" hint-placeholder-val="{{ false }}">
                 <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px">
                   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:28px;font-weight:400;letter-spacing:-0.5px">{{ pn.ty.name }}</span><span data-tip="{{ pn.ty.vTip }}" style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;color:{{ pn.ty.vc.fg }};background:{{ pn.ty.vc.bg }};border:1px {{ pn.ty.vc.bs }} {{ pn.ty.vc.bd }}">{{ pn.ty.vc.label }}</span><span data-q="1" tabindex="0" role="button" aria-label="도움말" data-tip="{{ pn.ty.summary }}" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;border:1px solid var(--color-hairline-strong);font-size:11px;font-weight:600;color:var(--color-muted);cursor:help;flex:none">?</span></div>
+                  <sc-if value="{{ pn.ty.hasSc }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;border-top:1px solid var(--color-hairline-soft);padding-top:14px">
+                      <div style="display:flex;flex-direction:column;gap:2px;flex:none"><span style="font-size:12px;color:var(--color-muted)">유형 점수</span><span style="display:flex;align-items:baseline;gap:4px;white-space:nowrap"><span data-count="{{ pn.ty.sc.score }}" style="font-size:40px;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums;color:{{ pn.ty.sc.sc }}">{{ pn.ty.sc.score }}</span><span style="font-size:13px;color:var(--color-muted)">/ 100</span></span><span data-tip="{{ scoreNote }}" style="font-size:11px;color:var(--color-body);cursor:help;text-decoration:underline dotted;white-space:nowrap">관측 요약, 예측 아님</span></div>
+                      <div style="display:flex;flex-direction:column;gap:7px;flex:1 1 220px;min-width:0"><sc-for list="{{ pn.ty.sc.parts }}" as="p" hint-placeholder-count="3"><div data-tip="{{ p.desc }}" style="display:grid;grid-template-columns:32px minmax(0,1fr) 28px 82px;gap:8px;align-items:center;font-size:12px"><span style="font-weight:600">{{ p.label }}</span><span style="height:6px;border-radius:3px;background:var(--color-hairline-soft);overflow:hidden"><span data-anim="bar" style="display:block;height:100%;transform-origin:left;background:var(--color-ink);width:{{ p.w }}"></span></span><span style="text-align:right;font-variant-numeric:tabular-nums">{{ p.v }}</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--color-body)">{{ p.contrib }}</span></div></sc-for></div>
+                      <div data-tip="{{ pn.ty.sc.topsTip }}" style="display:flex;flex-direction:column;gap:4px;flex:1 1 220px;min-width:0"><span style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-muted)"><span>TOP100 안, 5주</span><span style="font-weight:600;color:{{ pn.ty.sc.cc }}">{{ pn.ty.sc.chg }}</span></span><svg width="100%" height="56" viewBox="0 0 260 56" preserveAspectRatio="none" style="overflow:visible"><path d="{{ pn.ty.sc.sparkL }}" pathLength="1" data-anim="draw" fill="none" stroke="var(--color-ink)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg><span style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-body);font-variant-numeric:tabular-nums"><span>{{ pn.ty.sc.topsTxt }}</span><span>{{ pn.ty.sc.streak }} 연속, 브랜드 {{ pn.ty.sc.brandsTxt }}</span></span></div>
+                    </div>
+                  </sc-if>
                                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px;border-top:1px solid var(--color-hairline-soft);padding-top:14px">
                     <sc-for list="{{ pn.ty.tiles }}" as="x" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;color:var(--color-muted)">{{ x.label }}</span><span style="font-size:22px;font-variant-numeric:tabular-nums">{{ x.v }}</span></div></sc-for>
                   </div>
@@ -204,21 +238,21 @@
                 </section>
                 <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
                   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 22px">
-                    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:180px"><span style="font-size:16px;font-weight:600">유형 심층 검증</span><span data-q="1" tabindex="0" role="button" aria-label="도움말" data-tip="유형 전체의 상품, 브랜드 분포, 세부 속성, 검색을 Claude 추론 모델에 넘겨 진짜 트렌드인지, 브랜드 단독인지 판단합니다. 진행 과정은 아래 로그 패널에도 흐릅니다." style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;border:1px solid var(--color-hairline-strong);font-size:11px;font-weight:600;color:var(--color-muted);cursor:help;flex:none">?</span></div>
-                    <sc-if value="{{ pn.ty.canStart }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ pn.ty.start }}" hint-size="150px,40px">유형 심층 검증</x-import></sc-if>
-                    <sc-if value="{{ pn.ty.canRerun }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ pn.ty.start }}" hint-size="100px,40px">다시 실행</x-import></sc-if>
+                    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:180px"><span style="font-size:16px;font-weight:600">유형 심층 검증</span><span data-q="1" tabindex="0" role="button" aria-label="도움말" data-tip="유형 전체의 상품, 브랜드 분포, 세부 속성, 검색을 모델에 넘겨 진짜 트렌드인지, 브랜드 단독인지 판단합니다. 진행 과정은 아래 로그 패널에도 흐릅니다." style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;border:1px solid var(--color-hairline-strong);font-size:11px;font-weight:600;color:var(--color-muted);cursor:help;flex:none">?</span></div>
+                    <sc-if value="{{ pn.ty.canStart }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ pn.ty.start }}" hint-size="150px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>유형 심층 검증</span></x-import></sc-if>
+                    <sc-if value="{{ pn.ty.canRerun }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ pn.ty.start }}" hint-size="100px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>다시 실행</span></x-import></sc-if>
                   </div>
                   <sc-if value="{{ pn.ty.running }}" hint-placeholder-val="{{ false }}">
-                    <div style="height:3px;background:var(--color-hairline-soft);overflow:hidden"><div style="height:100%;background:var(--color-ink);transition:width 500ms cubic-bezier(.2,.7,.2,1);width:{{ pn.ty.pct }}"></div></div>
+                    <div style="height:3px;background:var(--color-hairline-soft);overflow:hidden"><div style="position:relative;overflow:hidden;height:100%;background:var(--color-ink);transition:width 500ms cubic-bezier(.2,.7,.2,1);width:{{ pn.ty.pct }}"><span data-hairline="1" style="position:absolute;top:0;left:0;height:100%;width:35%;background:rgba(255,255,255,0.45)"></span></div></div>
                     <div style="padding:14px 22px 18px;display:flex;flex-direction:column;gap:6px;font-family:var(--font-mono);font-size:12px;color:var(--color-body)">
                       <span>{{ pn.ty.lastLog }}</span>
-                      <sc-if value="{{ pn.ty.thinking }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:8px;color:var(--color-ink)"><span data-pulse="1" style="width:6px;height:6px;border-radius:3px;background:var(--color-primary)"></span>추론 중…</span></sc-if>
+                      <sc-if value="{{ pn.ty.thinking }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-direction:column;gap:6px;color:var(--color-ink);min-width:160px"><span>추론 중…</span><span style="position:relative;display:block;height:1px;width:100%;overflow:hidden;background:var(--color-hairline)"><span data-hairline="1" style="position:absolute;top:0;left:0;height:1px;width:35%;background:var(--color-ink)"></span></span></span></sc-if>
                     </div>
                   </sc-if>
                   <sc-if value="{{ pn.ty.error }}" hint-placeholder-val="{{ false }}"><div style="margin:0 22px 18px;padding:12px 14px;border:1px solid var(--color-semantic-error);border-radius:8px;font-size:13px;color:var(--color-semantic-error)">추론 요청이 실패했습니다. 다시 실행해 주세요.</div></sc-if>
                   <sc-if value="{{ pn.ty.done }}" hint-placeholder-val="{{ false }}">
                     <div data-stagger="1" style="padding:22px;display:flex;flex-direction:column;gap:22px;border-top:1px solid var(--color-hairline)">
-                      <div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span data-anim="pop" style="display:inline-flex;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;color:{{ pn.ty.rc.fg }};background:{{ pn.ty.rc.bg }};border:1px {{ pn.ty.rc.bs }} {{ pn.ty.rc.bd }}">{{ pn.ty.rc.label }}</span><span style="font-size:13px;color:var(--color-body)">확신도 {{ pn.ty.r.confidence }}</span><span style="font-size:12px;color:var(--color-muted);font-family:var(--font-mono)">{{ pn.ty.at }} 작성, Claude</span></div><span data-type="1" style="font-size:20px;font-weight:400;line-height:1.45;text-wrap:pretty">{{ pn.ty.r.headline }}</span></div>
+                      <div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span data-anim="pop" style="display:inline-flex;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;color:{{ pn.ty.rc.fg }};background:{{ pn.ty.rc.bg }};border:1px {{ pn.ty.rc.bs }} {{ pn.ty.rc.bd }}">{{ pn.ty.rc.label }}</span><span style="font-size:13px;color:var(--color-body)">확신도 {{ pn.ty.r.confidence }}</span><span style="font-size:12px;color:var(--color-muted);font-family:var(--font-mono)">{{ pn.ty.at }} 작성</span></div><span data-type="1" style="font-size:20px;font-weight:400;line-height:1.45;text-wrap:pretty">{{ pn.ty.r.headline }}</span></div>
                       <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:600">끌고 가는 세부 속성</span><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ pn.ty.r.drivers }}" as="x" hint-placeholder-count="2"><span style="font-size:13px;padding:3px 12px;border-radius:999px;border:1px solid var(--color-ink)">{{ x }}</span></sc-for></div></div>
                       <sc-if value="{{ pn.ty.hasNext }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:12px;align-items:baseline;padding:12px 14px;background:var(--color-canvas);border-radius:8px;font-size:14px"><span style="font-size:12px;font-weight:600;color:var(--color-body);white-space:nowrap">다음 할 일</span><span style="flex:1;text-wrap:pretty">{{ pn.ty.nextAct }}</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--color-body);white-space:nowrap">{{ pn.ty.nextWhen }}</span></div></sc-if>
                       <button onClick="{{ pn.ty.toggleMore }}" aria-expanded="{{ pn.ty.more }}" style="align-self:flex-start;display:flex;align-items:center;gap:6px;border:1px solid var(--color-hairline-strong);background:transparent;border-radius:999px;padding:5px 14px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease" style-hover="background:var(--color-surface-strong)">{{ pn.ty.moreLabel }}</button>
@@ -279,18 +313,18 @@
                 </section>
                 <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
                   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 22px">
-                    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:180px"><span style="font-size:16px;font-weight:600">상품 심층 검증</span><span data-q="1" tabindex="0" role="button" aria-label="도움말" data-tip="이 상품의 순위, 검색, 필터 점검, 같은 속성 상품을 Claude 추론 모델에 넘겨 진짜 신호인지 판단합니다. 연결 전 데이터는 추측하지 않고 부족한 데이터로 적습니다." style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;border:1px solid var(--color-hairline-strong);font-size:11px;font-weight:600;color:var(--color-muted);cursor:help;flex:none">?</span></div>
-                    <sc-if value="{{ pn.deep.canStart }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ pn.deep.start }}" hint-size="140px,40px">심층 검증 시작</x-import></sc-if>
-                    <sc-if value="{{ pn.deep.canRerun }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ pn.deep.start }}" hint-size="100px,40px">다시 실행</x-import></sc-if>
+                    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:180px"><span style="font-size:16px;font-weight:600">상품 심층 검증</span><span data-q="1" tabindex="0" role="button" aria-label="도움말" data-tip="이 상품의 순위, 검색, 필터 점검, 같은 속성 상품을 모델에 넘겨 진짜 신호인지 판단합니다. 연결 전 데이터는 추측하지 않고 부족한 데이터로 적습니다." style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9px;border:1px solid var(--color-hairline-strong);font-size:11px;font-weight:600;color:var(--color-muted);cursor:help;flex:none">?</span></div>
+                    <sc-if value="{{ pn.deep.canStart }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ pn.deep.start }}" hint-size="140px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>심층 검증 시작</span></x-import></sc-if>
+                    <sc-if value="{{ pn.deep.canRerun }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ pn.deep.start }}" hint-size="100px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>다시 실행</span></x-import></sc-if>
                   </div>
                   <sc-if value="{{ pn.deep.showTimeline }}" hint-placeholder-val="{{ false }}">
-                    <div style="height:3px;background:var(--color-hairline-soft);overflow:hidden"><div style="height:100%;background:var(--color-ink);transition:width 500ms cubic-bezier(.2,.7,.2,1);width:{{ pn.deep.progress }}"></div></div>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 22px 16px"><sc-for list="{{ pn.deep.steps }}" as="st" hint-placeholder-count="5"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.TimelinePill" stage="{{ st.key }}" pending="{{ st.pending }}" hint-size="48px,24px">{{ st.label }}</x-import></sc-for><span style="flex:1"></span><sc-if value="{{ pn.deep.running }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-body)"><span data-pulse="1" style="width:6px;height:6px;border-radius:3px;background:var(--color-primary)"></span>{{ pn.deep.nowTxt }}</span></sc-if></div>
+                    <div style="height:3px;background:var(--color-hairline-soft);overflow:hidden"><div style="position:relative;overflow:hidden;height:100%;background:var(--color-ink);transition:width 500ms cubic-bezier(.2,.7,.2,1);width:{{ pn.deep.progress }}"><span data-hairline="1" style="position:absolute;top:0;left:0;height:100%;width:35%;background:rgba(255,255,255,0.45)"></span></div></div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 22px 16px"><sc-for list="{{ pn.deep.steps }}" as="st" hint-placeholder-count="5"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.TimelinePill" stage="{{ st.key }}" pending="{{ st.pending }}" hint-size="48px,24px">{{ st.label }}</x-import></sc-for><span style="flex:1"></span><sc-if value="{{ pn.deep.running }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px"><span style="display:flex;flex-direction:column;gap:6px;color:var(--color-ink);min-width:160px"><span>{{ pn.deep.nowTxt }}</span><span style="position:relative;display:block;height:1px;width:100%;overflow:hidden;background:var(--color-hairline)"><span data-hairline="1" style="position:absolute;top:0;left:0;height:1px;width:35%;background:var(--color-ink)"></span></span></span></span></sc-if></div>
                   </sc-if>
                   <sc-if value="{{ pn.deep.error }}" hint-placeholder-val="{{ false }}"><div style="margin:0 22px 18px;padding:12px 14px;border:1px solid var(--color-semantic-error);border-radius:8px;font-size:13px;color:var(--color-semantic-error)">추론 요청이 실패했습니다. 다시 실행해 주세요.</div></sc-if>
                   <sc-if value="{{ pn.deep.done }}" hint-placeholder-val="{{ false }}">
                     <div data-stagger="1" style="padding:22px;display:flex;flex-direction:column;gap:22px;border-top:1px solid var(--color-hairline)">
-                      <div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><span data-anim="pop" style="display:inline-flex;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;color:{{ pn.deep.vc.fg }};background:{{ pn.deep.vc.bg }};border:1px {{ pn.deep.vc.bs }} {{ pn.deep.vc.bd }}">{{ pn.deep.r.verdict }}</span><span style="font-size:13px;color:var(--color-body)">확신도 {{ pn.deep.r.confidence }}</span><span style="font-size:12px;color:var(--color-muted);font-family:var(--font-mono)">{{ pn.deep.at }} 작성, Claude</span></div><span data-type="1" style="font-size:20px;font-weight:400;line-height:1.45;text-wrap:pretty">{{ pn.deep.r.headline }}</span></div>
+                      <div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><span data-anim="pop" style="display:inline-flex;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;color:{{ pn.deep.vc.fg }};background:{{ pn.deep.vc.bg }};border:1px {{ pn.deep.vc.bs }} {{ pn.deep.vc.bd }}">{{ pn.deep.r.verdict }}</span><span style="font-size:13px;color:var(--color-body)">확신도 {{ pn.deep.r.confidence }}</span><span style="font-size:12px;color:var(--color-muted);font-family:var(--font-mono)">{{ pn.deep.at }} 작성</span></div><span data-type="1" style="font-size:20px;font-weight:400;line-height:1.45;text-wrap:pretty">{{ pn.deep.r.headline }}</span></div>
                       <sc-if value="{{ pn.deep.hasNext }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:12px;align-items:baseline;padding:12px 14px;background:var(--color-canvas);border-radius:8px;font-size:14px"><span style="font-size:12px;font-weight:600;color:var(--color-body);white-space:nowrap">다음 할 일</span><span style="flex:1;text-wrap:pretty">{{ pn.deep.nextAct }}</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--color-body);white-space:nowrap">{{ pn.deep.nextWhen }}</span></div></sc-if>
                       <button onClick="{{ pn.deep.toggleMore }}" aria-expanded="{{ pn.deep.more }}" style="align-self:flex-start;display:flex;align-items:center;gap:6px;border:1px solid var(--color-hairline-strong);background:transparent;border-radius:999px;padding:5px 14px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease" style-hover="background:var(--color-surface-strong)">{{ pn.deep.moreLabel }}</button>
                       <sc-if value="{{ pn.deep.more }}" hint-placeholder-val="{{ false }}">
@@ -308,7 +342,7 @@
                         <span style="font-size:13px;font-weight:600">이 판단이 맞나요?</span>
                         <sc-for list="{{ pn.deep.fbBtns }}" as="b" hint-placeholder-count="2"><button onClick="{{ b.go }}" disabled="{{ b.dis }}" aria-pressed="{{ b.on }}" style="border-radius:8px;padding:5px 14px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease;background:{{ b.bg }};color:{{ b.fg }};border:1px solid {{ b.bd }}">{{ b.label }}</button></sc-for>
                         <span style="flex:1"></span>
-                        <x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ pn.deep.copy }}" hint-size="110px,40px">리포트 복사</x-import>
+                        <x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ pn.deep.copy }}" hint-size="110px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><rect width="14" height="14" x="8" y="8" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>리포트 복사</span></x-import>
                       </div>
                     </div>
                   </sc-if>
@@ -324,7 +358,7 @@
               <sc-if value="{{ pn.isLedger }}" hint-placeholder-val="{{ false }}">
                 <span style="font-size:26px;font-weight:400;letter-spacing:-0.325px">검증 기록</span>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
-                  <sc-for list="{{ ledgerTiles }}" as="t" hint-placeholder-count="4"><div data-tip="{{ t.tip }}" data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;cursor:help"><span style="font-size:12px;color:var(--color-body)">{{ t.label }}</span><span style="font-size:30px;font-variant-numeric:tabular-nums;color:{{ t.c }}">{{ t.value }}</span></div></sc-for>
+                  <sc-for list="{{ ledgerTiles }}" as="t" hint-placeholder-count="3"><div data-tip="{{ t.tip }}" data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;cursor:help"><span style="font-size:12px;color:var(--color-body)">{{ t.label }}</span><span style="font-size:30px;font-variant-numeric:tabular-nums;color:{{ t.c }}">{{ t.value }}</span></div></sc-for>
                 </div>
                 <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
                   <div style="display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid var(--color-hairline)"><span style="font-size:15px;font-weight:600;flex:1">사람 피드백</span><span style="font-family:var(--font-mono);font-size:12px">{{ fbSummary }}</span></div>
@@ -332,7 +366,7 @@
                   <sc-if value="{{ fbEmpty }}" hint-placeholder-val="{{ true }}"><div style="padding:22px 20px;font-size:13px;color:var(--color-muted)">아직 피드백이 없습니다. 상품 심층 검증 리포트에서 남길 수 있습니다.</div></sc-if>
                 </section>
                 <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
-                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--color-hairline)"><span style="font-size:15px;font-weight:600">지난주 상승 상품, 일주일 뒤</span><span style="flex:1"></span><span style="font-family:var(--font-mono);font-size:12px">25건 중 10건 남음 (40.0%)</span><button onClick="{{ exportLedger }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:6px;padding:4px 10px;cursor:pointer;font:var(--type-nav-link);font-size:12px;color:var(--color-ink)">CSV</button></div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--color-hairline)"><span style="font-size:15px;font-weight:600">지난주 상승 상품, 일주일 뒤</span><span style="flex:1"></span><span style="font-family:var(--font-mono);font-size:12px">25건 중 10건 남음 (40.0%)</span><button onClick="{{ exportLedger }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:6px;padding:4px 10px;cursor:pointer;font:var(--type-nav-link);font-size:12px;color:var(--color-ink)"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path><path d="M12 15V3"></path></svg>CSV</span></button></div>
                   <div style="overflow-x:auto"><div style="min-width:560px">
                     <sc-for list="{{ ledger }}" as="x" hint-placeholder-count="12"><div data-anim="rise" data-anim-i="{{ $index }}" style="display:grid;grid-template-columns:minmax(220px,1fr) 44px 44px 44px 64px;gap:12px;padding:10px 20px;font-size:13px;border-bottom:1px solid var(--color-hairline-soft);align-items:center;font-variant-numeric:tabular-nums"><span>{{ x.name }}</span><span style="text-align:right;font-family:var(--font-mono);color:var(--color-muted)">{{ x.r0 }}</span><span style="text-align:right;font-family:var(--font-mono)">{{ x.r1 }}</span><span style="text-align:right;font-family:var(--font-mono);color:{{ x.r2c }}">{{ x.r2 }}</span><span><span style="display:inline-flex;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;color:{{ x.res.fg }};background:{{ x.res.bg }};border:1px solid {{ x.res.bd }}">{{ x.res.label }}</span></span></div></sc-for>
                   </div></div>
@@ -345,7 +379,7 @@
                   <sc-for list="{{ weeklyTiles }}" as="t" hint-placeholder-count="6"><div data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;color:var(--color-body)">{{ t.label }}</span><span style="font-size:26px;font-variant-numeric:tabular-nums">{{ t.value }}</span><span style="font-size:11px;color:var(--color-muted)">{{ t.sub }}</span></div></sc-for>
                 </div>
                 <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
-                  <div style="display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid var(--color-hairline)"><span style="font-size:15px;font-weight:600;flex:1">보고용 요약</span><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ copyWeekly }}" hint-size="80px,40px">복사</x-import><button onClick="{{ exportWeekly }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink)">CSV</button></div>
+                  <div style="display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid var(--color-hairline)"><span style="font-size:15px;font-weight:600;flex:1">보고용 요약</span><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ copyWeekly }}" hint-size="80px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><rect width="14" height="14" x="8" y="8" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>복사</span></x-import><button onClick="{{ exportWeekly }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink)"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path><path d="M12 15V3"></path></svg>CSV</span></button></div>
                   <div style="margin:18px 20px 20px;padding:14px 16px;background:var(--color-canvas);border-radius:8px;white-space:pre-wrap;font-size:14px;line-height:1.75;text-wrap:pretty">{{ weeklyText }}</div>
                 </section>
               </sc-if>
@@ -359,7 +393,7 @@
                     <div style="display:flex;flex-direction:column;gap:12px;padding:16px 20px">
                       <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-body)">Slack 채널<input value="{{ slack }}" onChange="{{ onSlack }}" style="height:36px;box-sizing:border-box;padding:0 12px;border:1px solid var(--color-hairline-strong);border-radius:8px;background:var(--color-surface-card);font:inherit;font-size:14px;color:var(--color-ink)"></label>
                       <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-body)">이메일<input value="{{ email }}" onChange="{{ onEmail }}" placeholder="md-team@example.com" style="height:36px;box-sizing:border-box;padding:0 12px;border:1px solid var(--color-hairline-strong);border-radius:8px;background:var(--color-surface-card);font:inherit;font-size:14px;color:var(--color-ink)"></label>
-                      <div style="display:flex"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ testAlert }}" hint-size="140px,40px">테스트 알림 보기</x-import></div>
+                      <div style="display:flex"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ testAlert }}" hint-size="140px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>테스트 알림 보기</span></x-import></div>
                     </div>
                   </section>
                   <div style="flex:1 1 300px;display:flex;flex-direction:column;gap:14px;min-width:0">
@@ -373,15 +407,66 @@
               </sc-if>
 
               <sc-if value="{{ pn.isBench }}" hint-placeholder-val="{{ false }}">
-                <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:26px;font-weight:400;letter-spacing:-0.325px">2차 벤치마킹</span><span style="font-size:13px;color:var(--color-body)">카테고리 구분 없이 모아서 심층 분석합니다</span></div>
-                <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-                  <div style="display:flex;flex-direction:column;gap:8px;flex:1 1 320px;min-width:0">
-                    <span style="font-size:12px;font-weight:600;color:var(--color-body)">1차 카테고리별 선별</span>
-                    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"><sc-for list="{{ bench.cats }}" as="c" hint-placeholder-count="4"><div data-tip="{{ c.tip }}" data-anim="rise" data-anim-i="{{ $index }}" style="border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;border:1px {{ c.bs }} {{ c.bd }};background:{{ c.bg }}"><span style="font-size:13px;font-weight:600;color:{{ c.fg }}">{{ c.name }}</span><span style="font-size:12px;color:var(--color-body)">{{ c.sub }}</span></div></sc-for></div>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:26px;font-weight:400;letter-spacing:-0.325px;flex:1">지금 유행</span><sc-if value="{{ tr.canRun }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="{{ tr.btnVariant }}" on-click="{{ tr.run }}" hint-size="120px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><sc-if value="{{ tr.isRe }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg></sc-if><sc-if value="{{ tr.isFirst }}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></sc-if>{{ tr.btnLabel }}</span></x-import></sc-if></div>
+                <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:16px 20px 18px;display:grid;grid-template-columns:minmax(200px,1.2fr) minmax(48px,0.5fr) minmax(200px,1fr);column-gap:0;row-gap:8px">
+                  <span style="font-size:11px;font-weight:600;color:var(--color-muted)">1차 후보 유형 <span style="font-weight:400">(* 예시)</span></span><span></span><span style="font-size:11px;font-weight:600;color:var(--color-muted)">지금 유행</span>
+                  <div style="display:flex;flex-direction:column">
+                    <sc-for list="{{ tr.left }}" as="l" hint-placeholder-count="7"><div onMouseEnter="{{ l.enter }}" onMouseLeave="{{ tr.leave }}" data-tip="{{ l.tip }}" data-anim="rise" data-anim-i="{{ $index }}" style="height:36px;box-sizing:border-box;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;padding:0 10px;border-radius:6px;transition:opacity 160ms ease, background 160ms ease;opacity:{{ l.op }};background:{{ l.bg }}"><span style="font-size:11px;color:var(--color-muted);white-space:nowrap">{{ l.cat }}</span><span style="font-size:14px;font-weight:{{ l.fw }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span><span style="font-size:12px;font-weight:600;color:var(--color-semantic-success);font-variant-numeric:tabular-nums">▲{{ l.risen }}</span></div></sc-for>
                   </div>
-                  <span data-anim="fade" data-anim-i="5" style="font-size:22px;color:var(--color-muted)">→</span>
-                  <div data-anim="pop" data-anim-i="6" style="border-radius:10px;padding:12px 18px;background:var(--color-ink);color:var(--color-canvas);display:flex;flex-direction:column;gap:2px;min-width:120px"><span style="font-size:12px;color:var(--color-hairline-strong)">2차 대상</span><span style="font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums">{{ bench.n }}</span><span style="font-size:12px;color:var(--color-hairline-strong)">{{ bench.doneTxt }}</span></div>
+                  <svg width="100%" height="{{ tr.H }}" viewBox="{{ tr.vb }}" preserveAspectRatio="none" style="display:block;overflow:visible;align-self:start"><sc-for list="{{ tr.links }}" as="k" hint-placeholder-count="0"><path d="{{ k.d }}" pathLength="1" data-anim="draw" data-anim-i="{{ $index }}" fill="none" stroke="var(--color-ink)" stroke-linecap="round" vector-effect="non-scaling-stroke" stroke-width="{{ k.w }}" opacity="{{ k.op }}" style="transition:opacity 160ms ease"></path></sc-for><sc-for list="{{ tr.left }}" as="l" hint-placeholder-count="0"><circle cx="0" cy="{{ l.y }}" r="3" fill="{{ l.dot }}" stroke="var(--color-ink)" stroke-width="1.5" vector-effect="non-scaling-stroke"></circle></sc-for></svg>
+                  <div style="display:flex;flex-direction:column;height:{{ tr.Hpx }}">
+                    <sc-if value="{{ tr.noThemes }}" hint-placeholder-val="{{ true }}"><div style="flex:1;display:flex;align-items:center;justify-content:center;border:1px dashed var(--color-hairline-strong);border-radius:8px;padding:16px;text-align:center;font-size:13px;color:var(--color-muted)">{{ tr.rightEmpty }}</div></sc-if>
+                    <sc-for list="{{ tr.right }}" as="m" hint-placeholder-count="0"><div onMouseEnter="{{ m.enter }}" onMouseLeave="{{ tr.leave }}" data-anim="pop" data-anim-i="{{ m.i }}" style="flex:1;display:flex;align-items:center;min-height:0"><div style="width:100%;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;transition:opacity 160ms ease, background 160ms ease;border:1px solid var(--color-ink);opacity:{{ m.op }};background:{{ m.bg }};color:{{ m.fg }}"><span style="font-size:11px;font-variant-numeric:tabular-nums;opacity:0.7">{{ m.no }}</span><span data-tip="{{ m.name }}" style="font-size:14px;font-weight:600;flex:1;min-width:0;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-wrap:pretty">{{ m.name }}</span><span style="font-size:11px;font-weight:600">{{ m.strength }}</span></div></div></sc-for>
+                  </div>
                 </section>
+                <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+                  <span data-tip="두 개 이상 카테고리의 오른 상품에 함께 나온 세부 속성과 브랜드입니다" style="font-size:14px;font-weight:600;cursor:help;align-self:flex-start">카테고리를 넘는 공통점</span>
+                  <sc-if value="{{ tr.noOverlap }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--color-muted)">아직 겹치는 속성이나 브랜드가 없습니다</span></sc-if>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ tr.overlaps }}" as="o" hint-placeholder-count="5"><span data-tip="{{ o.tip }}" data-anim="pop" data-anim-i="{{ $index }}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);color:var(--color-ink);white-space:nowrap"><span style="font-size:10px;font-weight:600;color:var(--color-muted)">{{ o.kind }}</span>{{ o.label }}<span style="font-size:11px;font-weight:600;padding:0 6px;border-radius:999px;background:var(--color-ink);color:var(--color-canvas)">{{ o.n }}</span></span></sc-for></div>
+                </section>
+                <sc-if value="{{ tr.running }}" hint-placeholder-val="{{ false }}">
+                  <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column;overflow:hidden">
+                    <div style="height:3px;background:var(--color-hairline-soft);overflow:hidden"><div style="position:relative;overflow:hidden;height:100%;background:var(--color-ink);transition:width 400ms ease;width:{{ tr.pct }}"><span data-hairline="1" style="position:absolute;top:0;left:0;height:100%;width:35%;background:rgba(255,255,255,0.45)"></span></div></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding:16px 20px"><sc-for list="{{ tr.stages }}" as="g" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;transition:background 200ms ease, opacity 200ms ease;background:{{ g.bg }};opacity:{{ g.op }}"><span style="width:18px;height:18px;flex:none;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;background:{{ g.mbg }};color:{{ g.mfg }}">{{ g.mark }}</span><span style="font-size:13px">{{ g.label }}</span></div></sc-for></div>
+                  </section>
+                </sc-if>
+                <sc-if value="{{ tr.error }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 14px;border:1px solid var(--color-semantic-error);border-radius:8px;font-size:13px;color:var(--color-semantic-error)">유행을 정리하지 못했습니다. 다시 실행해 주세요.</div></sc-if>
+                <sc-if value="{{ tr.idle }}" hint-placeholder-val="{{ false }}"><div style="padding:32px 24px;border:1px dashed var(--color-hairline-strong);border-radius:12px;text-align:center;font-size:14px;color:var(--color-body)">"유행 찾기"를 누르면 모든 카테고리의 후보를 모아 지금 유행을 정리합니다</div></sc-if>
+                <sc-if value="{{ tr.done }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:6px"><span data-type="1" style="font-size:22px;font-weight:400;letter-spacing:-0.11px;line-height:1.45;text-wrap:pretty">{{ tr.headline }}</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--color-muted)">{{ tr.at }} 작성</span></div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">
+                    <sc-for list="{{ tr.themes }}" as="m" hint-placeholder-count="3">
+                      <section data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;transition:border-color 160ms ease" style-hover="border-color:var(--color-ink)">
+                        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-muted)">{{ m.no }}</span><span style="font-size:22px;font-weight:600;flex:1;text-wrap:pretty">{{ m.name }}</span><span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:{{ m.sbg }};color:{{ m.sfg }}">{{ m.strength }}</span></div>
+                        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px"><sc-for list="{{ m.cov }}" as="c" hint-placeholder-count="4"><span data-anim="bar" data-anim-i="{{ $index }}" style="display:flex;flex-direction:column;gap:4px;transform-origin:left"><span style="height:6px;border-radius:3px;background:{{ c.bg }}"></span><span style="font-size:11px;color:{{ c.fg }}">{{ c.name }}</span></span></sc-for></div>
+                        <span style="font-size:14px;line-height:1.6;color:var(--color-body);text-wrap:pretty">{{ m.summary }}</span>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+                          <div data-tip="{{ m.olTip }}" style="background:var(--color-canvas);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+                            <span style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:11px;font-weight:600;color:var(--color-muted)">얼마나 갈지</span><span style="font-size:11px;color:var(--color-muted)">모델 추정</span></span>
+                            <span style="font-size:20px;font-weight:400;letter-spacing:-0.2px">{{ m.olWeeks }}</span>
+                            <svg width="100%" height="54" viewBox="0 0 200 54" preserveAspectRatio="none" style="overflow:visible"><path d="M0 50 C40 50, 55 6, 100 6 S160 50, 200 50" pathLength="1" data-anim="draw" fill="none" stroke="var(--color-hairline-strong)" stroke-width="1.5" vector-effect="non-scaling-stroke"></path><path d="{{ m.olPath }}" pathLength="1" data-anim="draw" fill="none" stroke="var(--color-ink)" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg>
+                            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px"><sc-for list="{{ m.olStages }}" as="g" hint-placeholder-count="4"><span style="font-size:11px;text-align:center;padding:2px 0;border-radius:4px;transition:background 200ms ease;background:{{ g.bg }};color:{{ g.fg }};font-weight:{{ g.fw }}">{{ g.label }}</span></sc-for></div>
+                          </div>
+                          <div style="background:var(--color-canvas);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+                            <span style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:11px;font-weight:600;color:var(--color-muted)">관련 검색어 비중</span><span style="font-size:11px;color:var(--color-muted)">최근 4주</span></span>
+                            <sc-if value="{{ m.noKwData }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-muted)">검색량 데이터 연결 전</span></sc-if>
+                            <sc-if value="{{ m.hasKwData }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:12px">
+                              <svg width="84" height="84" viewBox="0 0 42 42" style="flex:none;transform:rotate(-90deg)"><circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--color-hairline-soft)" stroke-width="6"></circle><sc-for list="{{ m.donut }}" as="d" hint-placeholder-count="3"><circle cx="21" cy="21" r="15.915" fill="none" stroke-width="6" pathLength="100" data-anim="fade" data-anim-i="{{ $index }}" stroke="{{ d.c }}" stroke-dasharray="{{ d.dash }}" stroke-dashoffset="{{ d.off }}"></circle></sc-for></svg>
+                              <div style="display:flex;flex-direction:column;gap:5px;min-width:0;flex:1"><sc-for list="{{ m.donut }}" as="d" hint-placeholder-count="3"><a href="{{ d.href }}" target="_blank" rel="noopener" data-tip="{{ d.tip }}" style="display:grid;grid-template-columns:8px minmax(0,1fr) auto auto;gap:6px;align-items:center;font-size:12px;color:var(--color-ink);text-decoration:none"><span style="width:8px;height:8px;border-radius:2px;background:{{ d.c }}"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.k }}</span><span style="font-variant-numeric:tabular-nums;color:var(--color-body)">{{ d.pct }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600;color:{{ d.cc }}">{{ d.chg }}</span></a></sc-for></div>
+                            </div></sc-if>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ m.types }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" data-tip="{{ t.tip }}" style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--color-ink);background:var(--color-surface-card);border-radius:999px;padding:4px 10px;cursor:pointer;font-family:var(--font-sans);font-size:13px;color:var(--color-ink);transition:background 120ms ease" style-hover="background:var(--color-canvas-soft)"><span style="font-size:10px;color:var(--color-muted)">{{ t.cat }}</span>{{ t.type }}</button></sc-for></div>
+                        <sc-if value="{{ m.kwChips }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:11px;font-weight:600;color:var(--color-muted)">검색어</span><sc-for list="{{ m.keywords }}" as="k" hint-placeholder-count="3"><a href="{{ k.href }}" target="_blank" rel="noopener" style="font-size:12px;padding:2px 8px;border-radius:4px;background:var(--color-surface-strong);color:var(--color-ink);text-decoration:none;transition:background 120ms ease" style-hover="background:var(--color-hairline-strong)">{{ k.k }} ↗</a></sc-for></div></sc-if>
+                        <sc-if value="{{ m.hasBrands }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:11px;font-weight:600;color:var(--color-muted)">브랜드</span><sc-for list="{{ m.brands }}" as="b" hint-placeholder-count="3"><span style="font-size:12px;color:var(--color-body)">{{ b }}</span></sc-for></div></sc-if>
+                        <button onClick="{{ m.toggle }}" aria-expanded="{{ m.open }}" style="align-self:flex-start;border:0;background:transparent;padding:0;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-body)">{{ m.toggleLabel }}</button>
+                        <sc-if value="{{ m.open }}" hint-placeholder-val="{{ false }}"><div data-stagger="1" style="display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:var(--color-canvas);border-radius:8px"><sc-for list="{{ m.signals }}" as="x" hint-placeholder-count="3"><span style="font-size:13px;line-height:1.5;text-wrap:pretty">✓ {{ x }}</span></sc-for></div></sc-if>
+                      </section>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ tr.hasMissing }}" hint-placeholder-val="{{ false }}"><span data-tip="{{ tr.missing }}" style="font-size:12px;color:var(--color-muted);cursor:help;align-self:flex-start;text-decoration:underline dotted">부족한 데이터 {{ tr.missingN }}</span></sc-if>
+                </sc-if>
+                <span style="font-size:17px;font-weight:600;margin-top:8px">후보 유형</span>
                 <sc-if value="{{ bench.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:36px 24px;border:1px dashed var(--color-hairline-strong);border-radius:12px;text-align:center;font-size:14px;color:var(--color-body)">아직 2차로 올라온 유형이 없습니다. 유형 탭 오른쪽 패널에서 "2차로 올리기"를 누르면 추가됩니다.</div></sc-if>
                 <sc-for list="{{ bench.items }}" as="b" hint-placeholder-count="2">
                   <section data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
@@ -392,9 +477,9 @@
                       <span style="font-size:13px;color:var(--color-body);font-variant-numeric:tabular-nums">{{ b.stat }}</span>
                       <span style="flex:1"></span>
                       <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:{{ b.sbg }};color:{{ b.sfg }}">{{ b.status }}</span>
-                      <button onClick="{{ b.toggle }}" aria-expanded="{{ b.exp }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease;background:{{ b.tbg }}" style-hover="background:var(--color-canvas-soft)">{{ b.toggleLabel }}</button><sc-if value="{{ b.hasType }}" hint-placeholder-val="{{ true }}"><button onClick="{{ b.openType }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease" style-hover="background:var(--color-canvas-soft)">1차 결과</button></sc-if>
-                      <sc-if value="{{ b.canRun }}" hint-placeholder-val="{{ true }}"><button onClick="{{ b.run }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);border-radius:8px;padding:7px 14px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease" style-hover="background:#000000">{{ b.runLabel }}</button></sc-if>
-                      <button onClick="{{ b.remove }}" disabled="{{ readOnly }}" data-tip="2차 목록에서 뺍니다" aria-label="2차에서 빼기" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease;color:var(--color-body)" style-hover="background:var(--color-canvas-soft)">빼기</button>
+                      <button onClick="{{ b.toggle }}" aria-expanded="{{ b.exp }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease;background:{{ b.tbg }}" style-hover="background:var(--color-canvas-soft)">{{ b.toggleLabel }}</button><sc-if value="{{ b.hasType }}" hint-placeholder-val="{{ true }}"><button onClick="{{ b.openType }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease" style-hover="background:var(--color-canvas-soft)"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>1차 결과</span></button></sc-if>
+                      <sc-if value="{{ b.canRun }}" hint-placeholder-val="{{ true }}"><button onClick="{{ b.run }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);border-radius:8px;padding:7px 14px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease" style-hover="background:#000000"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>{{ b.runLabel }}</span></button></sc-if>
+                      <button onClick="{{ b.remove }}" disabled="{{ readOnly }}" data-tip="2차 목록에서 뺍니다" aria-label="2차에서 빼기" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease;color:var(--color-body)" style-hover="background:var(--color-canvas-soft)"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>빼기</span></button>
                     </div>
                     <sc-if value="{{ b.exp }}" hint-placeholder-val="{{ false }}">
                       <div data-anim="rise" style="border-top:1px solid var(--color-hairline-soft);padding:16px 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start">
@@ -418,7 +503,7 @@
                           </sc-for>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
-                          <span style="font-size:12px;font-weight:600;color:var(--color-body)">관련 검색어</span>
+                          <span data-tip="막대는 최근 8주 검색량(상대값), 숫자는 직전 4주 대비 최근 4주 변화" style="font-size:12px;font-weight:600;color:var(--color-body);cursor:help">관련 검색어</span>
                           <div style="border:1px solid var(--color-hairline);border-radius:8px;display:flex;flex-direction:column">
                             <sc-for list="{{ b.kws }}" as="k" hint-placeholder-count="4">
                               <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 64px auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--color-hairline-soft)">
@@ -429,21 +514,20 @@
                               </div>
                             </sc-for>
                           </div>
-                          <span style="font-size:11px;color:var(--color-muted)">막대는 최근 8주 검색량(상대값), 숫자는 직전 4주 대비 최근 4주 변화</span>
                         </div>
                       </div>
                     </sc-if>
                     <sc-if value="{{ b.showStages }}" hint-placeholder-val="{{ false }}">
                       <div style="border-top:1px solid var(--color-hairline-soft);padding:16px 20px;display:flex;flex-direction:column;gap:12px">
-                        <div style="height:4px;border-radius:2px;background:var(--color-hairline-soft);overflow:hidden"><div style="height:100%;background:var(--color-ink);transition:width 400ms ease;width:{{ b.pct }}"></div></div>
+                        <div style="height:4px;border-radius:2px;background:var(--color-hairline-soft);overflow:hidden"><div style="position:relative;overflow:hidden;height:100%;background:var(--color-ink);transition:width 400ms ease;width:{{ b.pct }}"><span data-hairline="1" style="position:absolute;top:0;left:0;height:100%;width:35%;background:rgba(255,255,255,0.45)"></span></div></div>
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px"><sc-for list="{{ b.stages }}" as="g" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;transition:background 200ms ease, opacity 200ms ease;background:{{ g.bg }};opacity:{{ g.op }}"><span style="width:18px;height:18px;flex:none;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;transition:background 200ms ease;background:{{ g.mbg }};color:{{ g.mfg }}">{{ g.mark }}</span><span style="font-size:13px">{{ g.label }}</span></div></sc-for></div>
                         <sc-if value="{{ b.error }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--color-semantic-error)">분석에 실패했습니다. 다시 실행해 주세요.</span></sc-if>
                       </div>
                     </sc-if>
                     <sc-if value="{{ b.done }}" hint-placeholder-val="{{ false }}">
                       <div data-anim="rise" style="border-top:1px solid var(--color-hairline-soft);padding:18px 20px 20px;display:flex;flex-direction:column;gap:16px">
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;padding:4px 12px;border-radius:999px;background:{{ b.vbg }};color:{{ b.vfg }}">{{ b.verdict }}</span><span style="font-size:13px;color:var(--color-body)">확신도 {{ b.conf }}</span><span style="flex:1"></span><span style="font-family:var(--font-mono);font-size:11px;color:var(--color-muted)">{{ b.at }}</span></div>
-                        <span style="font-size:15px;line-height:1.6;text-wrap:pretty">{{ b.summary }}</span>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span data-anim="pop" style="font-size:13px;font-weight:600;padding:4px 12px;border-radius:999px;background:{{ b.vbg }};color:{{ b.vfg }}">{{ b.verdict }}</span><span style="font-size:13px;color:var(--color-body)">확신도 {{ b.conf }}</span><span style="flex:1"></span><span style="font-family:var(--font-mono);font-size:11px;color:var(--color-muted)">{{ b.at }}</span></div>
+                        <span data-type="1" style="font-size:15px;line-height:1.6;text-wrap:pretty">{{ b.summary }}</span>
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
                           <sc-for list="{{ b.blocks }}" as="k" hint-placeholder-count="4"><div style="background:var(--color-canvas);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;font-weight:600;color:var(--color-body)">{{ k.title }}</span><sc-for list="{{ k.items }}" as="it" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500;text-wrap:pretty">{{ it.a }}</span><sc-if value="{{ it.hasB }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-body);text-wrap:pretty">{{ it.b }}</span></sc-if></div></sc-for></div></sc-for>
                         </div>
@@ -499,7 +583,7 @@
       <div onMouseDown="{{ dragInsp }}" onDoubleClick="{{ resetInsp }}" role="separator" aria-label="속성 패널 너비 조절" style="width:6px;margin:0 -3px;flex:none;cursor:col-resize;position:relative;z-index:6;transition:background 120ms ease" style-hover="background:var(--color-hairline-strong)"></div>
       <aside style="flex:none;width:{{ inspW }};border-left:1px solid var(--color-hairline);overflow:auto;background:var(--color-surface-card);display:flex;flex-direction:column">
         <div style="padding:14px 18px 10px;border-bottom:1px solid var(--color-hairline-soft);display:flex;align-items:center;gap:8px"><span style="font:var(--type-caption-upper);letter-spacing:0.88px;color:var(--color-muted);flex:1">속성</span><button onClick="{{ toggleInsp }}" aria-label="속성 패널 닫기" style="border:0;background:transparent;width:22px;height:22px;border-radius:4px;cursor:pointer;color:var(--color-muted)" style-hover="background:var(--color-surface-strong)">›</button></div>
-        <div style="padding:16px 18px 28px;display:flex;flex-direction:column;gap:18px">
+        <div data-insp="1" style="padding:16px 18px 28px;display:flex;flex-direction:column;gap:18px">
           <span style="font-size:16px;font-weight:600;line-height:1.35;text-wrap:pretty">{{ ins.title }}</span>
           <sc-if value="{{ ins.isOv }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ ins.counts }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:10px;height:10px;border-radius:5px;flex:none;box-sizing:border-box;background:{{ c.bg }};border:1.5px solid {{ c.bd }}"></span><span style="flex:1">{{ c.label }}</span><span style="font-family:var(--font-mono)">{{ c.v }}</span></div></sc-for></div>
@@ -508,9 +592,9 @@
           <sc-if value="{{ ins.isType }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ ins.vc.fg }};background:{{ ins.vc.bg }};border:1px {{ ins.vc.bs }} {{ ins.vc.bd }}">{{ ins.vc.label }}</span><span style="font-size:12px;color:var(--color-body)">{{ ins.vTip }}</span></div>
             <div style="display:flex;flex-direction:column;gap:8px">
-              <button onClick="{{ ins.deep }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;text-align:center">{{ ins.deepLabel }}</button>
-              <button onClick="{{ ins.promote }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-hairline-strong);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease;background:{{ ins.pbg }};color:var(--color-ink)">{{ ins.promoteLabel }}</button>
-              <button onClick="{{ ins.watch }}" aria-pressed="{{ ins.watching }}" style="border:1px solid var(--color-hairline-strong);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease;background:{{ ins.wbg }};color:var(--color-ink)">{{ ins.watchLabel }}</button>
+              <button onClick="{{ ins.deep }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;text-align:center"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>{{ ins.deepLabel }}</span></button>
+              <button onClick="{{ ins.promote }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-hairline-strong);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease;background:{{ ins.pbg }};color:var(--color-ink)"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>{{ ins.promoteLabel }}</span></button>
+              <button onClick="{{ ins.watch }}" aria-pressed="{{ ins.watching }}" style="border:1px solid var(--color-hairline-strong);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease;background:{{ ins.wbg }};color:var(--color-ink)"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>{{ ins.watchLabel }}</span></button>
             </div>
             <div style="display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--color-hairline-soft);padding-top:12px"><span style="font-size:12px;font-weight:600;color:var(--color-body);padding-bottom:6px">오른 상품</span><sc-for list="{{ ins.prods }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.open }}" style="display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:center;border:0;background:transparent;border-radius:6px;padding:6px 4px;cursor:pointer;text-align:left;font-family:var(--font-sans);font-size:12px;color:var(--color-ink)" style-hover="background:var(--color-canvas-soft)"><span style="font-family:var(--font-mono);color:var(--color-muted)">{{ p.rank }}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span><span style="font-weight:600;color:{{ p.jc }}">{{ p.jt }}</span></button></sc-for><sc-if value="{{ ins.noProds }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-muted)">없음</span></sc-if></div>
           </sc-if>
@@ -558,12 +642,12 @@
 
   <sc-if value="{{ guideOpen }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;z-index:25;background:rgba(38,37,30,0.35);display:flex;align-items:center;justify-content:center;padding:24px">
-      <div data-anim="pop" role="dialog" aria-label="처음 안내" style="width:min(520px,92vw);background:var(--color-surface-card);border-radius:12px;padding:26px 28px;display:flex;flex-direction:column;gap:18px">
-        <span style="font-size:22px;font-weight:400;letter-spacing:-0.11px">TrendCheck 작업 공간</span>
+      <div data-anim="pop" role="dialog" aria-label="도움말" style="width:min(560px,92vw);max-height:84vh;overflow:auto;background:var(--color-surface-card);border-radius:12px;padding:26px 28px;display:flex;flex-direction:column;gap:18px">
+        <span style="font-size:22px;font-weight:400;letter-spacing:-0.11px">도움말</span>
         <div style="display:flex;flex-direction:column;gap:12px">
           <sc-for list="{{ guideRows }}" as="g" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;font-size:13px;line-height:1.55"><span style="font-weight:600">{{ g.k }}</span><span style="color:var(--color-body);text-wrap:pretty">{{ g.v }}</span></div></sc-for>
         </div>
-        <div style="display:flex;justify-content:flex-end"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ closeGuide }}" hint-size="100px,40px">시작하기</x-import></div>
+        <div style="display:flex;justify-content:flex-end"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ closeGuide }}" hint-size="100px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>시작하기</span></x-import></div>
       </div>
     </div>
   </sc-if>
@@ -577,7 +661,7 @@
           <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-body);flex:1 1 180px">받는 사람<select value="{{ reqTo }}" onChange="{{ onReqTo }}" style="height:36px;padding:0 8px;border:1px solid var(--color-hairline-strong);border-radius:8px;background:var(--color-surface-card);font:inherit;font-size:13px;color:var(--color-ink)"><sc-for list="{{ reqToOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.t }}</option></sc-for></select></label>
           <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--color-body);flex:1 1 150px">희망 회신일<input type="date" value="{{ reqDue }}" onChange="{{ onReqDue }}" style="height:36px;padding:0 8px;border:1px solid var(--color-hairline-strong);border-radius:8px;background:var(--color-surface-card);font:inherit;font-size:13px;color:var(--color-ink)"></label>
         </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:14px 24px 20px;border-top:1px solid var(--color-hairline)"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ copyReq }}" hint-size="80px,40px">복사</x-import><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ sendReq }}" hint-size="110px,40px">요청 보내기</x-import></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:14px 24px 20px;border-top:1px solid var(--color-hairline)"><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="secondary" on-click="{{ copyReq }}" hint-size="80px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><rect width="14" height="14" x="8" y="8" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>복사</span></x-import><x-import component-from-global-scope="TrendCheckDesignSystem_f78377.Button" variant="primary" on-click="{{ sendReq }}" hint-size="110px,40px"><span style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>요청 보내기</span></x-import></div>
       </div>
     </div>
   </sc-if>
@@ -654,6 +738,7 @@ const path = (arr, w, h) => {
   });
   return s;
 };
+const md2 = d => { const p = String(d).split('-'); return +p[1] + '/' + +p[2]; };
 const md = (d0, i) => { const t = new Date(d0 + 'T00:00:00'); t.setDate(t.getDate() + 7 * i); return (t.getMonth() + 1) + '/' + t.getDate(); };
 const z = x => String(x).padStart(2, '0');
 const stamp = () => { const d = new Date(); return z(d.getMonth() + 1) + '/' + z(d.getDate()) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); };
@@ -718,6 +803,70 @@ const PENDING_TYPES = [['경량패딩', '아우터'], ['카고 팬츠', '하의'
 const TV = { '트렌드 후보': { fg: '#ffffff', bg: OK, bd: OK, bs: 'solid' }, '진짜 트렌드': { fg: '#ffffff', bg: OK, bd: OK, bs: 'solid' }, '브랜드 단독': { fg: '#ffffff', bg: 'var(--color-body)', bd: 'var(--color-body)', bs: 'solid' }, '잡음': { fg: '#ffffff', bg: 'var(--color-body)', bd: 'var(--color-body)', bs: 'solid' }, '관찰': { fg: INK, bg: 'transparent', bd: INK, bs: 'dashed' }, '지켜보기': { fg: INK, bg: 'transparent', bd: INK, bs: 'dashed' }, '신호 없음': { fg: MUTED, bg: 'transparent', bd: 'var(--color-hairline-strong)', bs: 'solid' } };
 const VORDER = { '트렌드 후보': 0, '관찰': 1, '브랜드 단독': 2, '신호 없음': 3 };
 const SEGC = [INK, '#5a5852', '#807d72', '#a09c92', '#cfcdc4'];
+// 유형 다주 궤적. 파이프라인이 채운다. 값이 없으면 null (화면은 빈 자리로 둔다)
+const TRACK = {
+  "후드": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: ["트렌드 후보","트렌드 후보","트렌드 후보","트렌드 후보","트렌드 후보"],
+    tops: [8, 8, 10, 20, 28],
+    rises: [5, 7, 9, 17, 20],
+    brands: [4, 6, 7, 11, 13],
+    streak: 5, direction: "확대", change: 2.0, score: 89,
+    parts: { growth: 100, streak: 100, spread: 46 }
+  },
+  "블라우스": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [9, 10, 11, 14, 9], rises: null, brands: [null, null, null, null, 4],
+    streak: 5, direction: null, change: 0.21, score: 74,
+    parts: { growth: 70, streak: 100, spread: 44 }
+  },
+  "맨투맨": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [20, 19, 28, 29, 26], rises: null, brands: [null, null, null, null, 9],
+    streak: 5, direction: null, change: 0.41, score: 72,
+    parts: { growth: 70, streak: 100, spread: 35 }
+  },
+  "티셔츠": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [51, 66, 68, 53, 54], rises: null, brands: [null, null, null, null, 22],
+    streak: 5, direction: null, change: -0.08, score: 58,
+    parts: { growth: 40, streak: 100, spread: 41 }
+  },
+  "롱슬리브": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [33, 34, 33, 25, 30], rises: null, brands: [null, null, null, null, 16],
+    streak: 5, direction: null, change: -0.18, score: 46,
+    parts: { growth: 10, streak: 100, spread: 53 }
+  },
+  "기타": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [59, 52, 37, 45, 36], rises: null, brands: [null, null, null, null, 17],
+    streak: 5, direction: null, change: -0.27, score: 44,
+    parts: { growth: 10, streak: 100, spread: 47 }
+  },
+  "탑": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [14, 8, 7, 9, 14], rises: null, brands: [null, null, null, null, 5],
+    streak: 2, direction: null, change: 0.04, score: 39,
+    parts: { growth: 40, streak: 40, spread: 36 }
+  },
+  "이너웨어": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [2, 2, 3, 3, 1], rises: null, brands: [null, null, null, null, 0],
+    streak: 0, direction: null, change: 0, score: 20,
+    parts: { growth: 40, streak: 0, spread: 0 }
+  },
+  "니트": {
+    weeks: ["2026-10-05","2026-10-12","2026-10-19","2026-10-26","2026-11-02"],
+    verdicts: null, tops: [4, 1, 3, 2, 2], rises: null, brands: [null, null, null, null, 0],
+    streak: 1, direction: null, change: -0.2, score: 11,
+    parts: { growth: 10, streak: 20, spread: 0 }
+  },
+};
+const SCORE_W = { growth: 0.5, streak: 0.3, spread: 0.2 };
+const SCORE_NOTE = '관측 요약이며 예측이 아닙니다. 유형 단위 검증 표본이 28건, 기저율이 89%라 어떤 점수도 찍기보다 낫다고 증명할 수 없습니다. 9월에서 11월 구간이라 계절 효과와 구분되지 않습니다.';
+const SCORE_FORMULA = '점수 = 추세 x 0.5 + 연속 x 0.3 + 분산 x 0.2';
+const SEASON_NOTE = '9월에서 11월 구간이라 계절 효과와 구분되지 않습니다.';
 const EXK = (k, src, w) => ({ k, src, w });
 const EXP = (brand, name, prev, rank, price, gender, attrs) => ({ brand, name, prev, rank, price, gender, attrs });
 const EX = [
@@ -730,6 +879,16 @@ const EX = [
   { cat: '신발', name: '스웨이드 스니커즈', prods: [EXP('아디다스', 'SL 72 OG 스웨이드 그린', 42, 9, 109000, '남녀공용', ['스웨이드', '레트로 러닝']), EXP('푸마', '스피드캣 OG 레드', 61, 19, 119000, '여성', ['스웨이드', '로우 프로파일']), EXP('오니츠카타이거', '멕시코 66 SD', 77, 35, 160000, '남녀공용', ['스웨이드', '로우 프로파일'])],
     kws: [EXK('스웨이드 스니커즈', '네이버', [20, 21, 23, 26, 28, 31, 34, 37]), EXK('스피드캣', '네이버', [12, 15, 19, 24, 27, 31, 36, 40]), EXK('suede sneakers', '구글 미국', [48, 50, 52, 55, 56, 59, 61, 63])] }
 ];
+const SYS_TR = `너는 무신사 상품기획팀의 트렌드 분석가다. 상의, 하의, 아우터, 신발 등 여러 카테고리에서 1차로 걸러진 트렌드 후보 유형을 한꺼번에 받아, 카테고리를 넘어 지금 무엇이 유행하는지 묶어서 정리한다.
+규칙:
+- 개별 상품이나 유형 하나가 아니라, 여러 유형을 꿰는 유행(스타일, 무드, 소재, 실루엣 등)을 찾는다.
+- 주어진 데이터만 근거로 쓴다. 예시데이터 표시가 있는 카테고리는 예시라고 근거에 적는다. 없는 데이터는 missing에 적는다.
+- 한 유행은 가능하면 두 개 이상 카테고리에 걸쳐야 한다. 하나뿐이면 strength를 약함으로 둔다.
+- 유행은 많아야 4개, 강한 순서로 쓴다.
+- 가운뎃점 문자를 쓰지 않는다. 나열은 쉼표로 한다. 한국어로 짧게 쓴다.
+- 오직 JSON 하나만 출력한다.
+형식: {"headline":"지금 유행 한 문장","themes":[{"name":"유행 이름","summary":"두 문장","strength":"강함|보통|약함","types":[{"cat":"하의","type":"카펜터 팬츠"}],"signals":["근거"],"brands":["브랜드"],"keywords":["검색어"],"outlook":{"stage":"초기|확산|정점|꺾임","weeks":"앞으로 얼마나 갈지, 예: 4주에서 8주","basis":"근거 한 문장"}}],"missing":["부족한 데이터"]}
+- outlook은 1차 데이터(순위 상승, 브랜드 수, 검색어 4주 변화, 연속 주 수)로만 추정한다. 근거가 약하면 weeks를 판단 어려움으로 둔다.`;
 const SYS_B = `너는 무신사 상품기획팀의 트렌드 벤치마킹 분석가다. 카테고리별 1차 선별을 통과한 아이템 유형을 받아, 실제로 벤치마킹하고 입고를 준비할 만한지 최종 판단한다.
 규칙:
 - 주어진 데이터만 근거로 쓴다. 없는 데이터는 추측하지 말고 missing에 적는다.
@@ -762,7 +921,7 @@ class Component extends DCLogic {
     this.state = {
       act: 'trend', side: W >= 860, insp: W >= 1240, bottom: false, btab: 'log',
       tabs: [{ id: 'ov', kind: 'overview' }], active: 'ov', split: null, focus: 'L',
-      tri: saved.tri || {}, memo: saved.memo || {}, fb: saved.fb || {}, runs: saved.runs || {}, typeRuns: saved.typeRuns || {}, bench: saved.bench || {}, benchRuns: saved.benchRuns || {},
+      tri: saved.tri || {}, memo: saved.memo || {}, fb: saved.fb || {}, runs: saved.runs || {}, typeRuns: saved.typeRuns || {}, bench: saved.bench || {}, benchRuns: saved.benchRuns || {}, trendRun: saved.trendRun && saved.trendRun.phase === 'done' ? saved.trendRun : null, themeOpen: {},
       owner: saved.owner || {}, log: saved.log || [], rules: saved.rules || { pass: true, top30: true, real: true, order: false },
       slack: saved.slack ?? '#md-trend-alert', email: saved.email ?? '', stageOn: saved.stageOn || [true, true], th: saved.th ?? null,
       me: saved.me || '김지윤', roles: saved.roles || { ...ROLES0 }, watchTypes: saved.watchTypes || {},
@@ -794,15 +953,23 @@ class Component extends DCLogic {
     addEventListener('keydown', this.onKey);
   }
   componentWillUnmount() { clearTimeout(this.tt); clearTimeout(this.sv); clearInterval(this.tk); removeEventListener('keydown', this.onKey); }
-  componentDidUpdate(pp, ps) {
+  componentDidUpdate() {
     this.animateNew(); this.persist();
+    const s = this.state, root = this.rootRef.current, ps = this._prev || s;
+    this._prev = { active: s.active, split: s.split, focus: s.focus, act: s.act, side: s.side, ovView: s.ovView, cmd: s.cmd };
+    if (root && root.animate && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      const go = (sel, k, dur) => root.querySelectorAll(sel).forEach(el => el.animate(k, { duration: dur, easing: 'cubic-bezier(.2,.7,.2,1)' }));
+      if (s.active !== ps.active || s.split !== ps.split || s.focus !== ps.focus) { go('[data-pane]', [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], 280); go('[data-insp]', [{ opacity: 0, transform: 'translateX(8px)' }, { opacity: 1, transform: 'none' }], 300); }
+      if (s.act !== ps.act || (s.side && !ps.side)) go('[data-side]', [{ opacity: 0, transform: 'translateX(-8px)' }, { opacity: 1, transform: 'none' }], 260);
+      if (s.ovView !== ps.ovView) go('[data-ovview]', [{ opacity: 0, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], 320);
+    }
     if (this.state.cmd && !ps.cmd) setTimeout(() => { if (this.cmdRef.current) this.cmdRef.current.focus(); }, 30);
   }
   persist() {
     clearTimeout(this.sv);
     this.sv = setTimeout(() => {
       const s = this.state, keep = o => Object.fromEntries(Object.entries(o).filter(([, r]) => r.phase === 'done'));
-      try { localStorage.setItem(LS, JSON.stringify({ tri: s.tri, memo: s.memo, fb: s.fb, runs: keep(s.runs), typeRuns: keep(s.typeRuns), bench: s.bench, benchRuns: keep(s.benchRuns), rules: s.rules, slack: s.slack, email: s.email, owner: s.owner, log: s.log.slice(0, 300), stageOn: s.stageOn, th: s.th, me: s.me, roles: s.roles, watchTypes: s.watchTypes, guideSeen: s.guideSeen, sideW: s.sideW, inspW: s.inspW, bottomH: s.bottomH })); } catch (e) {}
+      try { localStorage.setItem(LS, JSON.stringify({ tri: s.tri, memo: s.memo, fb: s.fb, runs: keep(s.runs), typeRuns: keep(s.typeRuns), bench: s.bench, benchRuns: keep(s.benchRuns), trendRun: s.trendRun && s.trendRun.phase === 'done' ? s.trendRun : null, rules: s.rules, slack: s.slack, email: s.email, owner: s.owner, log: s.log.slice(0, 300), stageOn: s.stageOn, th: s.th, me: s.me, roles: s.roles, watchTypes: s.watchTypes, guideSeen: s.guideSeen, sideW: s.sideW, inspW: s.inspW, bottomH: s.bottomH })); } catch (e) {}
     }, 300);
   }
   animateNew() {
@@ -810,10 +977,18 @@ class Component extends DCLogic {
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const E = 'cubic-bezier(.2,.7,.2,1)', born = [];
     const A = (el, k, o) => { born.push(el.animate(k, o)); };
-    root.querySelectorAll('[data-anim],[data-pulse],[data-stagger],[data-type],[data-ring],[data-count]').forEach(el => {
+    root.querySelectorAll('[data-anim],[data-pulse],[data-stagger],[data-type],[data-ring],[data-count],[data-hairline]').forEach(el => {
       if (this.seen.has(el)) return; this.seen.add(el);
       if (reduce) return;
       const d = Math.min(+el.getAttribute('data-anim-i') || 0, 12) * 40, a = el.getAttribute('data-anim');
+      if ((a === 'rise' || a === 'pop') && el.getBoundingClientRect().top > innerHeight + 10) {
+        el.style.opacity = '0';
+        this.io = this.io || new IntersectionObserver(es => es.forEach(en => { if (!en.isIntersecting) return; const t = en.target; this.io.unobserve(t); t.style.opacity = '';
+          t.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.2,.7,.2,1)' }); }), { threshold: 0.08 });
+        this.io.observe(el);
+        setTimeout(() => { if (el.style.opacity === '0') { this.io.unobserve(el); el.style.opacity = ''; } }, 1500);
+        return;
+      }
       if (a === 'rise') A(el, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 340, delay: d, easing: E, fill: 'backwards' });
       if (a === 'bar') A(el, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 700, delay: 120 + d * 2, easing: E, fill: 'backwards' });
       if (a === 'pop') A(el, [{ opacity: 0, transform: 'scale(.9)' }, { opacity: 1, transform: 'scale(1.04)', offset: .7 }, { opacity: 1, transform: 'none' }], { duration: 380, delay: d, easing: E, fill: 'backwards' });
@@ -828,6 +1003,12 @@ class Component extends DCLogic {
       if (el.hasAttribute('data-stagger')) Array.from(el.children).forEach((c, j) => A(c, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 400, delay: 150 + j * 100, easing: E, fill: 'backwards' }));
       if (el.hasAttribute('data-count')) this.countUp(el, 200 + d * 2);
       if (el.hasAttribute('data-type')) this.typeOut(el);
+      if (el.hasAttribute('data-hairline')) el.animate([{ transform: 'translateX(-100%)' }, { transform: 'translateX(290%)' }], { duration: 1400, iterations: Infinity, easing: 'cubic-bezier(.4,0,.2,1)' });
+    });
+    this.cv = this.cv || new WeakMap();
+    root.querySelectorAll('[data-count],[data-flash]').forEach(el => {
+      const v = el.getAttribute('data-count') ?? el.getAttribute('data-flash'), pv = this.cv.get(el); this.cv.set(el, v);
+      if (pv != null && pv !== v && !reduce) el.animate([{ backgroundColor: 'rgba(38,37,30,0.12)', boxShadow: '0 0 0 4px rgba(38,37,30,0.12)' }, { backgroundColor: 'transparent', boxShadow: '0 0 0 4px transparent' }], { duration: 700, easing: 'ease-out' });
     });
     if (born.length) setTimeout(() => born.forEach(x => { try { if (x.playState !== 'finished') x.finish(); } catch (e) {} }), 2000);
   }
@@ -847,8 +1028,14 @@ class Component extends DCLogic {
   typeOut(el) {
     const node = el.firstChild; if (!node || node.nodeType !== 3) return;
     const full = node.nodeValue; let n = 0; node.nodeValue = '';
-    const id = setInterval(() => { if (node.nodeValue !== full.slice(0, n)) { clearInterval(id); return; } n += 2; node.nodeValue = full.slice(0, n); if (n >= full.length) clearInterval(id); }, 18);
-    setTimeout(() => { clearInterval(id); if (full.startsWith(node.nodeValue) && node.nodeValue.length < full.length) node.nodeValue = full; }, 2500);
+    const caret = document.createElement('span');
+    caret.setAttribute('aria-hidden', 'true');
+    Object.assign(caret.style, { display: 'inline-block', width: '2px', height: '1em', marginLeft: '2px', verticalAlign: '-0.12em', background: 'currentColor' });
+    el.appendChild(caret);
+    const blink = caret.animate([{ opacity: 1 }, { opacity: 1, offset: 0.5 }, { opacity: 0, offset: 0.51 }, { opacity: 0 }], { duration: 900, iterations: Infinity });
+    const end = () => { clearInterval(id); setTimeout(() => { blink.cancel(); caret.remove(); }, 900); };
+    const id = setInterval(() => { if (node.nodeValue !== full.slice(0, n)) { end(); return; } n += 2; node.nodeValue = full.slice(0, n); if (n >= full.length) end(); }, 22);
+    setTimeout(() => { if (full.startsWith(node.nodeValue) && node.nodeValue.length < full.length) node.nodeValue = full; end(); }, 3000);
   }
   bindTips() {
     const root = this.rootRef.current, tip = this.tipRef.current; if (!root || !tip) return;
@@ -934,7 +1121,7 @@ class Component extends DCLogic {
     await wait(450); log(0, '일 단위 판매와 재고, 인플루언서, 해외 커머스는 연결 전이라 제외');
     await wait(550); log(1, `같은 속성에서 오른 상품 ${sib.length}건과 비교`);
     await wait(450); log(1, `필터 점검 통과 ${n('pass')}, 탈락 ${n('fail')}, 판단 불가 ${n('na')}`);
-    await wait(450); log(2, 'Claude 추론 모델에 근거 전달');
+    await wait(450); log(2, '모델에 근거 전달');
     let report;
     try {
       const input = this.prompt(p, gA, sib); upd(() => ({ input }));
@@ -959,7 +1146,7 @@ class Component extends DCLogic {
     await wait(450); log(`${id} 유형 상품 ${t.n}건, 이번 주 오른 상품 ${t.risen}건 수집`, 18);
     await wait(450); log(`오른 상품의 브랜드 ${t.brands}곳, 가장 많은 브랜드 비중 ${Math.round(t.share * 100)}%`, 32);
     await wait(450); log(t.gKey ? `검색어 ${t.gKey} 한국, 미국 26주` : '유형 검색어는 연결 전이라 제외', 46);
-    await wait(450); log('Claude 추론 모델에 근거 전달', 58); upd(() => ({ thinking: true }));
+    await wait(450); log('모델에 근거 전달', 58); upd(() => ({ thinking: true }));
     const g = t.gKey && G[t.gKey];
     const input = JSON.stringify({
       아이템유형: id, 카테고리: '29CM 상의 TOP100 (속성 태그가 붙은 표본)', 이번주_TOP100_상품수: t.n, 신규진입: t.fresh,
@@ -982,6 +1169,27 @@ class Component extends DCLogic {
     this.addLog(id + ' 유형', '유형 심층 검증 완료: ' + (report.verdict || '지켜보기'));
     upd(() => ({ phase: 'done', report, at: stamp(), input }));
     this.showToast(id + ' 유형 심층 검증 리포트를 작성했습니다');
+  }
+  async runTrend(pool, overlaps) {
+    const upd = f => this.setState(s => ({ trendRun: { ...(s.trendRun || {}), ...f(s.trendRun || {}) } }));
+    this.setState({ trendRun: { phase: 'running', step: 0, pct: 4 } });
+    for (let i = 1; i <= 4; i++) { await wait(560); upd(() => ({ step: i, pct: 4 + i * 18 })); }
+    const input = JSON.stringify({
+      카테고리별_후보: pool.map(t => ({ 카테고리: t.cat, 예시데이터: !!t.isEx, 유형: t.name, 오른상품수: t.risen, 브랜드수: t.brands, 브랜드: Object.keys(t.brandObj || {}).slice(0, 6), 세부속성: t.subObj, 상품: t.risenList.slice(0, 6).map(p => p.brand + ' ' + p.name), 검색어: (t.kws || []).map(k => ({ 검색어: k.k, 최근8주: k.w })), 연속주: TRACK[t.name] ? TRACK[t.name].streak : null, TOP100_5주: TRACK[t.name] ? TRACK[t.name].tops : null })),
+      카테고리를_넘는_공통점: overlaps.map(o => ({ 종류: o.kind, 이름: o.label, 카테고리: o.cats })),
+      없는데이터: ['일 단위 판매와 재고', '인플루언서 언급', '해외 커머스 랭킹'], 오늘: '2026-11-03'
+    }, null, 1);
+    let report;
+    try {
+      const text = await window.claude.complete({ model: 'claude-sonnet-4-5', max_tokens: 3000, system: SYS_TR, messages: [{ role: 'user', content: input }] });
+      report = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
+      const clean = v => Array.isArray(v) ? v.map(clean) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, clean(x)])) : nodot(v);
+      report = clean(report);
+    } catch (e) { upd(() => ({ phase: 'error' })); return; }
+    upd(() => ({ step: 5, pct: 100 })); await wait(400);
+    this.addLog('지금 유행', '유행 ' + ((report.themes || []).length) + '개 정리');
+    upd(() => ({ phase: 'done', report, at: stamp() }));
+    this.showToast('지금 유행을 정리했습니다');
   }
   async runBench(t) {
     const id = t.name;
@@ -1037,6 +1245,27 @@ class Component extends DCLogic {
     });
     const T = this.typeData(all, det);
     const byName = Object.fromEntries(all.map(p => [p.name, p]));
+    const spark = (arr, w, hh) => { const v = arr.filter(x => x != null), mx = Math.max(...v, 1); return arr.map((x, i) => (i ? 'L' : 'M') + (i / (arr.length - 1) * w).toFixed(1) + ' ' + (hh - 2 - x / mx * (hh - 4)).toFixed(1)).join(' '); };
+    const pctTxt = c => c == null ? '–' : (c > 0 ? '+' : '') + Math.round(c * 100) + '%';
+    const scoreOf = name => {
+      const k = TRACK[name]; if (!k) return null;
+      const tops = k.tops || [], lastB = k.brands ? k.brands[k.brands.length - 1] : null, open = !!(s.scoreOpen || {})[name], tt = T.find(x => x.name === name);
+      return { name, score: k.score, sw: k.score + '%', sc: k.score >= 70 ? OK : k.score >= 40 ? INK : MUTED,
+        spark: tops.length > 1 ? spark(tops, 120, 28) : '', sparkL: tops.length > 1 ? spark(tops, 260, 56) : '', topsTxt: tops.length ? tops[0] + ' → ' + tops[tops.length - 1] : '–',
+        topsTip: 'TOP100 안 ' + name + ' 상품 수, ' + (k.weeks || []).map(md2).join(', ') + ': ' + tops.join(', ') + '. ' + SEASON_NOTE,
+        chg: pctTxt(k.change), cc: k.change > 0 ? UP : k.change < 0 ? '#2b67c2' : MUTED, streak: k.streak + '주', brandsTxt: lastB == null ? '–' : lastB + '곳',
+        dir: k.direction || '', hasDir: !!k.direction, inT: !!tt, open: () => tt && this.openTab('type', name),
+        exp: open, caret: open ? '▴' : '▾', bg: open ? 'var(--color-canvas-soft)' : 'transparent',
+        toggle: () => this.setState(z => ({ scoreOpen: { ...(z.scoreOpen || {}), [name]: !open } })),
+        weeksTxt: (k.weeks || []).map(md2).join(', '), topsAll: tops.join(', '),
+        hasRises: Array.isArray(k.rises), risesAll: Array.isArray(k.rises) ? k.rises.join(', ') : '',
+        hasBrandsAll: Array.isArray(k.brands) && k.brands.every(x => x != null), brandsAll: Array.isArray(k.brands) ? k.brands.join(', ') : '',
+        parts: [['growth', '추세', 'TOP100 안 상품 수가 앞 절반 대비 뒤 절반에 얼마나 늘었나'], ['streak', '연속', '몇 주째 트렌드 후보인가 (최대 5주)'], ['spread', '분산', '오른 상품이 몇 개 브랜드에 퍼져 있나']].map(([key, label, desc]) => {
+          const v = k.parts ? k.parts[key] : null;
+          return { label, desc, v: v == null ? '–' : v, w: (v || 0) + '%', contrib: v == null ? '' : 'x ' + SCORE_W[key] + ' = ' + (Math.round(v * SCORE_W[key] * 10) / 10) };
+        }) };
+    };
+    const scoreRows = Object.keys(TRACK).map(scoreOf).filter(Boolean).sort((a, b) => b.score - a.score);
     const st = p => s.tri[p.name] && s.tri[p.name].s;
     const done = p => s.runs[p.name] && s.runs[p.name].phase === 'done';
     const short = n => { const c = n.replace(/\[[^\]]*\]/g, '').trim() || n; return c.length > 24 ? c.slice(0, 24) + '…' : c; };
@@ -1044,7 +1273,7 @@ class Component extends DCLogic {
     const tabById = id => s.tabs.find(t => t.id === id) || s.tabs[0];
     const focusTab = s.split && s.focus === 'R' ? tabById(s.split) : tabById(s.active);
     const leave = () => this.setState({ hoverType: null });
-    const titleOf = t => t.kind === 'overview' ? '이번 주 개요' : t.kind === 'type' ? t.key + ' 유형' : t.kind === 'product' ? short(t.key) : { bench: '2차 벤치마킹', ledger: '검증 기록', weekly: '주간 요약', alerts: '알림', settings: '기준 설정' }[t.kind];
+    const titleOf = t => t.kind === 'overview' ? '이번 주 개요' : t.kind === 'type' ? t.key + ' 유형' : t.kind === 'product' ? short(t.key) : { bench: '지금 유행', ledger: '검증 기록', weekly: '주간 요약', alerts: '알림', settings: '기준 설정' }[t.kind];
     const dotOf = t => { if (t.kind === 'type') { const x = T.find(y => y.name === t.key); return VDOT[x ? x.v : '신호 없음']; } if (t.kind === 'product') return [INK, INK]; return ['transparent', 'var(--color-hairline-strong)']; };
     const prodRow = p => ({ rank: p.rank, name: short(p.name), tip: p.brand + ' ' + p.name, jt: p.jump.t, jc: p.jump.c, open: () => this.openTab('product', p.name) });
 
@@ -1096,15 +1325,21 @@ class Component extends DCLogic {
       pts: mapPts, ticks: [0, 1, 2, 3, 4].map(i => Math.round(i * maxX / 4)), hasNone: none.length > 0, noneTxt: none.map(t => t.name).join(', '),
       hasCand: cand.length > 0, noCand: !cand.length, candN: cand.length + '개',
       noCandTxt: near ? `이번 주는 기준을 넘은 유형이 없습니다. 가장 가까운 유형은 ${near.name} (오른 상품 ${near.risen}건, 브랜드 ${near.brands}곳)입니다.` : '이번 주는 기준을 넘은 유형이 없습니다.',
-      cands: cand.map(t => ({ name: t.name, risen: t.risen, brands: t.brands, open: () => this.openTab('type', t.name), enter: () => this.setState({ hoverType: t.name }),
+      cands: cand.map(t => ({ ...(() => { const k = TRACK[t.name], tops = k && k.tops || []; return { hasSc: !!k, score: k ? k.score : '', hasSpark: tops.length > 1, spark: tops.length > 1 ? spark(tops, 120, 28) : '', topsTxt: tops.length ? tops[0] + ' → ' + tops[tops.length - 1] : '', sparkTip: 'TOP100 안 상품 수: ' + tops.join(', ') }; })(),
+        bdots: t.brandArr.map(([bn, c]) => ({ s: (8 + Math.min(c, 4) * 4) + 'px', tip: bn + ' ' + c + '건' })), name: t.name, risen: t.risen, brands: t.brands, open: () => this.openTab('type', t.name), enter: () => this.setState({ hoverType: t.name }),
         segs: t.brandArr.map(([bn, c], i) => ({ w: (c / t.risen * 100) + '%', c: SEGC[Math.min(i, SEGC.length - 1)], tip: `${bn} ${c}건` })),
         line: [t.subArr.length ? '세부 속성 ' + t.subArr.slice(0, 2).map(([a, c]) => a + ' ' + c + '건').join(', ') : '', t.g ? `검색 "${t.gKey}" 4주 평균 ${t.g.kp}에서 ${t.g.k4}` : '검색어 연결 예정'].filter(Boolean).join('. ') })),
+      restGroups: [['관찰', '오른 상품이나 브랜드 수가 아직 적습니다', 'transparent', INK], ['브랜드 단독', '한 브랜드가 절반 넘게 차지합니다', 'var(--color-body)', 'var(--color-body)'], ['신호 없음', '이번 주 오른 상품이 없습니다', 'transparent', 'var(--color-hairline-strong)']].map(([v, tip, dot, dotBd]) => {
+        const items = T.filter(t => t.v === v).map(t => ({ name: t.name, vTip: t.vTip + (t.risen ? `. 오른 상품 ${t.risen}건, 브랜드 ${t.brands}곳` : ''), nTxt: t.risen ? '▲' + t.risen : '–', nc: t.risen ? 'var(--color-semantic-success)' : MUTED,
+          hbg: s.hoverType === t.name ? 'var(--color-canvas-soft)' : 'var(--color-surface-card)', enter: () => this.setState({ hoverType: t.name }), open: () => this.openTab('type', t.name) }));
+        return { label: v, tip, dot, dotBd, n: items.length, items, empty: !items.length };
+      }),
       rest: T.filter(t => t.v !== '트렌드 후보').map(t => ({ name: t.name, vc: { label: t.v, ...TV[t.v] }, vTip: t.vTip, risen: t.risen, brands: t.brands, rw: (t.risen / maxR * 100) + '%', rc: t.v === '브랜드 단독' ? 'var(--color-body)' : INK,
         hbg: s.hoverType === t.name ? 'var(--color-canvas-soft)' : 'transparent', enter: () => this.setState({ hoverType: t.name }), open: () => this.openTab('type', t.name) }))
     };
 
     const typeDetail = t => {
-      const run = s.typeRuns[t.name], ph = run ? run.phase : 'idle', rep = (run && run.report) || {}, g = t.g;
+      const run = s.typeRuns[t.name], ph = run ? run.phase : 'idle', rep = (run && run.report) || {}, g = t.g, sc0 = TRACK[t.name] ? 'y' : '';
       const tops = t.subArr.slice(0, 2).map(([a]) => a);
       const summary = t.risen
         ? `이번 주 ${t.name} 상품 ${t.risen}건이 올랐고 브랜드 ${t.brands}곳이 함께 움직였습니다. ` + (t.share > 0.5 ? `${t.brandArr[0][0]}가 ${Math.round(t.share * 100)}%를 차지해 브랜드 단독 효과일 수 있습니다. ` : '한 브랜드에 몰리지 않았습니다. ') + (tops.length ? `세부 속성은 ${tops.join(', ')} 쪽이 많습니다. ` : '') + (g ? `검색 "${t.gKey}" 한국 4주 평균은 ${g.kp}에서 ${g.k4}${g.last < '2026-10-18' ? '이지만 ' + g.last + ' 이후 데이터가 없습니다.' : '입니다.'}` : '유형 검색어는 아직 수집하지 않습니다.')
@@ -1120,7 +1355,7 @@ class Component extends DCLogic {
         running: ph === 'running', thinking: !!(run && run.thinking), pct: (run ? run.pct : 0) + '%', logs: run ? run.logs : [], error: ph === 'error', done: ph === 'done', at: run ? run.at : '',
         rc: { label: rep.verdict || '지켜보기', ...(TV[rep.verdict] || TV['지켜보기']) },
         r: { confidence: rep.confidence || '–', headline: rep.headline || '', drivers: rep.drivers || [], support: rep.support || [], against: rep.against || [], actions: rep.actions || [], missing: rep.missing || [], reasoning: rep.reasoning || '' },
-        more: !!s.more['t:' + t.name], moreLabel: s.more['t:' + t.name] ? '접기' : '근거와 권장 행동 자세히', toggleMore: () => this.setState(x => ({ more: { ...x.more, ['t:' + t.name]: !x.more['t:' + t.name] } })),
+        more: !!s.more['t:' + t.name], moreLabel: s.more['t:' + t.name] ? '접기' : '판단 근거와 다음 할 일', toggleMore: () => this.setState(x => ({ more: { ...x.more, ['t:' + t.name]: !x.more['t:' + t.name] } })),
         hasNext: !!(rep.actions && rep.actions[0]), nextAct: rep.actions && rep.actions[0] ? rep.actions[0].what : '', nextWhen: rep.actions && rep.actions[0] ? rep.actions[0].when : '',
         lastLog: run && run.logs && run.logs.length ? run.logs[run.logs.length - 1] : '',
         prodCount: `오른 상품 ${t.risen}건, 전체 ${t.n}건`,
@@ -1149,7 +1384,7 @@ class Component extends DCLogic {
       const RC = { 통과: OK, 탈락: BAD }, rep = r;
       const lastL = run && run.logs && run.logs.length ? run.logs[run.logs.length - 1].text : '';
       return {
-        more: !!s.more['p:' + sel.name], moreLabel: s.more['p:' + sel.name] ? '접기' : '근거와 권장 행동 자세히', toggleMore: () => this.setState(x => ({ more: { ...x.more, ['p:' + sel.name]: !x.more['p:' + sel.name] } })),
+        more: !!s.more['p:' + sel.name], moreLabel: s.more['p:' + sel.name] ? '접기' : '판단 근거와 다음 할 일', toggleMore: () => this.setState(x => ({ more: { ...x.more, ['p:' + sel.name]: !x.more['p:' + sel.name] } })),
         hasNext: !!(rep.actions && rep.actions[0]), nextAct: rep.actions && rep.actions[0] ? rep.actions[0].what : '', nextWhen: rep.actions && rep.actions[0] ? rep.actions[0].when : '',
         running: ph === 'running', nowTxt: ph === 'running' && run.step === 2 ? '추론 중 ' + Math.round((Date.now() - run.t0) / 1000) + '초' : lastL,
         progress: !run ? '0%' : ph === 'done' ? '100%' : Math.min(96, (run.step || 0) / 5 * 100 + 8) + '%',
@@ -1173,7 +1408,7 @@ class Component extends DCLogic {
       const o = { isOv: k === 'overview', isType: k === 'type', isProd: k === 'product', isLedger: k === 'ledger', isWeekly: k === 'weekly', isBench: k === 'bench', isAlerts: k === 'alerts', isSettings: k === 'settings',
         isSplit: !!s.split, sideName: side === 'L' ? '왼쪽' : '오른쪽', title: titleOf(tab), focusDot: focused ? INK : 'var(--color-hairline-strong)', bl: side === 'R' ? '1px solid var(--color-hairline-strong)' : '0',
         focus: () => { if (s.split && this.state.focus !== side) this.setState({ focus: side }); } };
-      if (k === 'type') { const t = T.find(x => x.name === tab.key); o.ty = t ? typeDetail(t) : null; if (!t) { o.isType = false; o.isOv = true; } }
+      if (k === 'type') { const t = T.find(x => x.name === tab.key); o.ty = t ? typeDetail(t) : null; if (o.ty) { o.ty.sc = scoreOf(t.name); o.ty.hasSc = !!o.ty.sc; o.ty.noSc = !o.ty.sc; } if (!t) { o.isType = false; o.isOv = true; } }
       if (k === 'product') { const p = byName[tab.key]; if (p) { o.p = prodDetail(p); o.deep = deepVals(p); } else { o.isProd = false; o.isOv = true; } }
       return o;
     });
@@ -1275,9 +1510,9 @@ class Component extends DCLogic {
       ['기능', '이번 주 개요 열기', () => this.openTab('overview')], ['기능', '검증 기록 열기', () => this.openTab('ledger')], ['기능', '주간 요약 열기', () => this.openTab('weekly')],
       ['기능', '알림 설정 열기', () => this.openTab('alerts')], ['기능', '기준 설정 열기', () => this.openTab('settings')], ['기능', '급상승 상품 CSV 내보내기', exportQueue],
       ['기능', '화면 나란히 보기 켜고 끄기', () => this.toggleSplit()], ['기능', '아래 패널 열고 닫기', () => this.setState(z => ({ bottom: !z.bottom }))], ['기능', '처음 안내 다시 보기', () => this.setState({ guide: true })],
-      ['기능', '2차 벤치마킹 열기', () => this.openTab('bench')],
+      ['기능', '지금 유행 열기', () => this.openTab('bench')],
       ...T.map(t => ['유형', t.name + ' 유형 열기', () => this.openTab('type', t.name), t.v]),
-      ...T.filter(t => t.risen && !ro).map(t => ['검증', t.name + ' 유형 심층 검증', () => { this.openTab('type', t.name); this.runTypeDeep(t); }, 'Claude']),
+      ...T.filter(t => t.risen && !ro).map(t => ['검증', t.name + ' 유형 심층 검증', () => { this.openTab('type', t.name); this.runTypeDeep(t); }, '모델']),
       ...det.slice().sort((a, b) => a.rank - b.rank).map(p => ['상품', p.brand + ' ' + short(p.name), () => this.openTab('product', p.name), p.rank + '위'])
     ];
     const cq = s.cmdQ.trim().toLowerCase();
@@ -1286,7 +1521,7 @@ class Component extends DCLogic {
     this._cmdN = cmdList.length;
     this._cmdRun = () => { const c = cmdList[ci]; if (c) { this.setState({ cmd: false }); c[2](); } };
 
-    const BST = ['1차 결과 정리', '카테고리 교차 확인', '해외 선행 비교', '브랜드 확산 경로', '가격대와 소재', 'Claude 종합 판단'];
+    const BST = ['1차 결과 정리', '카테고리 교차 확인', '해외 선행 비교', '브랜드 확산 경로', '가격대와 소재', '모델 종합 판단'];
     const BV = { '벤치마킹': [OK, '#ffffff'], '보류': ['var(--color-surface-strong)', INK], '제외': ['var(--color-body)', '#ffffff'] };
     const exT = EX.map(e => {
       const risenList = e.prods.map(p => ({ ...p, jump: p.prev == null ? { t: '신규', c: UP } : { t: '▲ ' + (p.prev - p.rank), c: UP } }));
@@ -1320,7 +1555,7 @@ class Component extends DCLogic {
           bars: (has ? w : [0, 0, 0, 0, 0, 0, 0, 0]).map((v, i) => ({ h: has ? Math.max(8, v / mx * 100) + '%' : '8%', c: !has ? 'var(--color-hairline-soft)' : i >= 4 ? INK : 'var(--color-hairline-strong)' })),
           links: [{ label: '네이버', tip: '네이버에서 검색', href: 'https://search.naver.com/search.naver?query=' + enc(k.k) }, { label: '트렌드', tip: '구글 트렌드에서 보기', href: 'https://trends.google.com/trends/explore?q=' + enc(k.k) + (k.src === '구글 미국' ? '&geo=US' : '&geo=KR') }] }; });
       return { isEx: !!t.isEx, hasType: !t.isEx, exp, toggleLabel: exp ? '상세 접기 ▴' : '상품, 검색어 ▾', tbg: exp ? 'var(--color-surface-strong)' : 'var(--color-surface-card)',
-        toggle: () => this.setState(z => ({ benchExp: { ...(z.benchExp || {}), [t.name]: !exp } })), prods, pn: prods.length + '건', kws,
+        toggle: () => this.setState(z => ({ benchExp: { ...(z.benchExp || {}), [t.name]: !exp } })), prods, pn: prods.length + '건', kws, rn: '▲' + t.risen,
         name: t.name, cat: t.cat, src: t.isEx ? '1차 트렌드 후보' : man ? '직접 올림' : '1차 트렌드 후보', srcTip: man ? '담당자가 직접 2차로 올렸습니다' : '1차에서 트렌드 후보로 판정되어 자동으로 올라왔습니다',
         stat: `오른 상품 ${t.risen}건, 브랜드 ${t.brands}곳`, status: st2, sbg: sc[0], sfg: sc[1],
         canRun: !ro && ph !== 'running', runLabel: ph === 'done' || ph === 'error' ? '다시 분석' : '심층 분석',
@@ -1336,20 +1571,80 @@ class Component extends DCLogic {
     const bench = { n: benchItems.length, empty: !benchItems.length, items: benchItems, doneTxt: `분석 완료 ${benchDone}개`,
       cats: [['상의', true], ['하의', false], ['아우터', false], ['신발', false]].map(([name, on]) => ({ name, sub: `후보 ${benchT.filter(t => t.cat === name).length}개` + (on ? '' : ', 예시'), tip: on ? '29CM 상의 TOP100에서 1차 선별' : '연결 전이라 예시 데이터입니다',
         fg: on ? INK : 'var(--color-muted)', bg: on ? 'var(--color-surface-card)' : 'var(--color-canvas)', bd: on ? 'var(--color-ink)' : 'var(--color-hairline-strong)', bs: on ? 'solid' : 'dashed' })) };
-    const actDefs = [['trend', '트렌드', '유형과 상품 트리', 0], ['list', '급상승', '감지된 상품 목록', det.filter(p => p.dropAt < 0 && !st(p)).length], ['bench', '2차', '2차 벤치마킹', benchItems.filter(b => b.status === '분석 전').length], ['ledger', '검증', '검증 기록', 0], ['alerts', '알림', '알림', alerts.filter(a => a.hi).length], ['weekly', '요약', '주간 요약', 0], ['settings', '설정', '기준 설정', 0]];
+    const CATS4 = ['상의', '하의', '아우터', '신발'];
+    const ovMap = {};
+    benchT.forEach(t => {
+      t.risenList.forEach(p => { (p.attrs || []).forEach(a => { const k = '속성|' + a; (ovMap[k] = ovMap[k] || new Set()).add(t.cat); }); const kb = '브랜드|' + p.brand; (ovMap[kb] = ovMap[kb] || new Set()).add(t.cat); });
+    });
+    const overlaps = Object.entries(ovMap).filter(([, c]) => c.size >= 2).map(([k, c]) => { const [kind, label] = k.split('|'); return { kind, label, cats: [...c], n: c.size, tip: label + ': ' + [...c].join(', ') }; }).sort((a, b) => b.n - a.n || (a.kind === '속성' ? -1 : 1));
+    const trR = s.trendRun, tph = trR ? trR.phase : 'idle', trep = (trR && trR.report) || {};
+    const TST = ['카테고리별 후보 모으기', '공통 속성 찾기', '공통 브랜드 찾기', '검색어 묶기', '모델 유행 정리'];
+    const findType = (cat, type) => benchT.find(t => t.name === type && (!cat || t.cat === cat)) || benchT.find(t => t.name === type);
+    const SBG = { '강함': [OK, '#ffffff'], '보통': [INK, 'var(--color-canvas)'], '약함': ['var(--color-surface-strong)', 'var(--color-body)'] };
+    const themes = (trep.themes || []).map((m, i) => {
+      const ty = (m.types || []).map(x => ({ cat: x.cat || '', type: x.type || '' })), cs = new Set(ty.map(x => x.cat)), open = !!s.themeOpen[i], sb = SBG[m.strength] || SBG['보통'];
+      return { no: String(i + 1).padStart(2, '0'), name: m.name || '', summary: m.summary || '', strength: m.strength || '보통', sbg: sb[0], sfg: sb[1],
+        cov: CATS4.map(c => ({ name: c, bg: cs.has(c) ? INK : 'var(--color-hairline-soft)', fg: cs.has(c) ? INK : 'var(--color-muted)' })),
+        types: ty.map(x => { const t = findType(x.cat, x.type); return { cat: x.cat, type: x.type, tip: t ? `오른 상품 ${t.risen}건, 브랜드 ${t.brands}곳` : '후보 목록에 없는 유형', go: () => { if (!t) return; if (!t.isEx && T.find(z => z.name === t.name)) this.openTab('type', t.name); else this.setState(z => ({ benchExp: { ...(z.benchExp || {}), [t.name]: true } })); } }; }),
+        keywords: (m.keywords || []).slice(0, 6).map(k => ({ k, href: 'https://search.naver.com/search.naver?query=' + encodeURIComponent(k) })), hasKw: !!(m.keywords || []).length,
+        brands: (m.brands || []).slice(0, 8), hasBrands: !!(m.brands || []).length,
+        signals: m.signals || [], open, toggleLabel: open ? '근거 접기' : '근거 ' + (m.signals || []).length + '개 보기',
+        toggle: () => this.setState(z => ({ themeOpen: { ...z.themeOpen, [i]: !open } })) };
+    });
+    const OST = ['초기', '확산', '정점', '꺾임'], OX = [44, 80, 104, 150];
+    const allKw = {}; benchT.forEach(t => kwOf(t).forEach(k => { if (Array.isArray(k.w) && k.w.length >= 8) allKw[k.k] = k; }));
+    (trep.themes || []).forEach((m, i) => {
+      const th = themes[i], ol = m.outlook || {}, si = OST.indexOf(ol.stage), x = si < 0 ? null : OX[si];
+      const cy = xx => 50 - 44 * Math.exp(-Math.pow((xx / 200 - 0.5) / 0.2, 2));
+      let pth = ''; if (x != null) { for (let xx = 0; xx <= x; xx += 4) pth += (xx ? ' L' : 'M') + xx + ' ' + cy(xx).toFixed(1); }
+      th.olWeeks = ol.weeks || '판단 어려움'; th.olPath = pth; th.olTip = (ol.stage ? ol.stage + ' 단계. ' : '') + (ol.basis || '') + ' 1차 데이터 기반 모델 추정이며 정확도는 검증되지 않았습니다.';
+      th.olStages = OST.map((label, j) => ({ label, bg: j === si ? INK : 'transparent', fg: j === si ? 'var(--color-canvas)' : 'var(--color-muted)', fw: j === si ? 600 : 400 }));
+      const names = new Set(m.keywords || []); th.types.forEach(t => { const bt = findType(t.cat, t.type); (bt ? kwOf(bt) : []).forEach(k => names.add(k.k)); });
+      const ks = [...names].map(n => allKw[n]).filter(Boolean).map(k => { const w = k.w, a4 = w[0] + w[1] + w[2] + w[3], b4 = w[4] + w[5] + w[6] + w[7]; return { k: k.k, vol: b4, chg: a4 ? Math.round((b4 - a4) / a4 * 100) : 0 }; }).sort((a, b) => b.vol - a.vol).slice(0, 5);
+      const tot = ks.reduce((a, b) => a + b.vol, 0) || 1; let acc = 0;
+      th.donut = ks.map((k, j) => { const p = k.vol / tot * 100, d = { k: k.k, c: SEGC[Math.min(j, SEGC.length - 1)], dash: p.toFixed(2) + ' ' + (100 - p).toFixed(2), off: (-acc).toFixed(2), pct: Math.round(p) + '%', chg: (k.chg > 0 ? '+' : '') + k.chg + '%', cc: k.chg > 0 ? UP : k.chg < 0 ? '#2b67c2' : MUTED, tip: k.k + ', 최근 4주 비중 ' + Math.round(p) + '%, 직전 4주 대비 ' + (k.chg > 0 ? '+' : '') + k.chg + '%', href: 'https://search.naver.com/search.naver?query=' + encodeURIComponent(k.k) }; acc += p; return d; });
+      th.hasKwData = ks.length > 0; th.noKwData = !ks.length; th.kwChips = !ks.length && th.hasKw;
+    });
+    const inTheme = new Set(); themes.forEach(m => m.types.forEach(t => inTheme.add(t.type)));
+    const RH = 36, H = Math.max(benchT.length, 1) * RH, M = themes.length, hf = s.hoverFlow;
+    const tyY = benchT.map((t, i) => i * RH + RH / 2), thY = j => (j + 0.5) * H / Math.max(M, 1);
+    const pairs = []; themes.forEach((m, j) => m.types.forEach(x => { const i = benchT.findIndex(t => t.name === x.type && (!x.cat || t.cat === x.cat)); const i2 = i >= 0 ? i : benchT.findIndex(t => t.name === x.type); if (i2 >= 0) pairs.push([i2, j]); }));
+    const onPair = (i, j) => !hf || (hf[0] === 'L' && hf[1] === i) || (hf[0] === 'R' && hf[1] === j);
+    const flow = {
+      H, Hpx: H + 'px', vb: '0 0 100 ' + H, noThemes: !M, rightEmpty: tph === 'running' ? '유행을 묶는 중…' : '"유행 찾기"를 누르면 여기에 연결됩니다',
+      leave: () => this.setState({ hoverFlow: null }),
+      left: benchT.map((t, i) => { const linked = pairs.some(p => p[0] === i), on = !hf || pairs.some(p => p[0] === i && onPair(p[0], p[1])) || (hf[0] === 'L' && hf[1] === i);
+        return { cat: t.cat + (t.isEx ? '*' : ''), name: t.name, risen: t.risen, y: tyY[i], fw: linked ? 600 : 400, dot: linked ? INK : 'var(--color-surface-card)', op: on ? 1 : 0.3, bg: hf && hf[0] === 'L' && hf[1] === i ? 'var(--color-canvas-soft)' : 'transparent',
+          tip: `${t.cat} ${t.name}: 오른 상품 ${t.risen}건, 브랜드 ${t.brands}곳${t.isEx ? '. 예시 데이터' : ''}`, enter: () => this.setState({ hoverFlow: ['L', i] }) }; }),
+      right: themes.map((m, j) => { const on = !hf || pairs.some(p => p[1] === j && onPair(p[0], p[1])) || (hf[0] === 'R' && hf[1] === j), hot = hf && hf[0] === 'R' && hf[1] === j;
+        return { no: m.no, name: m.name, strength: m.strength, i: j + 3, op: on ? 1 : 0.3, bg: hot || m.strength === '강함' ? INK : 'var(--color-surface-card)', fg: hot || m.strength === '강함' ? 'var(--color-canvas)' : INK, enter: () => this.setState({ hoverFlow: ['R', j] }) }; }),
+      links: pairs.map(([i, j]) => { const y1 = tyY[i], y2 = thY(j); return { d: `M0 ${y1} C50 ${y1}, 50 ${y2}, 100 ${y2}`, w: 2, op: onPair(i, j) ? 0.85 : 0.08 }; })
+    };
+    const tr = { ...flow,
+      canRun: !ro && tph !== 'running', btnVariant: tph === 'done' ? 'secondary' : 'primary', isRe: tph === 'done' || tph === 'error', isFirst: !(tph === 'done' || tph === 'error'), btnLabel: tph === 'done' || tph === 'error' ? '다시 찾기' : '유행 찾기',
+      run: () => this.runTrend(benchT, overlaps), running: tph === 'running', error: tph === 'error', idle: tph === 'idle', done: tph === 'done', pct: (trR ? trR.pct : 0) + '%',
+      stages: TST.map((label, i) => { const st0 = trR ? trR.step : 0, dn = i < st0, cur = i === st0 && tph === 'running'; return { label, mark: dn ? '✓' : String(i + 1), mbg: dn ? OK : cur ? INK : 'var(--color-hairline-soft)', mfg: dn || cur ? '#ffffff' : 'var(--color-muted)', bg: cur ? 'var(--color-canvas-soft)' : 'transparent', op: dn || cur ? 1 : 0.55 }; }),
+      n: themes.length, nSub: tph === 'done' ? `후보 유형 ${benchT.length}개에서` : `후보 유형 ${benchT.length}개`,
+      headline: trep.headline || '', at: trR ? trR.at || '' : '', themes,
+      missing: (trep.missing || []).join(', '), missingN: (trep.missing || []).length + '개', hasMissing: !!(trep.missing || []).length,
+      overlaps, noOverlap: !overlaps.length,
+      cats: CATS4.map(c => { const ts = benchT.filter(t => t.cat === c), ex = ts.some(t => t.isEx); return { name: c, n: ts.length, tip: c + ' 후보: ' + (ts.map(t => t.name + (inTheme.has(t.name) ? ' (유행 포함)' : '')).join(', ') || '없음') + (ex ? '. 예시 데이터' : ''), bs: ex ? 'dashed' : 'solid', bg: 'var(--color-surface-card)',
+        types: ts.map(t => ({ name: t.name, bg: inTheme.has(t.name) ? INK : 'transparent' })) }; })
+    };
+    const actDefs = [['trend', '트렌드', '유형과 상품 트리', 0], ['list', '급상승', '감지된 상품 목록', det.filter(p => p.dropAt < 0 && !st(p)).length], ['bench', '2차', '지금 유행 (2차)', benchItems.filter(b => b.status === '분석 전').length], ['ledger', '검증', '검증 기록', 0], ['alerts', '알림', '알림', alerts.filter(a => a.hi).length], ['weekly', '요약', '주간 요약', 0], ['settings', '설정', '기준 설정', 0]];
     const sideRowsMap = {
-      bench: benchItems.map(b => ({ tag: b.status, tagBg: b.sbg, tagFg: b.sfg, label: b.name, sub: b.cat + ', ' + b.stat, go: () => this.openTab('bench') })),
+      bench: benchItems.map(b => ({ compact: true, label: b.name, sub: b.cat, cat: b.cat, n: b.rn, nc: b.done ? INK : 'var(--color-body)', dot: b.status === '분석 전' ? 'transparent' : b.sbg, dotBd: b.status === '분석 전' ? 'var(--color-hairline-strong)' : b.sbg, tip: b.name + ': ' + b.status + ', ' + b.stat, go: () => this.openTab('bench') })),
       ledger: fbRows.map(r => ({ tag: r.fb, tagBg: r.fb === '맞음' ? OK : BAD, tagFg: '#ffffff', label: r.name, sub: '모델 ' + r.verdict, go: r.open })),
       alerts: alerts.map(a => ({ tag: a.tag, tagBg: a.hi ? INK : 'var(--color-surface-strong)', tagFg: a.hi ? 'var(--color-canvas)' : 'var(--color-body)', label: a.title, sub: a.body, go: a.go })),
       weekly: T.map(t => ({ tag: t.v, tagBg: VDOT[t.v][0] === 'transparent' ? 'var(--color-surface-strong)' : VDOT[t.v][0], tagFg: VDOT[t.v][0] === 'transparent' ? 'var(--color-body)' : '#ffffff', label: t.name, sub: `오른 상품 ${t.risen}건, 브랜드 ${t.brands}곳`, go: () => this.openTab('type', t.name) })),
       settings: [['감지 기준', `${th}계단 이상 상승 또는 신규 진입`], ['필터 단계', '검색 교차, 브랜드 분산 외 연결 예정 3단계'], ['구성원과 권한', PEOPLE.length + '명']].map(([label, sub]) => ({ tag: '설정', tagBg: 'var(--color-surface-strong)', tagFg: 'var(--color-body)', label, sub, go: () => this.openTab('settings') }))
     };
-    const sideRows = (sideRowsMap[s.act] || []).filter(r => !q || (r.label + r.sub).toLowerCase().includes(q));
+    const sideRows = (sideRowsMap[s.act] || []).map(r => ({ ...r, full: !r.compact })).filter(r => !q || (r.label + r.sub).toLowerCase().includes(q));
     const btn = on => on ? 'var(--color-surface-strong)' : 'transparent';
 
     return {
-      bench, rootRef: this.rootRef, tipRef: this.tipRef, cmdRef: this.cmdRef, leave, stop: e => e.stopPropagation(),
-      acts: actDefs.map(([k, label, tip, badge]) => { const on = s.act === k && s.side; return { label, tip, badge, hasBadge: badge > 0, on, bg: on ? 'var(--color-surface-card)' : 'transparent', fg: on ? INK : 'var(--color-body)', bar: s.act === k ? INK : 'transparent',
+      bench, tr, scoreRows, scoreNote: SCORE_NOTE, scoreFormula: SCORE_FORMULA, seasonNote: SEASON_NOTE, rootRef: this.rootRef, tipRef: this.tipRef, cmdRef: this.cmdRef, leave, stop: e => e.stopPropagation(),
+      acts: actDefs.map(([k, label, tip, badge]) => { const on = s.act === k && s.side; return { label, tip, badge, hasBadge: badge > 0, on, bg: on ? 'var(--color-surface-card)' : 'transparent', fg: on ? INK : 'var(--color-body)', bar: s.act === k ? INK : 'transparent', bs: s.act === k ? 1 : 0,
         go: () => { this.setState(z => ({ act: k, side: z.act === k ? !z.side : true, treeQ: '' })); if (k === 'trend') this.openTab('overview'); if (['bench', 'ledger', 'alerts', 'weekly', 'settings'].includes(k)) this.openTab(k); } }; }),
       openCmd: () => this.setState({ cmd: true, cmdQ: '', cmdI: 0 }), openGuide: () => this.setState({ guide: true }),
       sideOpen: s.side, sideClosed: !s.side, toggleSide: () => this.setState(z => ({ side: !z.side })),
@@ -1378,7 +1673,7 @@ class Component extends DCLogic {
       roleLabel: ROLE_NAME[s.roles[s.me] || 'viewer'], roleTip: { admin: '모든 기능, 기준 설정, 권한 관리', md: '처리, 메모, 심층 검증, 발주 검토 요청', viewer: '보기만 가능' }[s.roles[s.me] || 'viewer'],
       cat: s.cat, readOnly: ro, canEdit: !ro, isAdmin, notAdmin: !isAdmin, showPending: s.showPending,
       internal: [['재고', '물류 WMS', '현재 재고, 창고별 수량'], ['일 판매량', '주문 데이터', '최근 14일 일별 판매'], ['입고 예정', 'SCM 발주 시스템', '입고 예정일과 수량'], ['정가, 할인율', '상품 마스터', '할인 때문에 오른 건지 판단']].map(([label, sys, desc]) => ({ label, sys, desc })),
-      ledgerTiles: [{ label: '짚은 상품 중 실제로 남은 비율', value: '–', c: MUTED, tip: '11/08 첫 채점. 기준 비율 54.1%와 비교합니다' }, { label: '실제 급등 중 미리 잡은 비율', value: '–', c: MUTED, tip: '놓친 급등까지 세야 계산됩니다' }, { label: '기준 비율', value: '54.1%', c: INK, tip: '전부 남는다고 했을 때의 비율' }, { label: '사람 피드백 일치', value: fbv.length ? Math.round(right / fbv.length * 100) + '%' : '–', c: fbv.length ? INK : MUTED, tip: '심층 검증 리포트에 남긴 맞음, 틀림' }],
+      ledgerTiles: [{ label: '짚은 상품 중 실제로 남은 비율', value: '–', c: MUTED, tip: '11/08 첫 채점. 기준 비율 54.1%와 비교합니다' }, { label: '실제 급등 중 미리 잡은 비율', value: '–', c: MUTED, tip: '놓친 급등까지 세야 계산됩니다' }, { label: '기준 비율', value: '54.1%', c: INK, tip: '전부 남는다고 했을 때의 비율' }],
       fbRows, fbEmpty: !fbRows.length, fbSummary: fbRows.length ? `맞음 ${right}, 틀림 ${fbv.length - right}` : '',
       ledger: LEDGER.map(([name, r0, r1, r2, held]) => ({ name, r0, r1, r2: r2 == null ? '이탈' : r2, r2c: r2 == null ? MUTED : INK, res: held ? { label: '남음', fg: '#ffffff', bg: OK, bd: OK } : r2 == null ? { label: '이탈', fg: 'var(--color-body)', bg: 'transparent', bd: 'var(--color-hairline-strong)' } : { label: '빠짐', fg: 'var(--color-body)', bg: 'var(--color-surface-strong)', bd: 'var(--color-surface-strong)' } })),
       exportLedger: () => csv('검증기록_1101.csv', ['상품', '10/18', '10/25', '11/01', '결과'], LEDGER.map(([n, a, b, c, hd]) => [n, a, b, c ?? '이탈', hd ? '남음' : c == null ? '이탈' : '빠짐'])),
@@ -1400,7 +1695,7 @@ class Component extends DCLogic {
       cmdItems: cmdList.map((c, i) => ({ kind: c[0], label: c[1], hint: c[3] || '', bg: i === ci ? 'var(--color-surface-strong)' : 'transparent', hover: () => { if (this.state.cmdI !== i) this.setState({ cmdI: i }); }, run: () => { this.setState({ cmd: false }); c[2](); } })),
       cmdEmpty: !cmdList.length,
       guideOpen: s.guide, closeGuide: this.closeGuide,
-      guideRows: [['왼쪽 줄', '트렌드, 급상승, 검증, 알림, 요약, 설정을 오갑니다. 같은 버튼을 다시 누르면 패널이 접힙니다.'], ['탐색 패널', '카테고리, 유형, 상품을 트리로 펼칩니다. 점 색은 판정, 숫자는 오른 상품 수 / 전체입니다.'], ['탭과 나란히', '누른 유형과 상품은 탭으로 열립니다. 나란히를 켜면 두 탭을 비교할 수 있습니다.'], ['아래, 오른쪽', '아래는 검증 로그, 알림, 처리 이력. 오른쪽은 선택한 항목의 처리 버튼과 근거입니다.'], ['Ctrl+K', '유형, 상품, 기능 이름을 쳐서 바로 이동하거나 실행합니다.']].map(([k, v]) => ({ k, v })),
+      guideRows: [['왼쪽 줄', '트렌드, 급상승, 검증, 알림, 요약, 설정을 오갑니다. 같은 버튼을 다시 누르면 패널이 접힙니다.'], ['탐색 패널', '카테고리, 유형, 상품을 트리로 펼칩니다. 점 색은 판정, 숫자는 오른 상품 수 / 전체입니다.'], ['탭과 나란히', '누른 유형과 상품은 탭으로 열립니다. 나란히를 켜면 두 탭을 비교할 수 있습니다.'], ['아래, 오른쪽', '아래는 검증 로그, 알림, 처리 이력. 오른쪽은 선택한 항목의 처리 버튼과 근거입니다.'], ['Ctrl+K', '유형, 상품, 기능 이름을 쳐서 바로 이동하거나 실행합니다.'], ['유형 점수', SCORE_FORMULA + '. 추세는 TOP100 안 상품 수가 앞 절반 대비 뒤 절반에 얼마나 늘었나, 연속은 몇 주째 트렌드 후보인가(최대 5주), 분산은 오른 상품이 몇 개 브랜드에 퍼져 있나입니다. 행을 누르면 세 점수가 펼쳐집니다.'], ['점수 해석', SCORE_NOTE], ['지금 유행', '상의, 하의, 아우터, 신발의 1차 트렌드 후보를 모아, 카테고리를 넘어 지금 무엇이 유행하는지 묶어 정리합니다. 하의, 아우터, 신발은 연결 전이라 예시 데이터입니다.'], ['관련 검색어', '막대는 최근 8주 검색량(상대값), 숫자는 직전 4주 대비 최근 4주 변화입니다.']].map(([k, v]) => ({ k, v })),
       toast: !!s.toast, toastText: s.toast
     };
   }

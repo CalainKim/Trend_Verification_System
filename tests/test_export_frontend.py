@@ -171,3 +171,60 @@ class TestPickWeeks:
     def test_rejects_when_history_is_too_short(self):
         with pytest.raises(SystemExit):
             pick_weeks(["2026-11-01"], "2026-11-01")
+
+
+class TestDuplicateDeclarations:
+    """화면이 자리표시자로 먼저 선언해 둔 상수를 패치가 지우는지 본다.
+
+    둘 다 남으면 const 중복 선언으로 스크립트가 통째로 죽고 화면이 백지가 된다.
+    TYPE_SKIP 에서 한 번, TRACK 에서 또 한 번 났다. 이름을 손으로 관리하면
+    다음에 또 난다.
+
+    선언이 여러 줄일 수 있다. TRACK 은 59줄이었다. 한 줄만 지우면 나머지가
+    고아로 남아 문법이 깨진다.
+    """
+
+    def _patch(self, tmp_path, screen: str, data: str) -> str:
+        import patch_design as pd
+
+        src = tmp_path / "screen.html"
+        src.write_text(screen, encoding="utf-8")
+        old_data = pd.DATA
+        pd.DATA = tmp_path / "data.js"
+        pd.DATA.write_text(data, encoding="utf-8")
+        try:
+            return pd.swap_data(src.read_text(encoding="utf-8"))
+        finally:
+            pd.DATA = old_data
+
+    def test_removes_single_line_declaration(self, tmp_path):
+        screen = "const TYPE_SKIP = { 후드: ['후드티'] };\nconst UP = '#cf2d56';\n"
+        out = self._patch(tmp_path, screen, 'const TYPE_SKIP = {"후드": ["후드티"]};\n')
+        assert out.count("const TYPE_SKIP = ") == 1
+
+    def test_removes_multi_line_declaration(self, tmp_path):
+        screen = (
+            "const TRACK = {\n"
+            "  '후드': { tops: [1, 2] },\n"
+            "  '니트': { tops: [3, 4] }\n"
+            "};\n"
+            "const UP = '#cf2d56';\n"
+        )
+        out = self._patch(tmp_path, screen, 'const TRACK = {"후드": {}};\n')
+        assert out.count("const TRACK = ") == 1
+        # 고아 줄이 남으면 안 된다
+        assert "'니트'" not in out
+        assert out.count("};") == 0 or "tops: [3, 4]" not in out
+
+    def test_keeps_unrelated_declarations(self, tmp_path):
+        screen = ("const KEEP = { a: 1 };\nconst TRACK = {\n x: 1\n};\n"
+                  "const UP = '#cf2d56';\n")
+        out = self._patch(tmp_path, screen, 'const TRACK = {};\n')
+        assert "const KEEP = { a: 1 };" in out
+
+    def test_refuses_when_boundary_missing(self, tmp_path):
+        import pytest as _pt
+
+        screen = "const TRACK = { x: 1 };\n"   # const UP 이 없다
+        with _pt.raises(SystemExit):
+            self._patch(tmp_path, screen, 'const TRACK = {};\n')

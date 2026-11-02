@@ -12,13 +12,13 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from export_frontend import (  # noqa: E402
-    build_ledger, build_type_skip, pick_weeks, self_attribute, type_of,
+    build_ledger, build_p, build_type_skip, pick_weeks, self_attribute, type_of,
 )
 
 
-def _item(name, rank):
+def _item(name, rank, sale_percent=0):
     return {"name": name, "rank": rank, "brand": "b", "price": 1000,
-            "gender": "남", "is_new": False, "sale_percent": 0}
+            "gender": "남", "is_new": False, "sale_percent": sale_percent}
 
 
 class TestTypeOf:
@@ -97,6 +97,32 @@ class TestLedger:
         # 기준 시점에 없던 상품은 상승폭을 잴 수 없다.
         got = build_ledger({}, {"x": _item("상품", 5)}, {"x": _item("상품", 5)})
         assert got == []
+
+
+class TestDiscount:
+    """할인율은 화면의 필터 3단계(할인 효과)가 쓴다.
+
+    기존 여섯 자리 뒤에 붙여야 한다. 중간에 끼우면 화면이 판매가 자리에서
+    할인율을 읽는다.
+    """
+
+    def test_appended_as_seventh_field(self):
+        import extract_attributes as ea
+
+        attrs, _stop, colors = ea.load_dictionary()
+        rows = build_p({"x": _item("와플 티셔츠", 3, sale_percent=24)}, {}, attrs, colors)
+        row = rows["와플"][0]
+        assert len(row) == 7
+        assert row[:6] == [3, None, "b", "와플 티셔츠", 1000, "남"]
+        assert row[6] == 24
+
+    def test_zero_discount_is_kept_not_dropped(self):
+        # 0 과 None 은 다르다. 0 은 정가 판매를 확인한 것이고 None 은 모른다는 뜻이다.
+        import extract_attributes as ea
+
+        attrs, _stop, colors = ea.load_dictionary()
+        rows = build_p({"x": _item("와플 티셔츠", 3, sale_percent=0)}, {}, attrs, colors)
+        assert rows["와플"][0][6] == 0
 
 
 class TestPickWeeks:

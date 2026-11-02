@@ -4,9 +4,14 @@
 화면(Claude Design 의 Trend Monitor v8)은 세 상수를 쓴다. 이 스크립트는 같은
 모양을 실제 수집분으로 채워 준다. 화면 구조는 건드리지 않는다.
 
-    G       속성별 검색 추이   {d0, last, k4, kp, kr[26], us[26]}
-    P       속성별 상품 목록   [순위, 지난주순위, 브랜드, 상품명, 판매가, 성별]
+    G       속성별 검색 추이   {d0, last, k4, kp, kr[26], us[26], lead}
+    P       속성별 상품 목록   [순위, 지난주순위, 브랜드, 상품명, 판매가, 성별, 할인율]
     LEDGER  검증 기록         [상품명, 기준순위, 감지순위, 확인순위, 남음여부]
+
+화면의 필터 5단계 가운데 할인 효과와 해외 선행이 "연결 예정"으로 비어 있었다.
+둘 다 수집된 자료로 채울 수 있어서 P 의 일곱 번째 값(할인율)과 G 의 lead 를
+추가했다. 기존 여섯 자리와 G 의 기존 키는 그대로라 화면이 안 고쳐져도 깨지지
+않는다.
 
     ./scripts/export_frontend.py                 최신 주 기준
     ./scripts/export_frontend.py --week 2026-11-01
@@ -35,6 +40,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import extract_attributes as ea  # noqa: E402
+from trend_pipeline import features as ft  # noqa: E402
 from trend_pipeline import storage  # noqa: E402
 from trend_pipeline.persistence import KEEP_RATIO, MIN_RISE  # noqa: E402
 
@@ -155,7 +161,26 @@ def weekly_series(conn: sqlite3.Connection, keyword: str, entity: str,
     return [{"at": r[0][:10], "v": r[1]} for r in rows][::-1]
 
 
-def build_g(conn: sqlite3.Connection, keywords: List[str]) -> Dict[str, dict]:
+def lead_of(conn: sqlite3.Connection, keyword: str, as_of: str,
+            geo: str = "US", window: int = 1500) -> Optional[dict]:
+    """해외가 한국보다 며칠 앞섰는지. 문턱을 못 넘으면 None 이다.
+
+    lead_days 는 양수면 해외 선행, 음수면 한국 선행이다. 상관이 문턱
+    (features.MIN_LEAD_CORRELATION) 에 못 미치거나 최적값이 탐색 범위 끝에
+    걸리면 쓰지 않는다. 끝에 걸렸다는 건 진짜 최적이 범위 밖일 수 있다는 뜻이다.
+    """
+    try:
+        r = ft.lead_lag(conn, keyword, as_of, geo, window_days=window)
+    except ft.MixedQueryWindow:
+        return None
+    if r is None or not r.reliable or r.at_boundary:
+        return None
+    return {"geo": r.geo, "days": r.lead_days, "corr": round(r.correlation, 2),
+            "n": r.n_overlap}
+
+
+def build_g(conn: sqlite3.Connection, keywords: List[str],
+            as_of: Optional[str] = None) -> Dict[str, dict]:
     g: Dict[str, dict] = {}
     for kw in keywords:
         kr = weekly_series(conn, kw, "geo=KR", WEEKS)
@@ -173,6 +198,10 @@ def build_g(conn: sqlite3.Connection, keywords: List[str]) -> Dict[str, dict]:
             "kr": [round(v) for v in vals],
             "us": [round(p["v"]) for p in us],
         }
+        if as_of:
+            lead = lead_of(conn, kw, as_of)
+            if lead:
+                g[kw]["lead"] = lead
     return g
 
 
@@ -219,6 +248,7 @@ def build_p(this_week: Dict[str, dict], last_week: Dict[str, dict],
             cur["name"],
             cur["price"],
             cur["gender"],
+            cur["sale_percent"],
         ]
         for a in ea.extract(cur["name"], attrs, colors):
             p[a["canonical"]].append(row)
@@ -260,6 +290,8 @@ def main(argv=None) -> int:
     ap.add_argument("--db", type=Path, default=None)
     ap.add_argument("--out", type=Path, default=ROOT / "build" / "frontend_data.js")
     ap.add_argument("--json", action="store_true", help="JSON 으로도 저장")
+    ap.add_argument("--no-lead", action="store_true",
+                    help="해외 선행 계산을 건너뛴다. 속성마다 5년치를 훑어서 느리다")
     args = ap.parse_args(argv)
 
     conn = storage.connect(args.db)
@@ -284,7 +316,7 @@ def main(argv=None) -> int:
 
     # 검색 추이는 이번 주 상품에 실제로 붙은 속성만 내보낸다. 화면이 세부 속성을
     # 누를 때만 쓰므로 안 쓰는 키워드를 넣으면 파일만 커진다.
-    g = build_g(conn, sorted(p))
+    g = build_g(conn, sorted(p), as_of=None if args.no_lead else hold_d)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     head = (
@@ -313,13 +345,18 @@ def main(argv=None) -> int:
 
     kept = sum(1 for r in ledger if r[4])
     print()
-    print(f"G       검색 추이 {len(g)}개 속성")
+    leads = {k: v["lead"] for k, v in g.items() if "lead" in v}
+    home = sum(1 for v in leads.values() if v["days"] < 0)
+    print(f"G       검색 추이 {len(g)}개 속성, 해외 선행 판정 {len(leads)}건 "
+          f"(한국 선행 {home}건, 해외 선행 {len(leads) - home}건)")
     names = {r[3] for rows in p.values() for r in rows}
+    disc = {r[3] for rows in p.values() for r in rows if (r[6] or 0) > 0}
     print(f"P       상품 목록 {len(p)}개 속성, 상품 {len(names)}개, 연인원 "
           f"{sum(len(v) for v in p.values())}건")
     if len(names) != len(hold):
         print(f"  주의. 확인 시점 TOP100 {len(hold)}개 중 {len(hold) - len(names)}개는 "
               f"사전에 걸리는 속성이 없어 화면에 안 나온다")
+    print(f"        할인 중인 상품 {len(disc)}개 / {len(names)}개")
     print("TYPE_SKIP  " + ", ".join(f"{k}:{v}" for k, v in type_skip.items() if v))
     if ledger:
         print(f"LEDGER  {len(ledger)}건 중 {kept}건 남음 ({kept / len(ledger) * 100:.1f}%)")

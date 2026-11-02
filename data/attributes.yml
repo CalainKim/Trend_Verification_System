@@ -86,6 +86,9 @@ attributes:
   # ---- 소매 ----
   - canonical: 긴팔
     group: 소매
+    # 화면의 롱슬리브 유형이 이 속성이다. 검색 지수가 없으면 그 유형은 커머스
+    # 단일 신호로만 남는다.
+    en: long sleeve
     variants: [long sleeve, longsleeve, l/s, ls, 롱 슬리브, 긴팔, 긴소매]
   - canonical: 반팔
     group: 소매
@@ -235,6 +238,9 @@ attributes:
   # ---- 품목 ----
   - canonical: 티셔츠
     group: 품목
+    # 화면이 유형으로 쓰는 말이라 검색 지수도 모은다. "t shirt" 는 그 품목만
+    # 가리켜서 질의어로 안전하다.
+    en: t shirt
     variants: [t shirt, tshirt, t-shirts, tee, tees, 티셔츠, 반팔티, 긴팔티, 티]
   - canonical: 셔츠
     group: 품목
@@ -271,6 +277,9 @@ attributes:
   # ---- 미매칭 토큰을 보고 보강한 항목 (2026-10-28) ----
   - canonical: 탑
     group: 품목
+    # en 을 일부러 넣지 않는다. 한국어 "탑"은 탑(tower), 영어 "top"은 최고,
+    # 상단, laptop 까지 가리키는 중의어라 검색 지수를 모으면 패션과 무관한
+    # 검색이 섞인다. 이 유형은 커머스 신호로만 판단한다.
     variants: [top, tops, 탑, 톱]
   - canonical: 풀오버
     group: 품목

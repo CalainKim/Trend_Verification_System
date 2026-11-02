@@ -1,0 +1,51 @@
+{
+  "case_id": "idx_gtrends_2024-12-15_자카드@geoUS",
+  "window_id": 6,
+  "experiment_type": "persistence-index-v1",
+  "candidate": {
+    "keyword": "자카드",
+    "definition": "gtrends 의 '자카드' 검색 지수다 (entity geo=US). 요청 창 안에서 최댓값이 100 이 되도록 정규화된 상대값이므로 다른 키워드의 값과 크기를 견줄 수 없다."
+  },
+  "claim": "2024-12-15 까지의 자료로 볼 때, 이 키워드의 검색 상승이 이후 12개 관측 구간 동안 상승분의 절반 이상 유지되겠는가?",
+  "simulated_cutoff": "2024-12-15",
+  "t_cut": "2024-12-15",
+  "horizon_points": 12,
+  "historical_available_at": null,
+  "item": {
+    "key": "자카드@geo=US",
+    "name": "자카드",
+    "brand": "",
+    "entity": "geo=US"
+  },
+  "features": {
+    "base_mean": 6.38,
+    "detect_mean": 8.25,
+    "rise_ratio": 1.294,
+    "rise_pct": 29.4,
+    "yoy_ratio": 0.966,
+    "coverage": 1.0
+  },
+  "evidence": [
+    {
+      "id": "index_change",
+      "channel": "gtrends",
+      "observation": "지수 평균이 기준 구간 6.4 에서 관측 구간 8.2 로 +29.4% 변했다"
+    },
+    {
+      "id": "coverage",
+      "channel": "gtrends",
+      "observation": "창 안에서 관측된 비율이 100% 다. 결측이 많으면 추세를 읽을 수 없다"
+    },
+    {
+      "id": "seasonality",
+      "channel": "gtrends",
+      "observation": "작년 같은 기간 대비 0.97 배다. 1 에 가까우면 해마다 반복되는 움직임이고, 그렇다면 계절성으로 설명된다"
+    }
+  ],
+  "limitations": [
+    "순위가 오른 원인은 관측할 수 없다. 광고 집행과 노출 알고리즘은 쇼핑몰 내부에만 있어 외부에서 볼 수 없다. 원인을 지목하지 말고 관측된 사실과 배제되는 설명만 쓴다.",
+    "검색 지수는 상대값이다. 같은 요청 안의 값끼리만 비교가 성립한다.",
+    "검색은 구매가 아니다. 찾아본 것과 산 것은 다르다.",
+    "작년 같은 기간 대비(yoy_ratio)가 1 에 가까우면 계절성으로 설명되는 움직임이다. 이 값이 없으면 계절성을 확인할 수 없다."
+  ]
+}

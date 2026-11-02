@@ -16,9 +16,10 @@ from export_frontend import (  # noqa: E402
 )
 
 
-def _item(name, rank, sale_percent=0):
+def _item(name, rank, sale_percent=0, image_url=None):
     return {"name": name, "rank": rank, "brand": "b", "price": 1000,
-            "gender": "남", "is_new": False, "sale_percent": sale_percent}
+            "gender": "남", "is_new": False, "sale_percent": sale_percent,
+            "image_url": image_url}
 
 
 class TestTypeOf:
@@ -112,7 +113,7 @@ class TestDiscount:
         attrs, _stop, colors = ea.load_dictionary()
         rows = build_p({"x": _item("와플 티셔츠", 3, sale_percent=24)}, {}, attrs, colors)
         row = rows["와플"][0]
-        assert len(row) == 8
+        assert len(row) == 9
         assert row[:6] == [3, None, "b", "와플 티셔츠", 1000, "남"]
         assert row[6] == 24
         assert row[7] is None   # 지난주 TOP100 에 없었으면 비교할 값이 없다
@@ -128,6 +129,24 @@ class TestDiscount:
                        attrs, colors)
         row = rows["와플"][0]
         assert row[6] == 40 and row[7] == 10   # 30%p 더 할인하며 47계단 올랐다
+
+    def test_image_url_gets_a_size_hint(self):
+        """사진은 원본이 283KB 다. CDN 이 줄여 주므로 크기를 지정해 받는다."""
+        import extract_attributes as ea
+
+        attrs, _stop, colors = ea.load_dictionary()
+        rows = build_p(
+            {"x": _item("와플 티셔츠", 3, image_url="https://img.29cm.co.kr/item/a.jpg")},
+            {}, attrs, colors)
+        assert rows["와플"][0][8] == "https://img.29cm.co.kr/item/a.jpg?width=240&format=webp"
+
+    def test_missing_image_stays_none(self):
+        # 랭킹에서 빠진 지 오래된 상품은 사진을 못 받는다. 화면에 자리표시자가 있다.
+        import extract_attributes as ea
+
+        attrs, _stop, colors = ea.load_dictionary()
+        rows = build_p({"x": _item("와플 티셔츠", 3)}, {}, attrs, colors)
+        assert rows["와플"][0][8] is None
 
     def test_zero_discount_is_kept_not_dropped(self):
         # 0 과 None 은 다르다. 0 은 정가 판매를 확인한 것이고 None 은 모른다는 뜻이다.

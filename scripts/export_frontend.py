@@ -32,6 +32,7 @@ import json
 import re
 import sqlite3
 import sys
+from datetime import date, timedelta
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -342,6 +343,8 @@ def main(argv=None) -> int:
         "baseISO": base_d,
         "detectISO": detect_d,
         "holdISO": hold_d,
+        # 다음 채점일. 화면이 LLM 에게 "오늘과 다음 채점일" 을 알려 줄 때 쓴다.
+        "nextISO": (date.fromisoformat(hold_d) + timedelta(days=7)).isoformat(),
     }
     args.out.write_text(
         head + js_literal("G", g) + js_literal("P", p) + js_literal("LEDGER", ledger)

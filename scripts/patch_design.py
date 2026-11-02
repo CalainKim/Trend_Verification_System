@@ -222,6 +222,23 @@ def wire_images(src: str) -> str:
     return src.replace(old, new)
 
 
+def fix_llm_prompt(src: str) -> tuple[str, int]:
+    """LLM 에게 알려 주는 "없는 데이터" 목록에서 이제 있는 것을 뺀다.
+
+    여기가 틀리면 LLM 이 "정가와 할인율이 없어 할인 효과를 판단할 수 없다" 같은
+    사실과 다른 답을 낸다. 화면 문구보다 조용히 틀리는 자리라 꼭 맞춰야 한다.
+    """
+    n = 0
+    for gone in ("'해외 선행 기간', ", "'정가와 할인율', ", ", '정가와 할인율'"):
+        n += src.count(gone)
+        src = src.replace(gone, "")
+    # 날짜도 주마다 바뀐다.
+    src = src.replace("오늘: '2026-11-02', 다음채점: '2026-11-08'",
+                      "오늘: WEEK.holdISO, 다음채점: WEEK.nextISO")
+    src = src.replace("오늘: '2026-11-02'", "오늘: WEEK.holdISO")
+    return src, n
+
+
 def wire_week(src: str) -> tuple[str, int]:
     # 신선도 문턱. 주가 바뀌면 같이 움직여야 한다.
     src, n = re.subn(r"'2026-10-18'", "WEEK.baseISO", src)
@@ -256,6 +273,8 @@ def main(argv=None) -> int:
     print(f"신선도 문턱 {n}곳과 검증 기록 CSV 를 WEEK 로 교체")
     src, n = fix_pending_text(src)
     print(f"연결이 끝났는데 연결 예정이라고 적힌 문구 {n}곳 수정")
+    src, n = fix_llm_prompt(src)
+    print(f"LLM 에게 알려 주는 없는 데이터에서 {n}곳 제거, 날짜를 WEEK 로 교체")
 
     args.out.write_text(src, encoding="utf-8")
     print(f"\n{args.out}")

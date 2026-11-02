@@ -372,6 +372,87 @@
                 </div>
               </sc-if>
 
+              <sc-if value="{{ pn.isBench }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:26px;font-weight:400;letter-spacing:-0.325px">2차 벤치마킹</span><span style="font-size:13px;color:var(--color-body)">카테고리 구분 없이 모아서 심층 분석합니다</span></div>
+                <section data-anim="rise" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                  <div style="display:flex;flex-direction:column;gap:8px;flex:1 1 320px;min-width:0">
+                    <span style="font-size:12px;font-weight:600;color:var(--color-body)">1차 카테고리별 선별</span>
+                    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"><sc-for list="{{ bench.cats }}" as="c" hint-placeholder-count="4"><div data-tip="{{ c.tip }}" data-anim="rise" data-anim-i="{{ $index }}" style="border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;border:1px {{ c.bs }} {{ c.bd }};background:{{ c.bg }}"><span style="font-size:13px;font-weight:600;color:{{ c.fg }}">{{ c.name }}</span><span style="font-size:12px;color:var(--color-body)">{{ c.sub }}</span></div></sc-for></div>
+                  </div>
+                  <span data-anim="fade" data-anim-i="5" style="font-size:22px;color:var(--color-muted)">→</span>
+                  <div data-anim="pop" data-anim-i="6" style="border-radius:10px;padding:12px 18px;background:var(--color-ink);color:var(--color-canvas);display:flex;flex-direction:column;gap:2px;min-width:120px"><span style="font-size:12px;color:var(--color-hairline-strong)">2차 대상</span><span style="font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums">{{ bench.n }}</span><span style="font-size:12px;color:var(--color-hairline-strong)">{{ bench.doneTxt }}</span></div>
+                </section>
+                <sc-if value="{{ bench.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:36px 24px;border:1px dashed var(--color-hairline-strong);border-radius:12px;text-align:center;font-size:14px;color:var(--color-body)">아직 2차로 올라온 유형이 없습니다. 유형 탭 오른쪽 패널에서 "2차로 올리기"를 누르면 추가됩니다.</div></sc-if>
+                <sc-for list="{{ bench.items }}" as="b" hint-placeholder-count="2">
+                  <section data-anim="rise" data-anim-i="{{ $index }}" style="background:var(--color-surface-card);border:1px solid var(--color-hairline);border-radius:12px;display:flex;flex-direction:column">
+                    <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;flex-wrap:wrap">
+                      <span style="font-size:20px;font-weight:600">{{ b.name }}</span>
+                      <span style="font-size:12px;padding:2px 8px;border-radius:4px;background:var(--color-surface-strong);color:var(--color-body)">{{ b.cat }}</span>
+                      <span data-tip="{{ b.srcTip }}" style="font-size:12px;color:var(--color-body)">{{ b.src }}</span><sc-if value="{{ b.isEx }}" hint-placeholder-val="{{ false }}"><span data-tip="연결 전 카테고리라 예시 데이터로 채웠습니다" style="font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;border:1px dashed var(--color-hairline-strong);color:var(--color-muted)">예시</span></sc-if>
+                      <span style="font-size:13px;color:var(--color-body);font-variant-numeric:tabular-nums">{{ b.stat }}</span>
+                      <span style="flex:1"></span>
+                      <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:{{ b.sbg }};color:{{ b.sfg }}">{{ b.status }}</span>
+                      <button onClick="{{ b.toggle }}" aria-expanded="{{ b.exp }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease;background:{{ b.tbg }}" style-hover="background:var(--color-canvas-soft)">{{ b.toggleLabel }}</button><sc-if value="{{ b.hasType }}" hint-placeholder-val="{{ true }}"><button onClick="{{ b.openType }}" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease" style-hover="background:var(--color-canvas-soft)">1차 결과</button></sc-if>
+                      <sc-if value="{{ b.canRun }}" hint-placeholder-val="{{ true }}"><button onClick="{{ b.run }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);border-radius:8px;padding:7px 14px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease" style-hover="background:#000000">{{ b.runLabel }}</button></sc-if>
+                      <button onClick="{{ b.remove }}" disabled="{{ readOnly }}" data-tip="2차 목록에서 뺍니다" aria-label="2차에서 빼기" style="border:1px solid var(--color-hairline-strong);background:var(--color-surface-card);border-radius:8px;padding:7px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;color:var(--color-ink);transition:background 120ms ease;color:var(--color-body)" style-hover="background:var(--color-canvas-soft)">빼기</button>
+                    </div>
+                    <sc-if value="{{ b.exp }}" hint-placeholder-val="{{ false }}">
+                      <div data-anim="rise" style="border-top:1px solid var(--color-hairline-soft);padding:16px 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start">
+                        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                          <span style="font-size:12px;font-weight:600;color:var(--color-body)">오른 상품 {{ b.pn }}</span>
+                          <sc-for list="{{ b.prods }}" as="p" hint-placeholder-count="3">
+                            <div style="border:1px solid var(--color-hairline);border-radius:8px;display:flex;flex-direction:column;background:{{ p.bg }}">
+                              <button onClick="{{ p.toggle }}" aria-expanded="{{ p.open }}" style="display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:0;background:transparent;cursor:pointer;text-align:left;font-family:var(--font-sans);color:var(--color-ink)">
+                                <span style="display:flex;flex-direction:column;gap:1px;font-variant-numeric:tabular-nums"><span style="font-size:15px;font-weight:600">{{ p.rank }}위</span><span style="font-size:11px;font-weight:600;color:{{ p.jc }}">{{ p.jt }}</span></span>
+                                <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;color:var(--color-body)">{{ p.brand }}</span><span style="font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span></span>
+                                <span style="font-size:13px;color:var(--color-body);font-variant-numeric:tabular-nums;display:flex;gap:8px;align-items:center">{{ p.price }}<span style="font-size:11px;color:var(--color-muted)">{{ p.caret }}</span></span>
+                              </button>
+                              <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
+                                <div data-anim="rise" style="border-top:1px solid var(--color-hairline-soft);padding:12px;display:flex;flex-direction:column;gap:10px">
+                                  <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:13px"><span style="color:var(--color-body)">상품명</span><span style="text-wrap:pretty">{{ p.full }}</span><span style="color:var(--color-body)">순위 흐름</span><span style="font-variant-numeric:tabular-nums">{{ p.flow }}</span><span style="color:var(--color-body)">가격</span><span>{{ p.price }}</span><span style="color:var(--color-body)">대상</span><span>{{ p.gender }}</span></div>
+                                  <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ p.attrs }}" as="a" hint-placeholder-count="3"><span style="font-size:12px;padding:2px 8px;border-radius:4px;background:var(--color-surface-strong);color:var(--color-body)">{{ a }}</span></sc-for></div>
+                                  <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ p.links }}" as="l" hint-placeholder-count="3"><a href="{{ l.href }}" target="_blank" rel="noopener" style="font-size:12px;font-weight:500;color:var(--color-ink);text-decoration:none;border:1px solid var(--color-hairline-strong);border-radius:6px;padding:3px 8px;white-space:nowrap;transition:background 120ms ease" style-hover="background:var(--color-canvas-soft)">{{ l.label }} ↗</a></sc-for></div>
+                                </div>
+                              </sc-if>
+                            </div>
+                          </sc-for>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                          <span style="font-size:12px;font-weight:600;color:var(--color-body)">관련 검색어</span>
+                          <div style="border:1px solid var(--color-hairline);border-radius:8px;display:flex;flex-direction:column">
+                            <sc-for list="{{ b.kws }}" as="k" hint-placeholder-count="4">
+                              <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 64px auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--color-hairline-soft)">
+                                <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:14px;font-weight:500">{{ k.k }}</span><span style="font-size:11px;color:var(--color-muted)">{{ k.src }}</span></span>
+                                <span data-tip="{{ k.tip }}" style="display:flex;align-items:flex-end;gap:2px;height:24px"><sc-for list="{{ k.bars }}" as="v" hint-placeholder-count="8"><span data-anim="bar-up" data-anim-i="{{ $index }}" style="flex:1;border-radius:1px;transform-origin:bottom;height:{{ v.h }};background:{{ v.c }}"></span></sc-for></span>
+                                <span style="font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;color:{{ k.cc }}">{{ k.chg }}</span>
+                                <span style="display:flex;gap:4px"><sc-for list="{{ k.links }}" as="l" hint-placeholder-count="2"><a href="{{ l.href }}" target="_blank" rel="noopener" data-tip="{{ l.tip }}" style="font-size:12px;font-weight:500;color:var(--color-ink);text-decoration:none;border:1px solid var(--color-hairline-strong);border-radius:6px;padding:3px 8px;white-space:nowrap;transition:background 120ms ease" style-hover="background:var(--color-canvas-soft)">{{ l.label }}</a></sc-for></span>
+                              </div>
+                            </sc-for>
+                          </div>
+                          <span style="font-size:11px;color:var(--color-muted)">막대는 최근 8주 검색량(상대값), 숫자는 직전 4주 대비 최근 4주 변화</span>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ b.showStages }}" hint-placeholder-val="{{ false }}">
+                      <div style="border-top:1px solid var(--color-hairline-soft);padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+                        <div style="height:4px;border-radius:2px;background:var(--color-hairline-soft);overflow:hidden"><div style="height:100%;background:var(--color-ink);transition:width 400ms ease;width:{{ b.pct }}"></div></div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px"><sc-for list="{{ b.stages }}" as="g" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;transition:background 200ms ease, opacity 200ms ease;background:{{ g.bg }};opacity:{{ g.op }}"><span style="width:18px;height:18px;flex:none;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;transition:background 200ms ease;background:{{ g.mbg }};color:{{ g.mfg }}">{{ g.mark }}</span><span style="font-size:13px">{{ g.label }}</span></div></sc-for></div>
+                        <sc-if value="{{ b.error }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--color-semantic-error)">분석에 실패했습니다. 다시 실행해 주세요.</span></sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ b.done }}" hint-placeholder-val="{{ false }}">
+                      <div data-anim="rise" style="border-top:1px solid var(--color-hairline-soft);padding:18px 20px 20px;display:flex;flex-direction:column;gap:16px">
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;padding:4px 12px;border-radius:999px;background:{{ b.vbg }};color:{{ b.vfg }}">{{ b.verdict }}</span><span style="font-size:13px;color:var(--color-body)">확신도 {{ b.conf }}</span><span style="flex:1"></span><span style="font-family:var(--font-mono);font-size:11px;color:var(--color-muted)">{{ b.at }}</span></div>
+                        <span style="font-size:15px;line-height:1.6;text-wrap:pretty">{{ b.summary }}</span>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+                          <sc-for list="{{ b.blocks }}" as="k" hint-placeholder-count="4"><div style="background:var(--color-canvas);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;font-weight:600;color:var(--color-body)">{{ k.title }}</span><sc-for list="{{ k.items }}" as="it" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500;text-wrap:pretty">{{ it.a }}</span><sc-if value="{{ it.hasB }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-body);text-wrap:pretty">{{ it.b }}</span></sc-if></div></sc-for></div></sc-for>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </section>
+                </sc-for>
+              </sc-if>
+
               <sc-if value="{{ pn.isSettings }}" hint-placeholder-val="{{ false }}">
                 <span style="font-size:26px;font-weight:400;letter-spacing:-0.325px">기준 설정</span>
                 <sc-if value="{{ notAdmin }}" hint-placeholder-val="{{ false }}"><div style="padding:36px 24px;border:1px dashed var(--color-hairline-strong);border-radius:12px;text-align:center;font-size:14px;color:var(--color-body);text-wrap:pretty">기준 설정은 관리자만 바꿀 수 있습니다. 아래 상태 줄에서 사용자를 최민호 팀장으로 바꾸면 볼 수 있습니다.</div></sc-if>
@@ -428,6 +509,7 @@
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ ins.vc.fg }};background:{{ ins.vc.bg }};border:1px {{ ins.vc.bs }} {{ ins.vc.bd }}">{{ ins.vc.label }}</span><span style="font-size:12px;color:var(--color-body)">{{ ins.vTip }}</span></div>
             <div style="display:flex;flex-direction:column;gap:8px">
               <button onClick="{{ ins.deep }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;text-align:center">{{ ins.deepLabel }}</button>
+              <button onClick="{{ ins.promote }}" disabled="{{ readOnly }}" style="border:1px solid var(--color-hairline-strong);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease;background:{{ ins.pbg }};color:var(--color-ink)">{{ ins.promoteLabel }}</button>
               <button onClick="{{ ins.watch }}" aria-pressed="{{ ins.watching }}" style="border:1px solid var(--color-hairline-strong);border-radius:8px;padding:8px 12px;cursor:pointer;font:var(--type-nav-link);font-size:13px;transition:background 120ms ease;background:{{ ins.wbg }};color:var(--color-ink)">{{ ins.watchLabel }}</button>
             </div>
             <div style="display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--color-hairline-soft);padding-top:12px"><span style="font-size:12px;font-weight:600;color:var(--color-body);padding-bottom:6px">오른 상품</span><sc-for list="{{ ins.prods }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.open }}" style="display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:center;border:0;background:transparent;border-radius:6px;padding:6px 4px;cursor:pointer;text-align:left;font-family:var(--font-sans);font-size:12px;color:var(--color-ink)" style-hover="background:var(--color-canvas-soft)"><span style="font-family:var(--font-mono);color:var(--color-muted)">{{ p.rank }}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span><span style="font-weight:600;color:{{ p.jc }}">{{ p.jt }}</span></button></sc-for><sc-if value="{{ ins.noProds }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-muted)">없음</span></sc-if></div>
@@ -636,6 +718,25 @@ const PENDING_TYPES = [['경량패딩', '아우터'], ['카고 팬츠', '하의'
 const TV = { '트렌드 후보': { fg: '#ffffff', bg: OK, bd: OK, bs: 'solid' }, '진짜 트렌드': { fg: '#ffffff', bg: OK, bd: OK, bs: 'solid' }, '브랜드 단독': { fg: '#ffffff', bg: 'var(--color-body)', bd: 'var(--color-body)', bs: 'solid' }, '잡음': { fg: '#ffffff', bg: 'var(--color-body)', bd: 'var(--color-body)', bs: 'solid' }, '관찰': { fg: INK, bg: 'transparent', bd: INK, bs: 'dashed' }, '지켜보기': { fg: INK, bg: 'transparent', bd: INK, bs: 'dashed' }, '신호 없음': { fg: MUTED, bg: 'transparent', bd: 'var(--color-hairline-strong)', bs: 'solid' } };
 const VORDER = { '트렌드 후보': 0, '관찰': 1, '브랜드 단독': 2, '신호 없음': 3 };
 const SEGC = [INK, '#5a5852', '#807d72', '#a09c92', '#cfcdc4'];
+const EXK = (k, src, w) => ({ k, src, w });
+const EXP = (brand, name, prev, rank, price, gender, attrs) => ({ brand, name, prev, rank, price, gender, attrs });
+const EX = [
+  { cat: '하의', name: '카펜터 팬츠', prods: [EXP('디키즈', '더블니 카펜터 팬츠 덕 브라운', 64, 18, 89000, '남녀공용', ['워크웨어', '더블니', '면 덕']), EXP('칼하트 WIP', '싱글니 팬츠 해밀턴 브라운', 72, 27, 159000, '남성', ['워크웨어', '싱글니']), EXP('유니폼브릿지', '카펜터 워크 팬츠 블랙', null, 33, 69000, '남녀공용', ['워크웨어', '와이드']), EXP('파르티멘토', '빈티지 워싱 카펜터 데님', 81, 41, 79000, '남녀공용', ['데님', '빈티지 워싱'])],
+    kws: [EXK('카펜터팬츠', '네이버', [22, 24, 25, 29, 34, 41, 52, 61]), EXK('더블니 팬츠', '네이버', [8, 9, 9, 12, 15, 19, 24, 30]), EXK('carpenter pants', '구글 미국', [41, 45, 48, 52, 55, 58, 60, 63]), EXK('워크팬츠 코디', '네이버', [12, 12, 13, 15, 17, 18, 22, 25])] },
+  { cat: '하의', name: '와이드 데님', prods: [EXP('리바이스', '578 배기 진 미디엄 인디고', 55, 22, 129000, '남녀공용', ['배기', '미디엄 워싱']), EXP('라퍼지스토어', '와이드 데님 팬츠 라이트 블루', 47, 30, 59000, '남녀공용', ['와이드', '라이트 워싱']), EXP('디스이즈네버댓', '루즈핏 데님 팬츠', null, 44, 99000, '남녀공용', ['루즈핏'])],
+    kws: [EXK('와이드데님', '네이버', [40, 41, 43, 42, 45, 47, 50, 52]), EXK('배기진', '네이버', [10, 11, 13, 14, 17, 18, 22, 24]), EXK('baggy jeans', '구글 미국', [55, 57, 60, 62, 63, 66, 68, 70])] },
+  { cat: '아우터', name: '경량패딩', prods: [EXP('아크테릭스', '아톰 후디 블랙', 38, 6, 380000, '남성', ['경량', '후드', '인슐레이션']), EXP('노스페이스', '눕시 라이트 재킷', 59, 14, 219000, '남녀공용', ['경량', '구스다운']), EXP('파타고니아', '나노 퍼프 재킷', 70, 25, 299000, '남녀공용', ['경량', '인슐레이션']), EXP('마무트', '알비나 IN 후디', null, 39, 289000, '남성', ['경량', '후드']), EXP('커버낫', '라이트 패딩 베스트', 88, 47, 99000, '남녀공용', ['경량', '베스트'])],
+    kws: [EXK('경량패딩', '네이버', [18, 20, 24, 31, 40, 52, 66, 80]), EXK('아톰후디', '네이버', [9, 10, 13, 17, 22, 28, 35, 41]), EXK('lightweight puffer', '구글 미국', [30, 34, 39, 45, 51, 58, 62, 67]), EXK('경량패딩 코디', '네이버', [6, 7, 9, 12, 15, 19, 24, 29])] },
+  { cat: '신발', name: '스웨이드 스니커즈', prods: [EXP('아디다스', 'SL 72 OG 스웨이드 그린', 42, 9, 109000, '남녀공용', ['스웨이드', '레트로 러닝']), EXP('푸마', '스피드캣 OG 레드', 61, 19, 119000, '여성', ['스웨이드', '로우 프로파일']), EXP('오니츠카타이거', '멕시코 66 SD', 77, 35, 160000, '남녀공용', ['스웨이드', '로우 프로파일'])],
+    kws: [EXK('스웨이드 스니커즈', '네이버', [20, 21, 23, 26, 28, 31, 34, 37]), EXK('스피드캣', '네이버', [12, 15, 19, 24, 27, 31, 36, 40]), EXK('suede sneakers', '구글 미국', [48, 50, 52, 55, 56, 59, 61, 63])] }
+];
+const SYS_B = `너는 무신사 상품기획팀의 트렌드 벤치마킹 분석가다. 카테고리별 1차 선별을 통과한 아이템 유형을 받아, 실제로 벤치마킹하고 입고를 준비할 만한지 최종 판단한다.
+규칙:
+- 주어진 데이터만 근거로 쓴다. 없는 데이터는 추측하지 말고 missing에 적는다.
+- 가운뎃점 문자를 쓰지 않는다. 나열은 쉼표로 한다.
+- 한국어로, 짧고 사실 위주로 쓴다.
+- 오직 JSON 하나만 출력한다.
+형식: {"verdict":"벤치마킹|보류|제외","confidence":"높음|중간|낮음","summary":"두세 문장","targets":[{"name":"참고할 브랜드나 상품","why":"이유"}],"evidence":["근거"],"risks":["위험"],"actions":["다음 할 일"],"missing":["부족한 데이터"]}`;
 const SYS_T = `너는 무신사 상품기획팀의 트렌드 검증 분석가다. 개별 상품이 아니라 아이템 유형(예: 경량패딩, 후드) 전체가 유행하는지 판단한다.
 규칙:
 - 주어진 데이터만 근거로 쓴다. 없는 데이터는 추측하지 말고 missing에 적는다.
@@ -661,7 +762,7 @@ class Component extends DCLogic {
     this.state = {
       act: 'trend', side: W >= 860, insp: W >= 1240, bottom: false, btab: 'log',
       tabs: [{ id: 'ov', kind: 'overview' }], active: 'ov', split: null, focus: 'L',
-      tri: saved.tri || {}, memo: saved.memo || {}, fb: saved.fb || {}, runs: saved.runs || {}, typeRuns: saved.typeRuns || {},
+      tri: saved.tri || {}, memo: saved.memo || {}, fb: saved.fb || {}, runs: saved.runs || {}, typeRuns: saved.typeRuns || {}, bench: saved.bench || {}, benchRuns: saved.benchRuns || {},
       owner: saved.owner || {}, log: saved.log || [], rules: saved.rules || { pass: true, top30: true, real: true, order: false },
       slack: saved.slack ?? '#md-trend-alert', email: saved.email ?? '', stageOn: saved.stageOn || [true, true], th: saved.th ?? null,
       me: saved.me || '김지윤', roles: saved.roles || { ...ROLES0 }, watchTypes: saved.watchTypes || {},
@@ -701,7 +802,7 @@ class Component extends DCLogic {
     clearTimeout(this.sv);
     this.sv = setTimeout(() => {
       const s = this.state, keep = o => Object.fromEntries(Object.entries(o).filter(([, r]) => r.phase === 'done'));
-      try { localStorage.setItem(LS, JSON.stringify({ tri: s.tri, memo: s.memo, fb: s.fb, runs: keep(s.runs), typeRuns: keep(s.typeRuns), rules: s.rules, slack: s.slack, email: s.email, owner: s.owner, log: s.log.slice(0, 300), stageOn: s.stageOn, th: s.th, me: s.me, roles: s.roles, watchTypes: s.watchTypes, guideSeen: s.guideSeen, sideW: s.sideW, inspW: s.inspW, bottomH: s.bottomH })); } catch (e) {}
+      try { localStorage.setItem(LS, JSON.stringify({ tri: s.tri, memo: s.memo, fb: s.fb, runs: keep(s.runs), typeRuns: keep(s.typeRuns), bench: s.bench, benchRuns: keep(s.benchRuns), rules: s.rules, slack: s.slack, email: s.email, owner: s.owner, log: s.log.slice(0, 300), stageOn: s.stageOn, th: s.th, me: s.me, roles: s.roles, watchTypes: s.watchTypes, guideSeen: s.guideSeen, sideW: s.sideW, inspW: s.inspW, bottomH: s.bottomH })); } catch (e) {}
     }, 300);
   }
   animateNew() {
@@ -717,6 +818,7 @@ class Component extends DCLogic {
       if (a === 'bar') A(el, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 700, delay: 120 + d * 2, easing: E, fill: 'backwards' });
       if (a === 'pop') A(el, [{ opacity: 0, transform: 'scale(.9)' }, { opacity: 1, transform: 'scale(1.04)', offset: .7 }, { opacity: 1, transform: 'none' }], { duration: 380, delay: d, easing: E, fill: 'backwards' });
       if (a === 'draw') A(el, [{ strokeDasharray: '1', strokeDashoffset: 1 }, { strokeDasharray: '1', strokeDashoffset: 0 }], { duration: 700, delay: 150 + d, easing: E, fill: 'backwards' });
+      if (a === 'bar-up') A(el, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 500, delay: 80 + d, easing: E, fill: 'backwards' });
       if (a === 'wipe-up') A(el, [{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 900, delay: 150, easing: E, fill: 'backwards' });
       if (a === 'wipe-right') A(el, [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 900, delay: 350, easing: E, fill: 'backwards' });
       if (a === 'fade') A(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 700, delay: 100 + d * 3, easing: 'ease-out', fill: 'backwards' });
@@ -881,6 +983,32 @@ class Component extends DCLogic {
     upd(() => ({ phase: 'done', report, at: stamp(), input }));
     this.showToast(id + ' 유형 심층 검증 리포트를 작성했습니다');
   }
+  async runBench(t) {
+    const id = t.name;
+    const upd = f => this.setState(s => ({ benchRuns: { ...s.benchRuns, [id]: { ...s.benchRuns[id], ...f(s.benchRuns[id] || {}) } } }));
+    this.setState(s => ({ benchRuns: { ...s.benchRuns, [id]: { phase: 'running', step: 0, pct: 4 } } }));
+    for (let i = 1; i <= 5; i++) { await wait(520); upd(() => ({ step: i, pct: 4 + i * 13 })); }
+    const g = t.gKey && G[t.gKey], prev = this.state.typeRuns[id];
+    const input = JSON.stringify({
+      아이템유형: id, 카테고리: t.cat || '상의 (29CM TOP100)', 예시데이터여부: !!t.isEx, 일차판정: t.v, 오른상품수: t.risen, 브랜드수: t.brands, 최다브랜드비중: Math.round(t.share * 100) + '%',
+      오른상품: t.risenList.map(p => ({ 브랜드: p.brand, 이름: p.name, 순위_1025: p.prev == null ? 'TOP100 밖' : p.prev, 순위_1101: p.rank, 가격: p.price, 세부속성: p.attrs })),
+      브랜드분포: t.brandObj, 세부속성: t.subObj,
+      검색: g ? { 검색어: t.gKey, 한국_최근12주: g.kr.slice(-12), 미국_최근12주: g.us.slice(-12) } : '없음',
+      일차_심층검증: prev && prev.report ? { 판정: prev.report.verdict, 요약: prev.report.summary } : '없음',
+      연결전_카테고리: ['하의', '아우터', '신발'], 없는데이터: ['일 단위 판매와 재고', '인플루언서 언급', '해외 커머스 랭킹', '무신사 자사 판매'], 오늘: '2026-11-02'
+    }, null, 1);
+    let report;
+    try {
+      const text = await window.claude.complete({ model: 'claude-sonnet-4-5', max_tokens: 2500, system: SYS_B, messages: [{ role: 'user', content: input }] });
+      report = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
+      const clean = v => Array.isArray(v) ? v.map(clean) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, clean(x)])) : nodot(v);
+      report = clean(report);
+    } catch (e) { upd(() => ({ phase: 'error' })); return; }
+    upd(() => ({ step: 6, pct: 100 })); await wait(400);
+    this.addLog(id + ' 유형', '2차 벤치마킹 분석 완료: ' + (report.verdict || '보류'));
+    upd(() => ({ phase: 'done', report, at: stamp() }));
+    this.showToast(id + ' 2차 분석 리포트를 작성했습니다');
+  }
   typeData(all, det) {
     const groups = {};
     all.forEach(p => { if (p.type !== '기타') (groups[p.type] = groups[p.type] || []).push(p); });
@@ -916,7 +1044,7 @@ class Component extends DCLogic {
     const tabById = id => s.tabs.find(t => t.id === id) || s.tabs[0];
     const focusTab = s.split && s.focus === 'R' ? tabById(s.split) : tabById(s.active);
     const leave = () => this.setState({ hoverType: null });
-    const titleOf = t => t.kind === 'overview' ? '이번 주 개요' : t.kind === 'type' ? t.key + ' 유형' : t.kind === 'product' ? short(t.key) : { ledger: '검증 기록', weekly: '주간 요약', alerts: '알림', settings: '기준 설정' }[t.kind];
+    const titleOf = t => t.kind === 'overview' ? '이번 주 개요' : t.kind === 'type' ? t.key + ' 유형' : t.kind === 'product' ? short(t.key) : { bench: '2차 벤치마킹', ledger: '검증 기록', weekly: '주간 요약', alerts: '알림', settings: '기준 설정' }[t.kind];
     const dotOf = t => { if (t.kind === 'type') { const x = T.find(y => y.name === t.key); return VDOT[x ? x.v : '신호 없음']; } if (t.kind === 'product') return [INK, INK]; return ['transparent', 'var(--color-hairline-strong)']; };
     const prodRow = p => ({ rank: p.rank, name: short(p.name), tip: p.brand + ' ' + p.name, jt: p.jump.t, jc: p.jump.c, open: () => this.openTab('product', p.name) });
 
@@ -1042,7 +1170,7 @@ class Component extends DCLogic {
 
     const panes = [{ tab: tabById(s.active), side: 'L' }].concat(s.split ? [{ tab: tabById(s.split), side: 'R' }] : []).map(({ tab, side }) => {
       const k = tab.kind, focused = !s.split || s.focus === side;
-      const o = { isOv: k === 'overview', isType: k === 'type', isProd: k === 'product', isLedger: k === 'ledger', isWeekly: k === 'weekly', isAlerts: k === 'alerts', isSettings: k === 'settings',
+      const o = { isOv: k === 'overview', isType: k === 'type', isProd: k === 'product', isLedger: k === 'ledger', isWeekly: k === 'weekly', isBench: k === 'bench', isAlerts: k === 'alerts', isSettings: k === 'settings',
         isSplit: !!s.split, sideName: side === 'L' ? '왼쪽' : '오른쪽', title: titleOf(tab), focusDot: focused ? INK : 'var(--color-hairline-strong)', bl: side === 'R' ? '1px solid var(--color-hairline-strong)' : '0',
         focus: () => { if (s.split && this.state.focus !== side) this.setState({ focus: side }); } };
       if (k === 'type') { const t = T.find(x => x.name === tab.key); o.ty = t ? typeDetail(t) : null; if (!t) { o.isType = false; o.isOv = true; } }
@@ -1097,6 +1225,9 @@ class Component extends DCLogic {
       ins = { ...ins, isType: true, vc: { label: t.v, ...TV[t.v] }, vTip: t.vTip, prods: t.risenList.slice(0, 8).map(prodRow), noProds: !t.risen,
         deepLabel: run && run.phase === 'done' ? '유형 심층 검증 다시 실행' : run && run.phase === 'running' ? '검증 중…' : '유형 심층 검증',
         deep: () => { if (!ro && !(run && run.phase === 'running')) this.runTypeDeep(t); },
+        ...(() => { const inB = s.bench[t.name] === 'in' || (t.v === '트렌드 후보' && s.bench[t.name] !== 'out');
+          return { promoteLabel: inB ? '2차에 올라감 ✓' : '2차로 올리기', pbg: inB ? 'var(--color-surface-strong)' : 'transparent',
+            promote: () => { if (ro) return; if (inB) { this.openTab('bench'); return; } this.setState(z => ({ bench: { ...z.bench, [t.name]: 'in' } })); this.addLog(t.name + ' 유형', '2차 벤치마킹으로 올림'); this.showToast(t.name + ' 유형을 2차로 올렸습니다'); } }; })(),
         watching: w, watchLabel: w ? '알림 받는 중 ✓' : '이 유형 알림 받기', wbg: w ? 'var(--color-surface-strong)' : 'transparent',
         watch: () => { this.setState(z => ({ watchTypes: { ...z.watchTypes, [t.name]: !w } })); this.showToast(w ? t.name + ' 유형 알림을 껐습니다' : t.name + ' 유형에 새 상품이 오르면 알려드립니다'); } };
     } else if (focusTab.kind === 'product' && byName[focusTab.key]) {
@@ -1144,6 +1275,7 @@ class Component extends DCLogic {
       ['기능', '이번 주 개요 열기', () => this.openTab('overview')], ['기능', '검증 기록 열기', () => this.openTab('ledger')], ['기능', '주간 요약 열기', () => this.openTab('weekly')],
       ['기능', '알림 설정 열기', () => this.openTab('alerts')], ['기능', '기준 설정 열기', () => this.openTab('settings')], ['기능', '급상승 상품 CSV 내보내기', exportQueue],
       ['기능', '화면 나란히 보기 켜고 끄기', () => this.toggleSplit()], ['기능', '아래 패널 열고 닫기', () => this.setState(z => ({ bottom: !z.bottom }))], ['기능', '처음 안내 다시 보기', () => this.setState({ guide: true })],
+      ['기능', '2차 벤치마킹 열기', () => this.openTab('bench')],
       ...T.map(t => ['유형', t.name + ' 유형 열기', () => this.openTab('type', t.name), t.v]),
       ...T.filter(t => t.risen && !ro).map(t => ['검증', t.name + ' 유형 심층 검증', () => { this.openTab('type', t.name); this.runTypeDeep(t); }, 'Claude']),
       ...det.slice().sort((a, b) => a.rank - b.rank).map(p => ['상품', p.brand + ' ' + short(p.name), () => this.openTab('product', p.name), p.rank + '위'])
@@ -1154,8 +1286,59 @@ class Component extends DCLogic {
     this._cmdN = cmdList.length;
     this._cmdRun = () => { const c = cmdList[ci]; if (c) { this.setState({ cmd: false }); c[2](); } };
 
-    const actDefs = [['trend', '트렌드', '유형과 상품 트리', 0], ['list', '급상승', '감지된 상품 목록', det.filter(p => p.dropAt < 0 && !st(p)).length], ['ledger', '검증', '검증 기록', 0], ['alerts', '알림', '알림', alerts.filter(a => a.hi).length], ['weekly', '요약', '주간 요약', 0], ['settings', '설정', '기준 설정', 0]];
+    const BST = ['1차 결과 정리', '카테고리 교차 확인', '해외 선행 비교', '브랜드 확산 경로', '가격대와 소재', 'Claude 종합 판단'];
+    const BV = { '벤치마킹': [OK, '#ffffff'], '보류': ['var(--color-surface-strong)', INK], '제외': ['var(--color-body)', '#ffffff'] };
+    const exT = EX.map(e => {
+      const risenList = e.prods.map(p => ({ ...p, jump: p.prev == null ? { t: '신규', c: UP } : { t: '▲ ' + (p.prev - p.rank), c: UP } }));
+      const bc = {}; risenList.forEach(p => { bc[p.brand] = (bc[p.brand] || 0) + 1; });
+      const brandArr = Object.entries(bc).sort((a, b) => b[1] - a[1]), sub = {}; risenList.forEach(p => p.attrs.forEach(a => { sub[a] = (sub[a] || 0) + 1; }));
+      return { ...e, isEx: true, v: '트렌드 후보', risenList, risen: risenList.length, brands: brandArr.length, share: brandArr[0][1] / risenList.length, brandArr, brandObj: Object.fromEntries(brandArr), subObj: sub, subArr: Object.entries(sub) };
+    });
+    const benchT = [...T.filter(t => s.bench[t.name] === 'in' || (t.v === '트렌드 후보' && s.bench[t.name] !== 'out')).map(t => ({ ...t, cat: '상의' })), ...exT.filter(t => s.bench[t.name] !== 'out')];
+    const enc = encodeURIComponent, won = n => n.toLocaleString('ko-KR') + '원';
+    const kwOf = t => {
+      if (t.kws) return t.kws;
+      const out = [];
+      if (t.gKey && G[t.gKey]) { const g = G[t.gKey]; out.push(EXK(t.gKey, '네이버', g.kr.slice(-8))); out.push(EXK(t.gKey, '구글 미국', g.us.slice(-8))); }
+      t.subArr.slice(0, 2).forEach(([a]) => out.push(EXK(a + ' ' + t.name, '연결 예정', null)));
+      return out;
+    };
+    const benchItems = benchT.map(t => {
+      const r = s.benchRuns[t.name], ph = r ? r.phase : 'idle', rep = (r && r.report) || {}, man = s.bench[t.name] === 'in' && t.v !== '트렌드 후보';
+      const st2 = ph === 'done' ? (rep.verdict || '보류') : ph === 'running' ? '분석 중' : ph === 'error' ? '실패' : '분석 전';
+      const sc = ph === 'done' ? (BV[rep.verdict] || BV['보류']) : ph === 'running' ? [INK, 'var(--color-canvas)'] : ['var(--color-surface-strong)', 'var(--color-body)'];
+      const L = (a) => (Array.isArray(a) ? a : []).map(x => typeof x === 'string' ? { a: x, b: '', hasB: false } : { a: x.name || '', b: x.why || '', hasB: !!x.why });
+      const exp = !!(s.benchExp || {})[t.name];
+      const prods = t.risenList.map((p, i) => { const key = t.name + '|' + i, op = !!(s.benchProd || {})[key];
+        return { rank: p.rank, jt: p.jump.t, jc: p.jump.c, brand: p.brand, name: short(p.name), full: p.name, price: won(p.price), gender: p.gender || '–', attrs: p.attrs, open: op, caret: op ? '▴' : '▾', bg: op ? 'var(--color-canvas-soft)' : 'var(--color-surface-card)',
+          flow: (p.prev == null ? 'TOP100 밖' : p.prev + '위') + ' → ' + p.rank + '위',
+          toggle: () => this.setState(z => ({ benchProd: { ...(z.benchProd || {}), [key]: !op } })),
+          links: [['29CM', 'https://www.29cm.co.kr/search?keyword='], ['무신사', 'https://www.musinsa.com/search/goods?keyword='], ['네이버 쇼핑', 'https://search.shopping.naver.com/search/all?query=']].map(([label, u]) => ({ label: label + '에서 찾기', href: u + enc(p.brand + ' ' + p.name.replace(/\[[^\]]*\]/g, '').trim()) })) }; });
+      const kws = kwOf(t).map(k => { const w = k.w, has = Array.isArray(w) && w.length >= 8, mx = has ? Math.max(...w, 1) : 1;
+        const a4 = has ? (w[0] + w[1] + w[2] + w[3]) / 4 : 0, b4 = has ? (w[4] + w[5] + w[6] + w[7]) / 4 : 0, chg = has && a4 ? Math.round((b4 - a4) / a4 * 100) : null;
+        return { k: k.k, src: k.src, chg: chg == null ? '–' : (chg > 0 ? '+' : '') + chg + '%', cc: chg == null ? MUTED : chg > 0 ? UP : '#2b67c2', tip: has ? '최근 8주: ' + w.join(', ') : '검색량 데이터 연결 전',
+          bars: (has ? w : [0, 0, 0, 0, 0, 0, 0, 0]).map((v, i) => ({ h: has ? Math.max(8, v / mx * 100) + '%' : '8%', c: !has ? 'var(--color-hairline-soft)' : i >= 4 ? INK : 'var(--color-hairline-strong)' })),
+          links: [{ label: '네이버', tip: '네이버에서 검색', href: 'https://search.naver.com/search.naver?query=' + enc(k.k) }, { label: '트렌드', tip: '구글 트렌드에서 보기', href: 'https://trends.google.com/trends/explore?q=' + enc(k.k) + (k.src === '구글 미국' ? '&geo=US' : '&geo=KR') }] }; });
+      return { isEx: !!t.isEx, hasType: !t.isEx, exp, toggleLabel: exp ? '상세 접기 ▴' : '상품, 검색어 ▾', tbg: exp ? 'var(--color-surface-strong)' : 'var(--color-surface-card)',
+        toggle: () => this.setState(z => ({ benchExp: { ...(z.benchExp || {}), [t.name]: !exp } })), prods, pn: prods.length + '건', kws,
+        name: t.name, cat: t.cat, src: t.isEx ? '1차 트렌드 후보' : man ? '직접 올림' : '1차 트렌드 후보', srcTip: man ? '담당자가 직접 2차로 올렸습니다' : '1차에서 트렌드 후보로 판정되어 자동으로 올라왔습니다',
+        stat: `오른 상품 ${t.risen}건, 브랜드 ${t.brands}곳`, status: st2, sbg: sc[0], sfg: sc[1],
+        canRun: !ro && ph !== 'running', runLabel: ph === 'done' || ph === 'error' ? '다시 분석' : '심층 분석',
+        run: () => this.runBench(t), openType: () => this.openTab('type', t.name),
+        remove: () => { this.setState(z => ({ bench: { ...z.bench, [t.name]: 'out' } })); this.showToast(t.name + ' 유형을 2차에서 뺐습니다'); },
+        showStages: ph === 'running' || ph === 'error', error: ph === 'error', pct: (r ? r.pct : 0) + '%',
+        stages: BST.map((label, i) => { const step = r ? r.step : 0, dn = i < step, cur = i === step && ph === 'running';
+          return { label, mark: dn ? '✓' : String(i + 1), mbg: dn ? OK : cur ? INK : 'var(--color-hairline-soft)', mfg: dn || cur ? '#ffffff' : 'var(--color-muted)', bg: cur ? 'var(--color-canvas-soft)' : 'transparent', op: dn || cur ? 1 : 0.55 }; }),
+        done: ph === 'done', verdict: rep.verdict || '보류', vbg: (BV[rep.verdict] || BV['보류'])[0], vfg: (BV[rep.verdict] || BV['보류'])[1], conf: rep.confidence || '–', at: r ? r.at || '' : '', summary: rep.summary || '',
+        blocks: [['벤치마킹 대상', L(rep.targets)], ['근거', L(rep.evidence)], ['위험', L(rep.risks)], ['다음 할 일', L(rep.actions)], ['부족한 데이터', L(rep.missing)]].filter(([, it]) => it.length).map(([title, items]) => ({ title, items })) };
+    });
+    const benchDone = benchItems.filter(b => b.done).length;
+    const bench = { n: benchItems.length, empty: !benchItems.length, items: benchItems, doneTxt: `분석 완료 ${benchDone}개`,
+      cats: [['상의', true], ['하의', false], ['아우터', false], ['신발', false]].map(([name, on]) => ({ name, sub: `후보 ${benchT.filter(t => t.cat === name).length}개` + (on ? '' : ', 예시'), tip: on ? '29CM 상의 TOP100에서 1차 선별' : '연결 전이라 예시 데이터입니다',
+        fg: on ? INK : 'var(--color-muted)', bg: on ? 'var(--color-surface-card)' : 'var(--color-canvas)', bd: on ? 'var(--color-ink)' : 'var(--color-hairline-strong)', bs: on ? 'solid' : 'dashed' })) };
+    const actDefs = [['trend', '트렌드', '유형과 상품 트리', 0], ['list', '급상승', '감지된 상품 목록', det.filter(p => p.dropAt < 0 && !st(p)).length], ['bench', '2차', '2차 벤치마킹', benchItems.filter(b => b.status === '분석 전').length], ['ledger', '검증', '검증 기록', 0], ['alerts', '알림', '알림', alerts.filter(a => a.hi).length], ['weekly', '요약', '주간 요약', 0], ['settings', '설정', '기준 설정', 0]];
     const sideRowsMap = {
+      bench: benchItems.map(b => ({ tag: b.status, tagBg: b.sbg, tagFg: b.sfg, label: b.name, sub: b.cat + ', ' + b.stat, go: () => this.openTab('bench') })),
       ledger: fbRows.map(r => ({ tag: r.fb, tagBg: r.fb === '맞음' ? OK : BAD, tagFg: '#ffffff', label: r.name, sub: '모델 ' + r.verdict, go: r.open })),
       alerts: alerts.map(a => ({ tag: a.tag, tagBg: a.hi ? INK : 'var(--color-surface-strong)', tagFg: a.hi ? 'var(--color-canvas)' : 'var(--color-body)', label: a.title, sub: a.body, go: a.go })),
       weekly: T.map(t => ({ tag: t.v, tagBg: VDOT[t.v][0] === 'transparent' ? 'var(--color-surface-strong)' : VDOT[t.v][0], tagFg: VDOT[t.v][0] === 'transparent' ? 'var(--color-body)' : '#ffffff', label: t.name, sub: `오른 상품 ${t.risen}건, 브랜드 ${t.brands}곳`, go: () => this.openTab('type', t.name) })),
@@ -1165,9 +1348,9 @@ class Component extends DCLogic {
     const btn = on => on ? 'var(--color-surface-strong)' : 'transparent';
 
     return {
-      rootRef: this.rootRef, tipRef: this.tipRef, cmdRef: this.cmdRef, leave, stop: e => e.stopPropagation(),
+      bench, rootRef: this.rootRef, tipRef: this.tipRef, cmdRef: this.cmdRef, leave, stop: e => e.stopPropagation(),
       acts: actDefs.map(([k, label, tip, badge]) => { const on = s.act === k && s.side; return { label, tip, badge, hasBadge: badge > 0, on, bg: on ? 'var(--color-surface-card)' : 'transparent', fg: on ? INK : 'var(--color-body)', bar: s.act === k ? INK : 'transparent',
-        go: () => { this.setState(z => ({ act: k, side: z.act === k ? !z.side : true, treeQ: '' })); if (k === 'trend') this.openTab('overview'); if (['ledger', 'alerts', 'weekly', 'settings'].includes(k)) this.openTab(k); } }; }),
+        go: () => { this.setState(z => ({ act: k, side: z.act === k ? !z.side : true, treeQ: '' })); if (k === 'trend') this.openTab('overview'); if (['bench', 'ledger', 'alerts', 'weekly', 'settings'].includes(k)) this.openTab(k); } }; }),
       openCmd: () => this.setState({ cmd: true, cmdQ: '', cmdI: 0 }), openGuide: () => this.setState({ guide: true }),
       sideOpen: s.side, sideClosed: !s.side, toggleSide: () => this.setState(z => ({ side: !z.side })),
       sideTitle: { trend: '탐색', list: '급상승 상품', ledger: '사람 피드백', alerts: '최근 알림', weekly: '유형별 이번 주', settings: '설정 항목' }[s.act],

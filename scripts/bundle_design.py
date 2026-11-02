@@ -32,7 +32,8 @@ OFFLINE_NOTE = (
 
 # 화면은 추론이 실패하면 "다시 실행해 주세요" 라고 적는다. 사본에서는 몇 번을
 # 눌러도 되지 않으므로 이유를 적어 준다. 문구는 마크업에 두 번 들어 있다.
-GENERIC_ERROR = "추론 요청이 실패했습니다. 다시 실행해 주세요."
+GENERIC_ERRORS = ("추론 요청이 실패했습니다. 다시 실행해 주세요.",
+                  "분석에 실패했습니다. 다시 실행해 주세요.")
 
 
 def inline_fonts(css: str, css_dir: Path) -> tuple[str, int]:
@@ -132,10 +133,11 @@ def soften_llm(html: str) -> tuple[str, int]:
              + repr(OFFLINE_NOTE) + ") })(")
     html = html.replace(call, guard)
 
-    n = html.count(GENERIC_ERROR)
+    n = sum(html.count(e) for e in GENERIC_ERRORS)
     if n == 0:
         raise SystemExit("추론 실패 문구를 찾지 못했다. 화면 구조가 바뀌었다")
-    html = html.replace(GENERIC_ERROR, OFFLINE_NOTE)
+    for e in GENERIC_ERRORS:
+        html = html.replace(e, OFFLINE_NOTE)
     return html, n
 
 

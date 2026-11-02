@@ -112,9 +112,22 @@ class TestDiscount:
         attrs, _stop, colors = ea.load_dictionary()
         rows = build_p({"x": _item("와플 티셔츠", 3, sale_percent=24)}, {}, attrs, colors)
         row = rows["와플"][0]
-        assert len(row) == 7
+        assert len(row) == 8
         assert row[:6] == [3, None, "b", "와플 티셔츠", 1000, "남"]
         assert row[6] == 24
+        assert row[7] is None   # 지난주 TOP100 에 없었으면 비교할 값이 없다
+
+    def test_previous_week_discount_for_comparison(self):
+        # 할인 때문에 올랐는지는 지난주와 견줘야 안다. 상시 할인 상품과
+        # 이번에 할인을 건 상품을 가르는 값이다.
+        import extract_attributes as ea
+
+        attrs, _stop, colors = ea.load_dictionary()
+        rows = build_p({"x": _item("와플 티셔츠", 3, sale_percent=40)},
+                       {"x": _item("와플 티셔츠", 50, sale_percent=10)},
+                       attrs, colors)
+        row = rows["와플"][0]
+        assert row[6] == 40 and row[7] == 10   # 30%p 더 할인하며 47계단 올랐다
 
     def test_zero_discount_is_kept_not_dropped(self):
         # 0 과 None 은 다르다. 0 은 정가 판매를 확인한 것이고 None 은 모른다는 뜻이다.

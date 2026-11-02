@@ -5,7 +5,8 @@
 모양을 실제 수집분으로 채워 준다. 화면 구조는 건드리지 않는다.
 
     G       속성별 검색 추이   {d0, last, k4, kp, kr[26], us[26], lead}
-    P       속성별 상품 목록   [순위, 지난주순위, 브랜드, 상품명, 판매가, 성별, 할인율]
+    P       속성별 상품 목록   [순위, 지난주순위, 브랜드, 상품명, 판매가, 성별,
+                              할인율, 지난주할인율]
     LEDGER  검증 기록         [상품명, 기준순위, 감지순위, 확인순위, 남음여부]
 
 화면의 필터 5단계 가운데 할인 효과와 해외 선행이 "연결 예정"으로 비어 있었다.
@@ -249,6 +250,9 @@ def build_p(this_week: Dict[str, dict], last_week: Dict[str, dict],
             cur["price"],
             cur["gender"],
             cur["sale_percent"],
+            # 할인 때문에 올랐는지 보려면 지난주와 견줘야 한다. 이번 주 값만으로는
+            # 원래 상시 할인하던 상품과 이번에 할인을 건 상품을 구분하지 못한다.
+            prev["sale_percent"] if prev else None,
         ]
         for a in ea.extract(cur["name"], attrs, colors):
             p[a["canonical"]].append(row)
@@ -351,12 +355,16 @@ def main(argv=None) -> int:
           f"(한국 선행 {home}건, 해외 선행 {len(leads) - home}건)")
     names = {r[3] for rows in p.values() for r in rows}
     disc = {r[3] for rows in p.values() for r in rows if (r[6] or 0) > 0}
+    # 지난주보다 할인을 더 건 상품. 화면의 할인 효과 단계가 볼 값이다.
+    deeper = {r[3] for rows in p.values() for r in rows
+              if r[7] is not None and (r[6] or 0) - r[7] >= 5}
     print(f"P       상품 목록 {len(p)}개 속성, 상품 {len(names)}개, 연인원 "
           f"{sum(len(v) for v in p.values())}건")
     if len(names) != len(hold):
         print(f"  주의. 확인 시점 TOP100 {len(hold)}개 중 {len(hold) - len(names)}개는 "
               f"사전에 걸리는 속성이 없어 화면에 안 나온다")
-    print(f"        할인 중인 상품 {len(disc)}개 / {len(names)}개")
+    print(f"        할인 중인 상품 {len(disc)}개 / {len(names)}개, "
+          f"지난주보다 5%p 이상 더 할인 {len(deeper)}개")
     print("TYPE_SKIP  " + ", ".join(f"{k}:{v}" for k, v in type_skip.items() if v))
     if ledger:
         print(f"LEDGER  {len(ledger)}건 중 {kept}건 남음 ({kept / len(ledger) * 100:.1f}%)")

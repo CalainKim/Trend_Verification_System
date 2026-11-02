@@ -18,7 +18,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "src"))
 from extract_attributes import extract, load_dictionary  # noqa: E402
+from trend_pipeline.persistence import KEEP_RATIO, MIN_RISE  # noqa: E402
 
 DB = ROOT / "data" / "signals.sqlite"
 OUT = ROOT / "docs" / "design" / "mock-data.json"
@@ -112,13 +114,30 @@ def persistence_track(c, runs):
                where channel='commerce_rank' and metric_type='rank' and observed_at=?""", (ts,))}
 
     a, b, d = (snap(last_day - timedelta(days=n)) for n in (14, 7, 0))
-    rose = [(k, a[k][0], b[k][0]) for k in b if k in a and a[k][0] - b[k][0] >= 10]
+    rose = [(k, a[k][0], b[k][0]) for k in b
+            if k in a and a[k][0] - b[k][0] >= MIN_RISE]
     recs = []
     for k, r0, r1 in rose:
         r2 = d.get(k, (None,))[0]
-        held = r2 is not None and (r0 - r2) >= (r0 - r1) / 2
+        held = r2 is not None and (r0 - r2) >= (r0 - r1) * KEEP_RATIO
         recs.append({"name": b[k][1], "r0": r0, "r1": r1, "r2": r2, "held": held})
     return {"rose": len(rose), "held": sum(r["held"] for r in recs), "examples": recs[:12]}
+
+
+def base_rate_29cm():
+    """커머스 벤치마크의 기저율. 봉인 파일에서 읽는다.
+
+    손으로 적어 두면 벤치마크를 다시 만들 때 시안 쪽만 옛 숫자로 남는다.
+    """
+    digest = ROOT / "benchmark" / "labels.digest.txt"
+    if not digest.exists():
+        print(f"경고. {digest} 가 없어 기저율을 넣지 못했다. "
+              f"./scripts/build_all_benchmarks.sh 를 먼저 돌려라")
+        return None
+    for line in digest.read_text(encoding="utf-8").splitlines():
+        if line.startswith("base"):
+            return round(float(line.split()[1]), 3)
+    return None
 
 
 def main(argv=None) -> int:
@@ -132,7 +151,7 @@ def main(argv=None) -> int:
         "commerce": commerce_attributes(c, runs),
         "gtrends": gtrends(c),
         "persistence_track": persistence_track(c, runs),
-        "benchmark_base_rate": {"29cm_7d": 0.541},
+        "benchmark_base_rate": {"29cm_7d": base_rate_29cm()},
     }
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")

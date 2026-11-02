@@ -4,6 +4,7 @@
 화면(Claude Design 의 Trend Monitor v8)은 세 상수를 쓴다. 이 스크립트는 같은
 모양을 실제 수집분으로 채워 준다. 화면 구조는 건드리지 않는다.
 
+    TRACK   유형 다주 궤적     {weeks, tops, rises, brands, score, parts, ...}
     SCORE   판정 성적표        {accuracy, coverage, precision, recall, ...}
     G       속성별 검색 추이   {d0, last, k4, kp, kr[26], us[26], lead}
     P       속성별 상품 목록   [순위, 지난주순위, 브랜드, 상품명, 판매가, 성별,
@@ -290,6 +291,44 @@ def build_ledger(base: Dict[str, dict], detect: Dict[str, dict],
     return out
 
 
+def build_track(conn: sqlite3.Connection, weeks: int = 6) -> Optional[dict]:
+    """유형 다주 궤적과 점수. 화면이 "계속 지켜본다" 에 답하는 자리다.
+
+    점수는 예측이 아니라 관측 요약이다. 유형 단위로 검증하려면 라벨이 필요한데
+    28건에 기저율 89.3% 라 어떤 점수도 찍기보다 낫다고 증명할 수 없다. 그래서
+    화면에 계산식과 함께 "예측 아님" 을 적어야 한다.
+    """
+    import track_types as tt
+
+    days = snapshot_days(conn)
+    chain = tt.weekly_chain(days, weeks)
+    if len(chain) < 3:
+        print(f"  주간 비교에 쓸 수집일이 {len(chain)}개뿐이라 궤적을 못 낸다")
+        return None
+    pairs = [(chain[i], chain[i + 1]) for i in range(len(chain) - 1)]
+    snaps = [(d, tt.week_snapshot(conn, pd, d)) for pd, d in pairs]
+    types = {t for _, s in snaps for t in s}
+    out = {}
+    for t in types:
+        got = [s.get(t, {}) for _, s in snaps]
+        rec = {
+            "weeks": [d for d, _ in snaps],
+            "verdicts": [g.get("verdict", tt.NONE) for g in got],
+            "tops": [g.get("n_top", 0) for g in got],
+            "rises": [g.get("n_rise", 0) for g in got],
+            "brands": [g.get("n_brand", 0) for g in got],
+        }
+        streak = best = 0
+        for v in rec["verdicts"]:
+            streak = streak + 1 if v == tt.CAND else 0
+            best = max(best, streak)
+        dirn, change = tt.direction(rec["tops"])
+        rec.update(streak=best, direction=dirn, change=round(change, 3))
+        rec.update(tt.type_score(rec))
+        out[t] = rec
+    return dict(sorted(out.items(), key=lambda kv: -kv[1]["score"]))
+
+
 def build_score(benchmark: Path, verdicts: Optional[Path]) -> Optional[dict]:
     """판정 성적표. 화면의 검증 기록 타일 네 개가 읽는다.
 
@@ -400,18 +439,20 @@ def main(argv=None) -> int:
         # 다음 채점일. 화면이 LLM 에게 "오늘과 다음 채점일" 을 알려 줄 때 쓴다.
         "nextISO": (date.fromisoformat(hold_d) + timedelta(days=7)).isoformat(),
     }
+    track = build_track(conn) or {}
     score = build_score(args.benchmark_dir, args.verdicts)
     args.out.write_text(
         head + js_literal("G", g) + js_literal("P", p) + js_literal("LEDGER", ledger)
         + js_literal("TYPE_SKIP", type_skip) + js_literal("WEEK", week)
-        + js_literal("SCORE", score),
+        + js_literal("TRACK", track) + js_literal("SCORE", score),
         encoding="utf-8",
     )
     if args.json:
         args.out.with_suffix(".json").write_text(
             json.dumps({"weeks": [base_d, detect_d, hold_d], "G": g, "P": p,
                         "LEDGER": ledger, "TYPE_SKIP": type_skip, "WEEK": week,
-                        "SCORE": score}, ensure_ascii=False, indent=1),
+                        "TRACK": track, "SCORE": score},
+                       ensure_ascii=False, indent=1),
             encoding="utf-8",
         )
 
@@ -436,6 +477,10 @@ def main(argv=None) -> int:
     withimg = {r[3] for rows in p.values() for r in rows if r[8]}
     print(f"        사진이 있는 상품 {len(withimg)}개 / {len(names)}개")
     print("TYPE_SKIP  " + ", ".join(f"{k}:{v}" for k, v in type_skip.items() if v))
+    if track:
+        top = list(track.items())[:3]
+        print(f"TRACK   유형 {len(track)}개 {len(next(iter(track.values()))['weeks'])}주, "
+              + ", ".join(f"{k} {v['score']}점" for k, v in top))
     if ledger:
         print(f"LEDGER  {len(ledger)}건 중 {kept}건 남음 ({kept / len(ledger) * 100:.1f}%)")
     else:

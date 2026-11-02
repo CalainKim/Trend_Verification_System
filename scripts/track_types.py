@@ -129,6 +129,32 @@ def direction(tops: List[float]) -> tuple:
     return FLAT, change
 
 
+# 점수의 가중치. 화면에 계산식을 적어야 하므로 단순하게 둔다. 이 점수는
+# 예측이 아니라 관측 요약이다. 유형 단위로 검증하려 해 봤으나 라벨이 28건에
+# 기저율이 89.3% 라, 어떤 점수도 찍기보다 낫다고 증명할 수 없다. 예측으로
+# 쓰려면 상품 단위로 가야 한다.
+W_GROWTH, W_STREAK, W_SPREAD = 0.5, 0.3, 0.2
+
+
+def type_score(track: dict) -> dict:
+    """유형 점수와 하위 점수 셋.
+
+    추세  TOP100 안 상품 수가 앞 절반 대비 뒤 절반에 얼마나 늘었나
+    연속  몇 주째 트렌드 후보인가
+    분산  오른 상품이 몇 개 브랜드에 퍼져 있나
+    """
+    ch = track["change"]
+    growth = 100 if ch >= 0.5 else 70 if ch >= TREND_SLOPE else 40 if ch > -TREND_SLOPE else 10
+    streak = min(track["streak"], 5) / 5 * 100
+    tops, brands = track["tops"][-1], track["brands"][-1]
+    spread = min(brands / tops, 1.0) * 100 if tops else 0.0
+    return {
+        "score": round(growth * W_GROWTH + streak * W_STREAK + spread * W_SPREAD),
+        "parts": {"growth": round(growth), "streak": round(streak),
+                  "spread": round(spread)},
+    }
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--db", type=Path, default=None)
@@ -152,7 +178,7 @@ def main(argv=None) -> int:
                    key=lambda t: -sum(s.get(t, {}).get("n_rise", 0) for _, s in snaps))
 
     head = ("  " + f"{'유형':<8}" + "".join(f"{d[5:]:>9}" for d, _ in snaps)
-            + "   연속    방향   변화")
+            + "   연속    방향   변화   점수")
     print(head)
     print("  " + "-" * (len(head) - 2))
     track = {}
@@ -168,7 +194,7 @@ def main(argv=None) -> int:
             best = max(best, streak)
         dirn, change = direction([s.get(t, {}).get("n_top", 0) for _, s in snaps])
         print(f"  {t:<8}" + "".join(f"{c:>9}" for c in cells)
-              + f"{best:>6}주  {dirn:>6} {change:>+6.0%}")
+              + f"{best:>6}주  {dirn:>6} {change:>+6.0%}", end="")
         track[t] = {
             "weeks": [d for d, _ in snaps],
             "verdicts": [s.get(t, {}).get("verdict", NONE) for _, s in snaps],
@@ -180,6 +206,8 @@ def main(argv=None) -> int:
             "direction": dirn,
             "change": round(change, 3),
         }
+        track[t].update(type_score(track[t]))
+        print(f"{track[t]['score']:>7}")
 
     print()
     rising = [t for t, v in track.items()

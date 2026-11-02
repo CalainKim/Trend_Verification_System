@@ -46,6 +46,22 @@ echo
 $PY scripts/patch_design.py "$SRC" -o "$WORK/patched.html"
 echo
 $PY scripts/bundle_design.py "$WORK/patched.html" --assets design/runtime -o "$OUT"
+
+# 내 컴퓨터에서 바로 쓸 사본. 키가 들어 있어 남에게 보내면 안 되므로 이름에
+# 로컬 을 넣는다. 번들러가 그 글자가 없으면 거부한다. ANTHROPIC_API_KEY 가
+# 없으면 이 단계는 건너뛴다.
+if [ -f .env ]; then set -a; . ./.env; set +a; fi
+LOCAL="build/트렌드 모니터 ($HOLD) 로컬.html"
+if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+    echo
+    $PY scripts/bundle_design.py "$WORK/patched.html" --assets design/runtime \
+        -o "$LOCAL" --embed-key
+else
+    echo
+    echo "ANTHROPIC_API_KEY 가 없어 로컬 사본은 만들지 않았다"
+fi
+
 echo
 echo "열어 보려면"
-echo "  open \"$OUT\""
+echo "  open \"$LOCAL\"        내 컴퓨터용, 키 들어 있음"
+echo "  open \"$OUT\"   보낼 것, 키 없음"

@@ -367,7 +367,24 @@ def main(argv=None) -> int:
     ap.add_argument("--assets", type=Path, required=True,
                     help="support.js 와 _ds 가 있는 폴더")
     ap.add_argument("-o", "--out", type=Path, required=True)
+    ap.add_argument("--embed-key", action="store_true",
+                    help="환경변수 ANTHROPIC_API_KEY 를 파일에 넣는다. 내 컴퓨터에서 "
+                         "바로 쓰려는 사본에만 쓴다. 이 파일은 절대 남에게 보내지 "
+                         "않는다. 파일 이름에 로컬 이 들어가야 한다")
     args = ap.parse_args(argv)
+
+    if args.embed_key:
+        import os
+
+        key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+        if not key.startswith("sk-ant-"):
+            raise SystemExit("ANTHROPIC_API_KEY 가 없거나 모양이 다르다. "
+                             "set -a && . ./.env && set +a 로 불러와라")
+        # 이름으로 구분하지 않으면 보낼 파일과 섞인다. 5.9MB 짜리를 카톡에 올릴
+        # 때 둘 중 어느 것인지 파일 이름만 보고 알 수 있어야 한다.
+        if "로컬" not in args.out.name:
+            raise SystemExit("--embed-key 로 만드는 파일은 이름에 '로컬' 이 "
+                             "들어가야 한다. 보낼 파일과 섞이면 키가 샌다")
 
     html = args.source.read_text(encoding="utf-8")
     before = len(html.encode())
@@ -384,7 +401,24 @@ def main(argv=None) -> int:
     if left:
         print(f"  주의. 아직 바깥 파일을 가리킨다: {sorted(set(left))[:5]}")
 
+    if args.embed_key:
+        # shim 이 묻지 않고 바로 쓰도록 키를 심는다. 지우려면 브라우저 저장소를
+        # 비우면 되고, 그러면 다시 묻는다.
+        import os
+
+        key = os.environ["ANTHROPIC_API_KEY"].strip()
+        seed = ("\n<script>\n"
+                "// 내 컴퓨터 전용 사본이다. 키가 들어 있으므로 남에게 보내지 않는다.\n"
+                "try { localStorage.setItem('trendcheck-anthropic-key', "
+                + json.dumps(key) + "); } catch (e) {}\n"
+                "</script>\n")
+        html = html.replace("</head>", seed + "</head>", 1)
+
     args.out.write_text(html, encoding="utf-8")
+    if args.embed_key:
+        print()
+        print("  주의. 이 파일에는 API 키가 들어 있다. 카톡이나 메일로 보내지 마라.")
+        print("  보낼 파일은 --embed-key 없이 따로 만든 것이다.")
     size = len(html.encode())
     print(f"CSS {stats['css']}개, JS {stats['js']}개, 폰트 {stats['font']}개를 넣었다")
     print(f"심층 검증 오류 문구 {n_err}곳을 사본용 설명으로 교체")

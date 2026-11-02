@@ -318,3 +318,48 @@ class TestImageDedup:
         assert "img:" in body
         # 새로 그려지는 상품에도 적용돼야 하므로 관찰자가 필요하다.
         assert "MutationObserver" in body
+
+
+class TestLocalCopyGuard:
+    """키를 넣은 사본과 보낼 사본이 섞이면 키가 샌다.
+
+    둘 다 4.5MB 짜리 html 이라 열어 보지 않으면 구분이 안 된다. 그래서 이름으로
+    가른다. --embed-key 는 이름에 로컬 이 들어가야만 통한다.
+    """
+
+    def _main(self, argv):
+        import bundle_design as bd
+
+        return bd.main(argv)
+
+    def test_refuses_name_without_local(self, tmp_path, monkeypatch):
+        import pytest as _pt
+
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-" + "x" * 30)
+        src = tmp_path / "in.html"
+        src.write_text("<html><head></head><body></body></html>", encoding="utf-8")
+        with _pt.raises(SystemExit) as e:
+            self._main([str(src), "--assets", str(tmp_path),
+                        "-o", str(tmp_path / "보낼것.html"), "--embed-key"])
+        assert "로컬" in str(e.value)
+
+    def test_refuses_without_key(self, tmp_path, monkeypatch):
+        import pytest as _pt
+
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+        src = tmp_path / "in.html"
+        src.write_text("<html><head></head><body></body></html>", encoding="utf-8")
+        with _pt.raises(SystemExit) as e:
+            self._main([str(src), "--assets", str(tmp_path),
+                        "-o", str(tmp_path / "로컬.html"), "--embed-key"])
+        assert "ANTHROPIC_API_KEY" in str(e.value)
+
+    def test_refuses_malformed_key(self, tmp_path, monkeypatch):
+        import pytest as _pt
+
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "not-a-key")
+        src = tmp_path / "in.html"
+        src.write_text("<html><head></head><body></body></html>", encoding="utf-8")
+        with _pt.raises(SystemExit):
+            self._main([str(src), "--assets", str(tmp_path),
+                        "-o", str(tmp_path / "로컬.html"), "--embed-key"])

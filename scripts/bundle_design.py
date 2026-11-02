@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import json
 import re
 import sys
 from pathlib import Path
@@ -253,6 +254,7 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> int:
     print(f"  사진 {len(urls)}장을 받는다")
     s = requests.Session()
     done = fail = 0
+    blobs: dict = {}
     for i, u in enumerate(urls, 1):
         try:
             r = s.get(u, timeout=timeout)
@@ -262,13 +264,42 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> int:
             fail += 1
             continue
         mime = r.headers.get("content-type", "image/webp").split(";")[0]
-        b64 = base64.b64encode(r.content).decode()
-        html = html.replace(f'"{u}"', f'"data:{mime};base64,{b64}"')
+        blobs[u] = f"data:{mime};base64," + base64.b64encode(r.content).decode()
         done += 1
         if i % 50 == 0 or i == len(urls):
             print(f"    {i}/{len(urls)}")
     if fail:
         print(f"  주의. {fail}장은 받지 못해 주소로 남겼다")
+    if not blobs:
+        return html, 0
+
+    # 같은 사진이 여러 자리에 나온다. 상품 하나가 여러 속성에 걸려 P 에 중복으로
+    # 들어가기 때문이다. 자리마다 base64 를 복사하면 196장이 428장 분량이 된다.
+    # 사진은 한 번만 담고 자리에는 번호만 둔 뒤, 화면이 그릴 때 번호로 찾게 한다.
+    index = {u: i for i, u in enumerate(sorted(blobs))}
+    table = [blobs[u] for u in sorted(blobs)]
+    for u, i in index.items():
+        html = html.replace(f'"{u}"', f'"img:{i}"')
+    lookup = (
+        "\n<script>\n"
+        "// 사진은 아래 표에 한 번만 담는다. 자리에는 img:번호 만 있고, 화면이\n"
+        "// 그릴 때 이 함수가 바꿔 준다. 자리마다 복사하면 같은 사진이 두 번\n"
+        "// 넘게 들어가 파일이 두 배가 된다.\n"
+        "window.__IMG = " + json.dumps(table) + ";\n"
+        "(function () {\n"
+        "  function fix(el) {\n"
+        "    var s = el.getAttribute('src') || '';\n"
+        "    if (s.indexOf('img:') !== 0) return;\n"
+        "    var v = window.__IMG[parseInt(s.slice(4), 10)];\n"
+        "    if (v) el.setAttribute('src', v);\n"
+        "  }\n"
+        "  function sweep() { document.querySelectorAll('img[src^=\"img:\"]').forEach(fix); }\n"
+        "  new MutationObserver(sweep).observe(document.documentElement,\n"
+        "    { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });\n"
+        "  sweep();\n"
+        "})();\n</script>\n"
+    )
+    html = html.replace("</head>", lookup + "</head>", 1)
     return html, done
 
 

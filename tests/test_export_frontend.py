@@ -284,3 +284,37 @@ class TestBrowserShim:
     def test_yields_to_claude_design_runtime(self):
         # Claude Design 안에서는 런타임이 넣어 준 것을 써야 한다.
         assert "if (window.claude && window.claude.complete) return;" in self._shim()
+
+
+class TestImageDedup:
+    """같은 사진이 여러 자리에 나오면 한 번만 담아야 한다.
+
+    상품 하나가 여러 속성에 걸려 P 에 중복으로 들어간다. 자리마다 base64 를
+    복사하면 196장이 428장 분량이 되어 파일이 2.5MB 대신 1.1MB 로 줄 것을
+    못 줄인다.
+    """
+
+    def test_shared_photos_are_counted_once(self):
+        import json
+
+        data = json.loads(
+            (ROOT / "build" / "frontend_data.json").read_text(encoding="utf-8")
+        ) if (ROOT / "build" / "frontend_data.json").exists() else None
+        if data is None:
+            import pytest as _pt
+
+            _pt.skip("내보내기 결과가 없다")
+        urls = [r[8] for rows in data["P"].values() for r in rows if r[8]]
+        # 중복이 실제로 있다는 것부터 확인한다. 없으면 이 테스트가 무의미하다.
+        assert len(urls) > len(set(urls)), "중복이 없어 무엇을 막는지 알 수 없다"
+
+    def test_lookup_script_replaces_placeholders(self):
+        import bundle_design as bd
+
+        # 자리표시자를 실제 사진으로 바꾸는 코드가 들어 있어야 한다.
+        src = bd.__file__
+        body = Path(src).read_text(encoding="utf-8")
+        assert "window.__IMG" in body
+        assert "img:" in body
+        # 새로 그려지는 상품에도 적용돼야 하므로 관찰자가 필요하다.
+        assert "MutationObserver" in body

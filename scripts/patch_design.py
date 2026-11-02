@@ -182,6 +182,46 @@ def fix_pending_text(src: str) -> int:
     return src, n
 
 
+def wire_images(src: str) -> str:
+    """상품 사진을 실제로 띄운다.
+
+    원래는 끌어다 놓는 자리(image-slot)만 있고 29CM 이미지는 연결 예정이었다.
+    랭킹 API 가 imageUrl 을 주는데 수집기가 버리고 있었을 뿐이다. 사진이 있으면
+    img 로 띄우고, 없으면 원래 자리표시자를 그대로 둔다.
+    """
+    # 상품 객체에 사진 주소를 싣는다. P 의 아홉째 값이다.
+    old = "disc: x[6] ?? null, prevDisc: x[7] ?? null, attrs: [] };"
+    new = "disc: x[6] ?? null, prevDisc: x[7] ?? null, img: x[8] ?? null, attrs: [] };"
+    if src.count(old) != 1:
+        raise SystemExit("상품 객체에 사진을 실을 자리를 찾지 못했다")
+    src = src.replace(old, new)
+
+    # 상세 화면이 읽는 자리에 넣는다.
+    old = "        slotId: 'prod-' +"
+    new = "        img: sel.img || null, noImg: !sel.img,\n        slotId: 'prod-' +"
+    if src.count(old) != 1:
+        raise SystemExit("상품 상세의 사진 자리를 찾지 못했다")
+    src = src.replace(old, new)
+
+    # 마크업. 사진이 있으면 img, 없으면 원래 자리표시자.
+    old = ('<div data-tip="상품 사진을 끌어다 놓으세요. 29CM 이미지 자동 연결은 '
+           '[데이터 연결 예정]" style="width:88px;height:110px;flex:none;'
+           'border-radius:8px;overflow:hidden;background:var(--color-canvas)">'
+           '<image-slot id="{{ pn.p.slotId }}" shape="rounded" radius="8" '
+           'placeholder="사진"></image-slot></div>')
+    new = ('<div data-tip="29CM 상품 사진" style="width:88px;height:110px;flex:none;'
+           'border-radius:8px;overflow:hidden;background:var(--color-canvas)">'
+           '<sc-if value="{{ pn.p.img }}" hint-placeholder-val="{{ true }}">'
+           '<img src="{{ pn.p.img }}" alt="" loading="lazy" '
+           'style="width:100%;height:100%;object-fit:cover;display:block"></sc-if>'
+           '<sc-if value="{{ pn.p.noImg }}" hint-placeholder-val="{{ false }}">'
+           '<image-slot id="{{ pn.p.slotId }}" shape="rounded" radius="8" '
+           'placeholder="사진"></image-slot></sc-if></div>')
+    if src.count(old) != 1:
+        raise SystemExit("사진 자리 마크업을 찾지 못했다")
+    return src.replace(old, new)
+
+
 def wire_week(src: str) -> tuple[str, int]:
     # 신선도 문턱. 주가 바뀌면 같이 움직여야 한다.
     src, n = re.subn(r"'2026-10-18'", "WEEK.baseISO", src)
@@ -210,6 +250,8 @@ def main(argv=None) -> int:
     print("데이터 상수 교체, 원본 TYPE_SKIP 선언 제거")
     src = wire_stages(src)
     print("할인 효과와 해외 선행 단계 연결 (측정만, 거르지 않음)")
+    src = wire_images(src)
+    print("상품 사진 연결")
     src, n = wire_week(src)
     print(f"신선도 문턱 {n}곳과 검증 기록 CSV 를 WEEK 로 교체")
     src, n = fix_pending_text(src)

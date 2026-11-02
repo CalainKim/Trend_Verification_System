@@ -6,7 +6,7 @@
 
     G       속성별 검색 추이   {d0, last, k4, kp, kr[26], us[26], lead}
     P       속성별 상품 목록   [순위, 지난주순위, 브랜드, 상품명, 판매가, 성별,
-                              할인율, 지난주할인율]
+                              할인율, 지난주할인율, 사진주소]
     LEDGER  검증 기록         [상품명, 기준순위, 감지순위, 확인순위, 남음여부]
 
 화면의 필터 5단계 가운데 할인 효과와 해외 선행이 "연결 예정"으로 비어 있었다.
@@ -144,6 +144,7 @@ def ranks_on(conn: sqlite3.Connection, day: str) -> Dict[str, dict]:
             "gender": GENDER.get(m.get("category1"), ""),
             "is_new": bool(m.get("is_new")),
             "sale_percent": m.get("sale_percent"),
+            "image_url": m.get("image_url"),
         }
     return out
 
@@ -253,6 +254,9 @@ def build_p(this_week: Dict[str, dict], last_week: Dict[str, dict],
             # 할인 때문에 올랐는지 보려면 지난주와 견줘야 한다. 이번 주 값만으로는
             # 원래 상시 할인하던 상품과 이번에 할인을 건 상품을 구분하지 못한다.
             prev["sale_percent"] if prev else None,
+            # 원본은 280KB 라 그대로 쓰면 화면이 무겁다. CDN 이 ?width 로 줄여
+            # 주므로 상세 화면에 맞는 크기만 받는다.
+            cur["image_url"] + "?width=240&format=webp" if cur["image_url"] else None,
         ]
         for a in ea.extract(cur["name"], attrs, colors):
             p[a["canonical"]].append(row)
@@ -370,6 +374,8 @@ def main(argv=None) -> int:
               f"사전에 걸리는 속성이 없어 화면에 안 나온다")
     print(f"        할인 중인 상품 {len(disc)}개 / {len(names)}개, "
           f"지난주보다 5%p 이상 더 할인 {len(deeper)}개")
+    withimg = {r[3] for rows in p.values() for r in rows if r[8]}
+    print(f"        사진이 있는 상품 {len(withimg)}개 / {len(names)}개")
     print("TYPE_SKIP  " + ", ".join(f"{k}:{v}" for k, v in type_skip.items() if v))
     if ledger:
         print(f"LEDGER  {len(ledger)}건 중 {kept}건 남음 ({kept / len(ledger) * 100:.1f}%)")

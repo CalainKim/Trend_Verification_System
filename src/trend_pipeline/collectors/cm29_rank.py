@@ -29,6 +29,10 @@ BASE_URL = "https://recommend-api.29cm.co.kr"
 CATEGORIES_PATH = "/api/v4/best/categories"
 ITEMS_PATH = "/api/v4/best/items"
 PRODUCT_URL = "https://product.29cm.co.kr/catalog/{item_no}"
+# 상품 사진. API 가 주는 imageUrl 은 "/item/202511/....jpg" 꼴의 상대 경로다.
+# ?width=N 을 붙이면 CDN 이 줄여서 준다. 160px webp 는 1.7KB 로 원본의 166분의
+# 1이라 화면에 통째로 넣어도 부담이 없다. Referer 없이도 200 이 온다.
+IMAGE_CDN = "https://img.29cm.co.kr"
 
 #: 1차 분석 범위(상의) 카테고리. 3차 분류(티셔츠/후드/맨투맨)는 응답의
 #: frontCategoryInfo.category3Name 으로 사후 필터링한다.
@@ -188,6 +192,9 @@ class Cm29RankCollector(Collector):
             "category3_code": cat.get("category3Code"),
             "period_sort": period_sort,
             "url": PRODUCT_URL.format(item_no=item_no),
+            "image_url": (IMAGE_CDN + item["imageUrl"]) if item.get("imageUrl") else None,
+            # 정가. lastSalePrice 는 할인된 값이라 둘이 있어야 할인액을 알 수 있다.
+            "consumer_price": item.get("consumerPrice"),
         }
         entity = f"{self.platform}:{item_no}"
 

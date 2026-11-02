@@ -56,6 +56,41 @@ def inline_fonts(css: str, css_dir: Path) -> tuple[str, int]:
     return re.sub(r"url\(([^)]+)\)", swap, css), n
 
 
+def inline_remote_images(html: str, timeout: float = 15.0) -> int:
+    """화면에 박힌 29CM 사진 주소를 base64 로 바꾼다.
+
+    주소를 그대로 두면 파일이 인터넷 없이는 사진을 못 띄운다. 미팅에서 와이파이가
+    안 될 수 있으므로 안에 넣는다. 240px webp 는 한 장에 2.8KB 라 196장을 넣어도
+    0.7MB 다. 받다가 실패한 장은 주소를 남겨 둔다. 그 자리는 인터넷이 있으면
+    뜨고 없으면 비는데, 통째로 깨지는 것보다 낫다.
+    """
+    import requests
+
+    urls = sorted(set(re.findall(r'"(https://img\.29cm\.co\.kr/[^"]+)"', html)))
+    if not urls:
+        return 0
+    print(f"  사진 {len(urls)}장을 받는다")
+    s = requests.Session()
+    done = fail = 0
+    for i, u in enumerate(urls, 1):
+        try:
+            r = s.get(u, timeout=timeout)
+            if r.status_code != 200:
+                raise RuntimeError(r.status_code)
+        except Exception:
+            fail += 1
+            continue
+        mime = r.headers.get("content-type", "image/webp").split(";")[0]
+        b64 = base64.b64encode(r.content).decode()
+        html = html.replace(f'"{u}"', f'"data:{mime};base64,{b64}"')
+        done += 1
+        if i % 50 == 0 or i == len(urls):
+            print(f"    {i}/{len(urls)}")
+    if fail:
+        print(f"  주의. {fail}장은 받지 못해 주소로 남겼다")
+    return html, done
+
+
 def bundle(html: str, assets: Path) -> tuple[str, dict]:
     stats = {"css": 0, "js": 0, "font": 0}
 
@@ -116,10 +151,14 @@ def main(argv=None) -> int:
     before = len(html.encode())
     html, stats = bundle(html, args.assets)
     html, n_err = soften_llm(html)
+    html, n_img = inline_remote_images(html)
 
     # {{ }} 는 화면이 그릴 때 채우는 자리표시자지 바깥 파일이 아니다.
     left = [u for u in re.findall(r'(?:src|href)="(?!data:|http|#)([^"]+)"', html)
             if "{{" not in u]
+    remote_img = re.findall(r'src="(https://img\.29cm\.co\.kr/[^"]+)"', html)
+    if remote_img:
+        print(f"  주의. 사진 {len(remote_img)}장은 주소로 남아 인터넷이 있어야 뜬다")
     if left:
         print(f"  주의. 아직 바깥 파일을 가리킨다: {sorted(set(left))[:5]}")
 
@@ -127,6 +166,7 @@ def main(argv=None) -> int:
     size = len(html.encode())
     print(f"CSS {stats['css']}개, JS {stats['js']}개, 폰트 {stats['font']}개를 넣었다")
     print(f"심층 검증 오류 문구 {n_err}곳을 사본용 설명으로 교체")
+    print(f"상품 사진 {n_img}장을 파일 안에 넣었다")
     print(f"{before / 1024:.0f}KB -> {size / 1024 / 1024:.1f}MB")
     print(f"\n{args.out}")
     return 0

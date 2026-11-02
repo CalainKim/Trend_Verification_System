@@ -1,0 +1,336 @@
+# 상품명에서 뽑아낼 속성 키워드 사전
+#
+# 29CM 상품명은 "( Waffle ) 루즈핏 와플 헨리넥 긴팔티 ( 4Color )" 처럼
+# 개별 상품을 가리킨다. 네이버 데이터랩은 "헨리넥" 처럼 품목 키워드를 받는다.
+# 두 채널이 같은 대상을 가리키게 하려면 상품명을 속성으로 쪼개야 한다.
+#
+# canonical 은 데이터랩에 그대로 질의할 한글 표준어다. 영어 표기를 한글로
+# 모으는 것이 이 사전의 핵심이다. variants 는 상품명에 나타나는 표기 변형이고
+# 띄어쓰기와 붙임표 차이는 매칭할 때 알아서 흡수하므로 적지 않아도 된다.
+#
+# en 은 해외 선행 여부를 볼 때 쓰는 현지 질의어다. 무신사가 제시한 "유행은
+# 해외에서 한국으로 온다"는 가설을 검증하려면 지역마다 다른 단어를 물어야 한다.
+# 미국에 "맨투맨"을 물으면 현지 유행이 아니라 한국어 사용자의 검색을 재게 되고,
+# 그래도 숫자는 멀쩡하게 나오므로 틀린 줄 모른다. en 이 없는 속성은 해외 비교에서
+# 제외한다. 티셔츠나 셔츠처럼 늘 검색되는 대분류는 일부러 비워 둔다.
+#
+# 이 값들이 연구 결과를 좌우한다. variants 를 빠뜨리면 그 상품은 속성이 없는
+# 것으로 집계되고, 색상을 속성으로 잘못 넣으면 색상 유행을 품목 유행으로
+# 읽는다. 사람이 검수하는 파일이므로 코드에 박지 않고 여기에 둔다.
+
+version: "2026-10-28"
+
+# 속성이 아닌 토큰. 매칭 후 남은 꼬리를 볼 때 걸러낸다.
+stopwords:
+  color:
+    - navy, 네이비, black, 블랙, white, 화이트, grey, gray, 그레이
+    - charcoal, 차콜, ivory, 아이보리, brown, 브라운, cream, 크림
+    - beige, 베이지, purple, 퍼플, red, 레드, pink, 핑크, blue, 블루
+    - green, 그린, olive, 올리브, khaki, 카키, yellow, 옐로우
+    - orange, mint, sky, skyblue, wine, burgundy, mocha, sand, stone
+    - ash, jet, snow, milk, butter, lemon, oatmeal, melange, heather
+    - lilac, kelp, phantom, 팬텀, sumi, dusty, natural, 네추럴
+    - light, dark, deep, bright, pale, neon
+  noise:
+    - logo, 로고, essential, classic, comfort, base, premium, standard
+    - uni, unisex, 공용, woman, women, men, mens, 남성, 여성
+    - new, set, ver, version, color, colors, 컬러, pack, 팩
+    - 재입고, 단독, 예약, 배송, 기획, 차, 세트
+    - soft, multi, mid, sport, athletic, 베이직, 데일리, 오리지널
+
+# 속성 본체. group 은 같은 축의 값끼리 묶어 분석할 때 쓴다.
+attributes:
+  # ---- 넥라인 ----
+  - canonical: 헨리넥
+    group: 넥라인
+    en: henley shirt
+    variants: [henley, henley neck, 헨리넥, 헨리]
+  - canonical: 보트넥
+    group: 넥라인
+    en: boat neck top
+    variants: [boat neck, boatneck, 보트넥]
+  - canonical: 브이넥
+    group: 넥라인
+    en: v neck shirt
+    variants: [v neck, vneck, 브이넥, 뷔넥]
+  - canonical: 크루넥
+    group: 넥라인
+    en: crewneck
+    variants: [crewneck, crew neck, crew, 크루넥, 크루]
+  - canonical: 모크넥
+    group: 넥라인
+    en: mock neck
+    variants: [mock neck, mockneck, 모크넥]
+  - canonical: 터틀넥
+    group: 넥라인
+    en: turtleneck
+    variants: [turtleneck, turtle neck, 터틀넥, 목폴라, 폴라]
+  - canonical: 라운드넥
+    group: 넥라인
+    variants: [round neck, 라운드넥, 라운드]
+  - canonical: 더블넥
+    group: 넥라인
+    variants: [double neck, 더블넥]
+  - canonical: 오프숄더
+    group: 넥라인
+    en: off shoulder top
+    variants: [off shoulder, offshoulder, 오프숄더]
+  - canonical: 스퀘어넥
+    group: 넥라인
+    variants: [square neck, 스퀘어넥]
+  - canonical: 카라
+    group: 넥라인
+    en: collared shirt
+    variants: [collar, collared, 카라, 칼라]
+
+  # ---- 소매 ----
+  - canonical: 긴팔
+    group: 소매
+    variants: [long sleeve, longsleeve, l/s, ls, 롱 슬리브, 긴팔, 긴소매]
+  - canonical: 반팔
+    group: 소매
+    variants: [half sleeve, short sleeve, s/s, 반팔, 반소매, 하프 슬리브, 숏 슬리브]
+  - canonical: 칠부소매
+    group: 소매
+    en: three quarter sleeve
+    variants: [3/4 sleeve, three quarter sleeve, 칠부, 7부]
+  - canonical: 민소매
+    group: 소매
+    en: sleeveless top
+    variants: [sleeveless, 민소매, 나시, 슬리브리스]
+  - canonical: 라글란
+    group: 소매
+    en: raglan shirt
+    variants: [raglan, 래글런, 라글란, 레글런]
+  - canonical: 퍼프소매
+    group: 소매
+    en: puff sleeve
+    variants: [puff sleeve, 퍼프소매, 퍼프]
+
+  # ---- 핏 ----
+  - canonical: 크롭
+    group: 핏
+    en: crop top
+    variants: [crop, cropped, 크롭]
+  - canonical: 오버사이즈
+    group: 핏
+    en: oversized tee
+    variants: [oversized, oversize, over fit, 오버사이즈, 오버핏]
+  - canonical: 루즈핏
+    group: 핏
+    en: loose fit shirt
+    variants: [loose fit, loosefit, 루즈핏, 루즈]
+  - canonical: 슬림핏
+    group: 핏
+    variants: [slim fit, slimfit, 슬림핏]
+  - canonical: 스탠다드핏
+    group: 핏
+    variants: [standard fit, regular fit, 스탠다드핏, 레귤러핏]
+  - canonical: 와이드
+    group: 핏
+    variants: [wide, 와이드]
+
+  # ---- 여밈 ----
+  - canonical: 집업
+    group: 여밈
+    en: zip up hoodie
+    variants: [zip up, zipup, full zip, 집업, 지퍼]
+  - canonical: 하프집업
+    group: 여밈
+    en: half zip pullover
+    variants: [half zip, halfzip, quarter zip, 하프집업, 반집업]
+  - canonical: 버튼업
+    group: 여밈
+    en: button up shirt
+    variants: [button up, button down, buttonup, 버튼업, 단추]
+
+  # ---- 패턴과 디테일 ----
+  - canonical: 스트라이프
+    group: 패턴
+    en: striped shirt
+    variants: [stripe, striped, 스트라이프, 줄무늬]
+  - canonical: 체크
+    group: 패턴
+    en: plaid shirt
+    variants: [check, checked, plaid, gingham, 체크]
+  - canonical: 와플
+    group: 패턴
+    en: waffle knit
+    variants: [waffle, 와플]
+  - canonical: 자카드
+    group: 패턴
+    en: jacquard knit
+    variants: [jacquard, 자카드]
+  - canonical: 레이스
+    group: 디테일
+    en: lace top
+    variants: [lace, 레이스]
+  - canonical: 패치워크
+    group: 디테일
+    en: patchwork shirt
+    variants: [patchwork, patch work, 패치워크]
+  - canonical: 레이어드
+    group: 디테일
+    en: layered tee
+    variants: [layered, layering, 레이어드]
+  - canonical: 컷아웃
+    group: 디테일
+    en: cut out top
+    variants: [cut out, cutout, 컷아웃]
+  - canonical: 컷오프
+    group: 디테일
+    variants: [cut off, cutoff, raw edge, 컷오프, 로우엣지]
+  - canonical: 포켓
+    group: 디테일
+    variants: [pocket, 포켓, 주머니]
+  - canonical: 플라워
+    group: 패턴
+    en: floral shirt
+    variants: [floral, flower, 플라워, 꽃]
+
+  # ---- 소재와 가공 ----
+  - canonical: 코튼
+    group: 소재
+    en: cotton tee
+    variants: [cotton, 코튼, 순면]
+  - canonical: 울
+    group: 소재
+    en: wool sweater
+    variants: [wool, 울, 양모]
+  - canonical: 캐시미어
+    group: 소재
+    en: cashmere sweater
+    variants: [cashmere, 캐시미어]
+  - canonical: 텐셀
+    group: 소재
+    en: tencel shirt
+    variants: [tencel, 텐셀]
+  - canonical: 슬러브
+    group: 소재
+    en: slub tee
+    variants: [slub, 슬러브]
+  - canonical: 니트
+    group: 소재
+    en: knit sweater
+    variants: [knit, knitted, 니트]
+  - canonical: 기모
+    group: 가공
+    en: fleece sweatshirt
+    variants: [fleece, brushed, 기모, 플리스]
+  - canonical: 워싱
+    group: 가공
+    en: washed tee
+    variants: [washed, washing, 워싱]
+  - canonical: 피그먼트
+    group: 가공
+    en: pigment dyed tee
+    variants: [pigment, 피그먼트]
+  - canonical: 빈티지
+    group: 가공
+    en: vintage tee
+    variants: [vintage, distressed, 빈티지]
+    # Vintage Black 처럼 뒤에 색상이 붙으면 가공이 아니라 색상 수식어다.
+    not_followed_by_color: true
+
+  # ---- 품목 ----
+  - canonical: 티셔츠
+    group: 품목
+    variants: [t shirt, tshirt, t-shirts, tee, tees, 티셔츠, 반팔티, 긴팔티, 티]
+  - canonical: 셔츠
+    group: 품목
+    variants: [shirt, shirts, 셔츠]
+  - canonical: 후드티
+    group: 품목
+    en: hoodie
+    variants: [hoodie, hoody, hooded, hood, 후드, 후디, 후드티]
+  - canonical: 맨투맨
+    group: 품목
+    en: sweatshirt
+    variants: [sweatshirt, sweat shirt, sweat shirts, sweat, 맨투맨, 스웨트셔츠, 스웻셔츠, 스웨트, 스웻]
+  - canonical: 블라우스
+    group: 품목
+    en: blouse
+    variants: [blouse, 블라우스]
+  - canonical: 탱크톱
+    group: 품목
+    en: tank top
+    variants: [tank top, tanktop, 탱크톱]
+  - canonical: 폴로셔츠
+    group: 품목
+    en: polo shirt
+    variants: [polo, 폴로, 피케]
+  - canonical: 가디건
+    group: 품목
+    en: cardigan
+    variants: [cardigan, 가디건, 카디건]
+  - canonical: 럭비셔츠
+    group: 품목
+    en: rugby shirt
+    variants: [rugby, 럭비, 럭비티, 럭비셔츠]
+
+  # ---- 미매칭 토큰을 보고 보강한 항목 (2026-10-28) ----
+  - canonical: 탑
+    group: 품목
+    variants: [top, tops, 탑, 톱]
+  - canonical: 풀오버
+    group: 품목
+    en: pullover
+    variants: [pullover, 풀오버]
+  - canonical: 캐미솔
+    group: 품목
+    en: camisole
+    variants: [camisole, cami, 캐미솔]
+  - canonical: 코르셋
+    group: 품목
+    en: corset top
+    variants: [corset, bustier, 코르셋, 뷔스티에]
+  - canonical: 홀터넥
+    group: 넥라인
+    en: halter top
+    variants: [halter, halter neck, 홀터넥, 홀터]
+  - canonical: 스카프
+    group: 디테일
+    en: scarf top
+    variants: [scarf, 스카프]
+  - canonical: 타이
+    group: 디테일
+    variants: [tie, 타이, 리본]
+  - canonical: 셔링
+    group: 디테일
+    en: shirred top
+    variants: [shirring, shirred, 셔링]
+  - canonical: 핀턱
+    group: 디테일
+    variants: [pintuck, pin tuck, 핀턱]
+  - canonical: 슬릿
+    group: 디테일
+    en: slit top
+    variants: [slit, 슬릿, 트임]
+  - canonical: 백리스
+    group: 디테일
+    en: backless top
+    variants: [backless, open back, 백리스]
+  - canonical: 커브
+    group: 디테일
+    variants: [curve, curved, 커브]
+  - canonical: 튜뷸러
+    group: 디테일
+    variants: [tubular, 튜뷸러]
+  - canonical: 메시
+    group: 소재
+    en: mesh top
+    variants: [mesh, 메시, 메쉬]
+  - canonical: 저지
+    group: 소재
+    en: jersey shirt
+    variants: [jersey, 저지]
+  - canonical: 링클
+    group: 가공
+    variants: [wrinkle, wrinkled, 링클]
+  - canonical: 가먼트다이
+    group: 가공
+    en: garment dyed shirt
+    variants: [garment dyed, garment dye, 가먼트다이]
+  - canonical: 염색
+    group: 가공
+    variants: [dyed, dyeing, 다잉]

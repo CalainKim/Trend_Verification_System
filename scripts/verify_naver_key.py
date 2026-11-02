@@ -82,9 +82,9 @@ def main() -> int:
     try:
         seg = list(search.collect({"티셔츠": ["티셔츠"]}, start.isoformat(),
                                   end.isoformat(), gender="f", ages=["4", "5"]))
-        print(OK, f"성별·연령 필터 동작 확인 ({len(seg)}행, entity={seg[0].entity})")
+        print(OK, f"성별과 연령 필터 동작 확인 ({len(seg)}행, entity={seg[0].entity})")
     except NaverApiError as exc:
-        print(FAIL, f"성별·연령 필터 실패: {exc}")
+        print(FAIL, f"성별과 연령 필터 실패: {exc}")
 
     # --- 쇼핑인사이트 ---------------------------------------------------
     shopping = NaverShoppingCollector(cid, secret)
@@ -104,10 +104,10 @@ def main() -> int:
         demo = list(shopping.collect_keyword_demographics(
             code, "티셔츠", start.isoformat(), end.isoformat()))
         groups = sorted({r.entity for r in demo})
-        print(OK, f"성별·연령 분해 {len(demo)}행")
+        print(OK, f"성별과 연령 분해 {len(demo)}행")
         print("       실제 그룹:", groups)
     except NaverApiError as exc:
-        print(FAIL, f"성별·연령 분해 실패: {exc}")
+        print(FAIL, f"성별과 연령 분해 실패: {exc}")
 
     if not TOPS_CATEGORIES:
         print(SKIP, "상의 카테고리 코드는 아직 비어 있다.")

@@ -12,3 +12,6 @@ sentence-transformers>=3.0
 # Google Trends (해외 선행 여부 검증). 비공식 라이브러리라
 # 첫 요청이 자주 429 로 막힌다. 수집기가 재시도로 흡수한다.
 pytrends>=4.9
+
+# 속성 키워드 사전(data/attributes.yml) 로딩
+PyYAML>=6.0

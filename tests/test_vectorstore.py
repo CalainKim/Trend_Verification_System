@@ -1,8 +1,8 @@
-"""벡터 저장·검색·클러스터링 검증.
+"""벡터 저장, 검색, 클러스터링 검증.
 
 임베딩 모델은 쓰지 않는다. 1GB 넘는 모델을 받아야 돌아가는 테스트는
 CI 에서도 로컬에서도 부담이라, 결정적인 가짜 인코더로 대체한다.
-여기서 확인할 것은 모델 품질이 아니라 저장·검색·묶기 규약이다.
+여기서 확인할 것은 모델 품질이 아니라 저장, 검색, 묶기 규약이다.
 """
 
 from __future__ import annotations
@@ -97,7 +97,7 @@ def test_search_floor_can_return_nothing(conn):
 
 
 def test_normalization_collapses_variant_markers():
-    """색상·차수·품번은 상품이 무엇인지와 무관하므로 임베딩 전에 걷어낸다."""
+    """색상, 차수, 품번은 상품이 무엇인지와 무관하므로 임베딩 전에 걷어낸다."""
     n = embeddings.normalize_for_embedding
     assert n("데일리 레글런 티셔츠 (레몬)") == n("데일리 레글런 티셔츠 (라벤더)")
     assert n("LAUNDRY SHIRT (SKY BLUE)") == n("LAUNDRY SHIRT [DEEP CHARCOAL]")

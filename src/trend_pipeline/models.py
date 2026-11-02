@@ -19,6 +19,26 @@ CHANNELS = frozenset(
 )
 
 
+#: 구글 트렌드 속성. 빈 문자열은 웹 검색이다.
+#: youtube 를 쓰면 숏폼 유행이 검색으로 넘어온 흔적을 볼 수 있다.
+GTRENDS_PROPS = ("", "youtube", "news", "images", "froogle")
+
+
+def geo_entity(geo: str, gprop: str = "") -> str:
+    """구글 트렌드 레코드의 entity 키를 만든다.
+
+    웹 검색에는 접미사를 붙이지 않는다. 붙이면 이미 쌓인 자료와 키가 달라져
+    과거 수집분이 조회에서 통째로 빠진다. 새 속성만 접미사를 받는다.
+
+        geo_entity("KR")             -> 'geo=KR'
+        geo_entity("KR", "youtube")  -> 'geo=KR;prop=youtube'
+    """
+    if gprop not in GTRENDS_PROPS:
+        raise ValueError(f"알 수 없는 구글 트렌드 속성: {gprop!r}")
+    base = f"geo={geo or 'WORLD'}"
+    return f"{base};prop={gprop}" if gprop else base
+
+
 def utcnow_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 

@@ -155,7 +155,7 @@ def s5(conn, rows, live):
     for r in qs:
         print("  " + "  ".join(str(r[c]).ljust(x) for c, x in zip(cols, w)))
     print()
-    print(hi("  entity 하나로 전체·성별·연령·교차셀·지역·상품을 모두 담는다."))
+    print(hi("  entity 하나로 전체, 성별, 연령, 교차셀, 지역, 상품을 모두 담는다."))
     print(hi("  세그먼트가 늘어도 스키마를 바꾸지 않는다."))
 
 

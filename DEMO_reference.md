@@ -17,7 +17,7 @@
 
 ratio 는 절대 검색량이 아니라 이 응답 안에서 최댓값=100 으로 정규화된 값이다.
 
-성별·연령 교차 조건을 걸어본다. 값이 달라지는 것을 확인한다.
+성별과 연령 교차 조건을 걸어본다. 값이 달라지는 것을 확인한다.
 
     curl -s -X POST "https://naverapihub.apigw.ntruss.com/search-trend/v1/search" \
       -H "X-NCP-APIGW-API-KEY-ID: $NAVER_CLIENT_ID" \
@@ -55,7 +55,7 @@ SQLite 는 이 CSV 에서 다시 만들 수 있는 파생물이다.
     sqlite3 data/signals.sqlite
 
 들어가면 프롬프트가 `sqlite>` 로 바뀐다. SQL 을 그대로 치면 된다.
-`~/.sqliterc` 에 헤더·컬럼 정렬을 켜 두었으므로 결과가 표로 나온다.
+`~/.sqliterc` 에 헤더와 컬럼 정렬을 켜 두었으므로 결과가 표로 나온다.
 
     sqlite> .tables
     sqlite> .schema signal_raw

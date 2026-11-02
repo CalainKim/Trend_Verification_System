@@ -8,10 +8,20 @@
     쿠키를 받는 워밍업 단계가 불안정해서다. 재시도하면 대체로 통과한다.
     2026-09-29 실측: 1회차 429, 2회차 성공(93행).
 
+한도 실측 (2026-10-28)
+    429 에는 두 종류가 있다. 워밍업 실패는 재시도로 풀리지만 한도 초과는
+    풀리지 않는다. 웹 검색 24회를 연속으로 받은 뒤(6,048행) 그다음 요청부터
+    전부 429 가 됐고, 90초와 180초와 270초를 기다려도 돌아오지 않았다.
+    다음 날 다시 시도해도 같았다. 속성(web, youtube)과 무관하게 막히므로
+    IP 단위 제한으로 보인다. 몇 시간 단위로 풀린다.
+
+    그래서 한 번에 많이 받으려 하면 안 된다. 속성 10개 남짓으로 끊어서
+    돌리고, 막히면 그날은 멈추는 편이 빠르다.
+
 robots.txt (2026-09-29 확인)
     trends.google.com 은 /explore? 와 /trends/explore? 만 차단한다.
     이는 웹 UI 의 질의 URL 이고, pytrends 가 쓰는 /trends/api/... 는
-    차단 대상이 아니다. 무신사·데이터랩과 달리 전면 차단이 아니다.
+    차단 대상이 아니다. 무신사나 데이터랩과 달리 전면 차단이 아니다.
 
 값의 성격
     네이버와 마찬가지로 요청 안에서 최댓값 100 으로 정규화된 상대 지수다.
@@ -24,7 +34,7 @@ from __future__ import annotations
 import time
 from typing import Dict, Iterator, List, Optional, Sequence
 
-from ..models import RawRecord
+from ..models import GTRENDS_PROPS, RawRecord, geo_entity
 from .base import Collector
 
 #: 비교할 지역. 빈 문자열은 전세계.
@@ -37,6 +47,22 @@ GEO_NAMES = {"KR": "한국", "US": "미국", "": "전세계", "JP": "일본", "G
 #: 대체로 통과한다. 한 번 실패했다고 채널을 포기하면 안 된다.
 MAX_ATTEMPTS = 4
 RETRY_BACKOFF_SEC = 5.0
+
+#: 429 는 성격이 다르다. 워밍업 실패가 아니라 요청이 너무 많다는 뜻이라
+#: 몇 초 기다려서는 풀리지 않는다. 2026-10-28 실측에서 웹 24회를 연속으로
+#: 받은 뒤 그다음 12회가 전부 429 로 막혔고, 5/10/15초 재시도는 전부 실패했다.
+#: 분 단위로 기다려야 한다.
+RATE_LIMIT_BACKOFF_SEC = 90.0
+
+#: 429 를 한 번이라도 본 뒤에는 요청 간격 자체를 늘린다. 같은 속도로 계속
+#: 두드리면 풀린 직후 다시 막힌다.
+RATE_LIMIT_COOLDOWN_SEC = 20.0
+
+
+def is_rate_limited(error: str) -> bool:
+    """429 인지 본다. pytrends 는 예외 종류가 일정하지 않아 문자열로 판별한다."""
+    low = error.lower()
+    return "429" in low or "toomanyrequests" in low.replace(" ", "")
 
 
 class GoogleTrendsUnavailable(RuntimeError):
@@ -62,6 +88,9 @@ class GoogleTrendsCollector(Collector):
         self.hl, self.tz = hl, tz
         self.max_attempts = max_attempts
         self._client = None
+        #: 429 를 본 뒤에는 이 수집기 전체가 느려진다. 키워드 하나가 막혔다고
+        #: 다음 키워드를 같은 속도로 두드리면 연달아 막힌다.
+        self._throttled = False
 
     def _fresh_client(self):
         from pytrends.request import TrendReq
@@ -69,7 +98,7 @@ class GoogleTrendsCollector(Collector):
         # 재시도마다 새 세션을 만든다. 막힌 세션을 계속 쓰면 같은 결과가 나온다.
         return TrendReq(hl=self.hl, tz=self.tz, timeout=(10, 30), retries=0)
 
-    def _fetch(self, keywords: Sequence[str], timeframe: str, geo: str):
+    def _fetch(self, keywords: Sequence[str], timeframe: str, geo: str, gprop: str = ""):
         """구글이 응답할 때까지 재시도한다. 빈 결과는 재시도하지 않는다.
 
         빈 결과는 실패가 아니라 "이 지역에서 측정할 만한 검색량이 없다"는
@@ -80,17 +109,25 @@ class GoogleTrendsCollector(Collector):
         for attempt in range(1, self.max_attempts + 1):
             try:
                 self.sleep()
+                if self._throttled:
+                    time.sleep(RATE_LIMIT_COOLDOWN_SEC)
                 client = self._fresh_client()
-                client.build_payload(list(keywords), timeframe=timeframe, geo=geo)
+                client.build_payload(list(keywords), timeframe=timeframe, geo=geo,
+                                     gprop=gprop)
                 frame = client.interest_over_time()
                 return frame if frame is not None else None
             except Exception as exc:       # pytrends 는 예외 종류가 일정하지 않다
                 last = f"{type(exc).__name__}: {exc}"
             if attempt < self.max_attempts:
-                time.sleep(RETRY_BACKOFF_SEC * attempt)
+                if is_rate_limited(last):
+                    # 429 는 몇 초로 풀리지 않는다. 90, 180, 270초로 벌린다.
+                    self._throttled = True
+                    time.sleep(RATE_LIMIT_BACKOFF_SEC * attempt)
+                else:
+                    time.sleep(RETRY_BACKOFF_SEC * attempt)
         raise GoogleTrendsUnavailable(
             f"{self.max_attempts}회 시도 후에도 응답을 받지 못했다 "
-            f"(geo={geo or 'WORLD'}): {last}"
+            f"(geo={geo or 'WORLD'}, prop={gprop or 'web'}): {last}"
         )
 
     def collect(
@@ -102,6 +139,7 @@ class GoogleTrendsCollector(Collector):
         keywords_by_geo: Optional[Dict[str, Sequence[str]]] = None,
         candidate: Optional[str] = None,
         run_id: Optional[str] = None,
+        gprop: str = "",
     ) -> Iterator[RawRecord]:
         """지역별 관심도 시계열. entity 에 지역을 남겨 구분한다.
 
@@ -114,12 +152,18 @@ class GoogleTrendsCollector(Collector):
         이때 keyword_raw 에는 질의어가 아니라 **후보**(맨투맨)를 넣는다.
         질의어를 정체성으로 쓰면 지역마다 다른 이름으로 저장되어 지역 간
         결합이 깨진다. 실제 질의어는 metadata.query_term 에 남긴다.
+
+        gprop 으로 구글 트렌드 속성을 고른다. 빈 값은 웹 검색이고 "youtube" 는
+        유튜브 검색이다. 숏폼에서 퍼진 유행은 틱톡 API 로 볼 수 없지만 사람들이
+        유튜브에서 찾아보는 흔적으로는 남는다. 한 단계 늦은 대리 지표다.
         """
+        if gprop not in GTRENDS_PROPS:
+            raise ValueError(f"알 수 없는 구글 트렌드 속성: {gprop!r}")
         label = candidate or (keywords[0] if keywords else "")
         timeframe = f"{start_date} {end_date}"
         for geo in geos:
             terms = list((keywords_by_geo or {}).get(geo, keywords))
-            frame = self._fetch(terms, timeframe, geo)
+            frame = self._fetch(terms, timeframe, geo, gprop)
             if frame is None or frame.empty:
                 continue      # 이 지역에는 측정할 만한 검색량이 없다
             for stamp, row in frame.iterrows():
@@ -131,13 +175,14 @@ class GoogleTrendsCollector(Collector):
                     yield RawRecord(
                         channel=self.channel,
                         keyword_raw=label,
-                        entity=f"geo={geo or 'WORLD'}",
+                        entity=geo_entity(geo, gprop),
                         metric_type="search_index",
                         metric_value=float(row[keyword]),
                         observed_at=stamp.date().isoformat(),
                         metadata={
                             "geo": geo or "WORLD",
                             "geo_name": GEO_NAMES.get(geo, geo or "전세계"),
+                            "gprop": gprop or "web",
                             "query_start": start_date,
                             "query_end": end_date,
                             "query_term": keyword,

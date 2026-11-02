@@ -78,7 +78,7 @@ def s1(conn):
         FROM signal_raw GROUP BY channel ORDER BY channel
     """, conn)
     p("\n  4개 채널이 하나의 테이블에 공통 스키마로 들어간다.", "d")
-    p("  채널마다 형식·주기·노이즈 특성이 다르지만 저장은 통일했다.", "d")
+    p("  채널마다 형식, 주기, 노이즈 특성이 다르지만 저장은 통일했다.", "d")
 
 
 def s2(conn):
@@ -104,7 +104,7 @@ def s3(conn):
         p("  등록된 케이스가 없다.", "d")
         return
     kw, t_cut = case["keyword"], case["t_cut"]
-    p(f"  사례 '{kw}' · 판단 기준 시점 T_cut = {t_cut}\n")
+    p(f"  사례 '{kw}' / 판단 기준 시점 T_cut = {t_cut}\n")
 
     total = conn.execute(
         "SELECT COUNT(*) c FROM signal_raw WHERE keyword_raw=?", (kw,)).fetchone()["c"]
@@ -161,7 +161,7 @@ def s5(conn):
             who = "해외 선행" if ll.lead_days > 0 else "한국 선행"
             flag = ("  경계에 걸림, 근거 불가" if ll.at_boundary
                     else ("" if ll.reliable else "  상관 낮음, 근거 불가"))
-            p(f"  {kw:<6} vs {geo}   {who} {abs(ll.lead_days)}일 · "
+            p(f"  {kw:<6} vs {geo}   {who} {abs(ll.lead_days)}일 / "
               f"상관 {ll.correlation}{flag}")
     if not found:
         p("  Google Trends 자료가 없다.", "d")

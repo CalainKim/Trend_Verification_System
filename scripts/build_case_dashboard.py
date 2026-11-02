@@ -98,8 +98,8 @@ def line_chart(named_series, t_cut) -> str:
                  f'stroke-width="2" stroke-linejoin="round"/>')
         for d, v, raw in sm:
             p.append(f'<circle cx="{round(x(d),1)}" cy="{round(y(v/peak),1)}" r="6" '
-                     f'fill="transparent" data-tip="{esc(name)} · {esc(d)} · '
-                     f'원본 {raw:.1f} · {SMOOTH_DAYS}일평균 {v:.1f}"/>')
+                     f'fill="transparent" data-tip="{esc(name)} / {esc(d)} / '
+                     f'원본 {raw:.1f} / {SMOOTH_DAYS}일평균 {v:.1f}"/>')
         anchors.append((y(sm[-1][1] / peak), name))
 
     # 끝점이 가까우면 라벨이 겹친다. 최소 간격만큼 벌린다.
@@ -158,8 +158,8 @@ def lift_chart(skews) -> str:
                  f'fill="var(--ink-2)">{esc(s.group)}대</text>')
         p.append(f'<rect x="{round(x0,1)}" y="{yy+4}" width="{round(max(w,1),1)}" '
                  f'height="14" rx="3" fill="{color}" '
-                 f'data-tip="{esc(s.group)}대 · 점유 {s.observed_share:.1%} · '
-                 f'기준 {s.baseline_share:.1%} · 리프트 {s.lift:.2f}"/>')
+                 f'data-tip="{esc(s.group)}대 / 점유 {s.observed_share:.1%} / '
+                 f'기준 {s.baseline_share:.1%} / 리프트 {s.lift:.2f}"/>')
         lx = (x0 + w + 8) if delta >= 0 else (x0 - 8)
         anchor = "start" if delta >= 0 else "end"
         p.append(f'<text x="{round(lx,1)}" y="{yy+16}" text-anchor="{anchor}" '
@@ -180,7 +180,7 @@ def case_section(conn, case) -> str:
     feats = ft.extract(conn, kw, t_cut, shopping_category=cat,
                        segment_entity="gender=m;ages=3+4")
     PRETTY = {"검색": "검색", "쇼핑클릭": "쇼핑 클릭",
-              "검색·gender=m;ages=3+4": "검색 20대男"}
+              "검색(gender=m;ages=3+4)": "검색 20대男"}
     age = dg.profile(conn, kw, cat, prefix="age")
 
     rows = []
@@ -231,8 +231,8 @@ def case_section(conn, case) -> str:
 
     return f"""<section>
 <h2>{esc(kw)}</h2>
-<p class="sub">판단 기준 시점 T_cut {esc(t_cut)} · 이 시점 이전 자료만 사용 ·
-관측 채널 {feats.channel_count}개 · 전년 동기 대비 {fmt(feats.seasonality_ratio)}</p>
+<p class="sub">판단 기준 시점 T_cut {esc(t_cut)}, 이 시점 이전 자료만 사용,
+관측 채널 {feats.channel_count}개, 전년 동기 대비 {fmt(feats.seasonality_ratio)}</p>
 {notes}
 <div class="card">
   <h3>채널별 추이</h3>
@@ -275,7 +275,7 @@ def build(conn) -> str:
     return f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>케이스 분석 · 트렌드 시그널 검증</title>
+<title>케이스 분석 (트렌드 시그널 검증)</title>
 <style>{webtheme.CSS}</style></head>
 <body><div class="wrap">
 <h1>케이스 분석</h1>
@@ -285,7 +285,7 @@ def build(conn) -> str:
 <div class="kpis">{kpi}</div>
 {body}
 <footer>
-판정(확정·보류·기각)은 검증 파트의 몫이다. 이 화면은 관측된 사실만 보여준다.<br>
+판정(확정, 보류, 기각)은 검증 파트의 몫이다. 이 화면은 관측된 사실만 보여준다.<br>
 모든 수치는 T_cut 이전 자료만으로 계산했다. 정답 라벨은 이 화면에 나오지 않는다.<br>
 <a href="https://github.com/CalainKim/Trend_Verification_System">저장소</a>
 </footer>

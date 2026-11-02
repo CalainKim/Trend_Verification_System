@@ -228,3 +228,59 @@ class TestDuplicateDeclarations:
         screen = "const TRACK = { x: 1 };\n"   # const UP 이 없다
         with _pt.raises(SystemExit):
             self._patch(tmp_path, screen, 'const TRACK = {};\n')
+
+
+class TestBrowserShim:
+    """파일 하나로 떼어낸 화면이 API 를 직접 부르는 shim.
+
+    키는 파일에 넣지 않는다. 이 파일은 남에게 보내는 것이라 키가 들어가면 받은
+    사람 누구나 꺼내 쓸 수 있고 과금은 만든 사람에게 간다.
+
+    생성 코드에 개행을 넣을 때 조심해야 한다. 파이썬 삼중따옴표 안의 이스케이프가
+    실제 개행으로 바뀌면 JS 작은따옴표 문자열이 끊겨 SyntaxError 가 난다.
+    실제로 한 번 그렇게 깨졌다.
+    """
+
+    def _shim(self) -> str:
+        import bundle_design as bd
+
+        return bd.BROWSER_SHIM
+
+    def test_no_api_key_in_shim(self):
+        import re
+
+        assert not re.search(r"sk-ant-[A-Za-z0-9_-]{20,}", self._shim())
+
+    def test_uses_browser_access_header(self):
+        # 이 헤더가 없으면 브라우저에서 CORS 로 막힌다.
+        assert "anthropic-dangerous-direct-browser-access" in self._shim()
+
+    def test_no_raw_newline_inside_js_string(self):
+        """JS 문자열 리터럴 안에 생 개행이 들어가면 문법이 깨진다.
+
+        따옴표를 세는 방식은 URL 의 // 를 주석으로 오인해서 쓸 수 없다. 여는
+        따옴표 뒤에 줄 끝까지 닫는 따옴표가 없는 줄을 직접 찾는다.
+        """
+        import re
+
+        for line in self._shim().split("\n"):
+            # 한 줄 안에서 짝이 맞는 문자열을 먼저 지운다. 남은 따옴표가 있으면
+            # 그 문자열이 줄을 넘는다는 뜻이다.
+            rest = re.sub(r"'(?:[^'\\]|\\.)*'", "", line)
+            rest = re.sub(r'"(?:[^"\\]|\\.)*"', "", rest)
+            assert "'" not in rest and '"' not in rest, (
+                f"문자열이 줄을 넘는다: {line.strip()[:70]}")
+
+    def test_clears_key_on_rejection(self):
+        # 401 이면 저장된 키를 지워야 한다. 안 지우면 틀린 키로 계속 두드린다.
+        shim = self._shim()
+        assert "401" in shim and "removeItem" in shim
+
+    def test_filters_empty_thinking_blocks(self):
+        # Opus 5.5 는 생각 블록을 돌려주는데 본문이 비어 있다. 거르지 않으면
+        # 빈 문자열이 앞에 붙는다.
+        assert "b.type === 'text'" in self._shim()
+
+    def test_yields_to_claude_design_runtime(self):
+        # Claude Design 안에서는 런타임이 넣어 준 것을 써야 한다.
+        assert "if (window.claude && window.claude.complete) return;" in self._shim()

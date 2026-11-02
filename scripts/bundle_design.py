@@ -26,9 +26,70 @@ MIME = {".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf",
         ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml"}
 
 OFFLINE_NOTE = (
-    "이 파일은 내려받아 혼자 열어 보는 사본입니다. 심층 검증은 Claude Design "
-    "안에서만 돌아갑니다. 나머지 화면은 모두 실제 수집 자료입니다."
+    "심층 검증을 쓰려면 Anthropic API 키가 필요합니다. 버튼을 다시 누르면 "
+    "키를 물어봅니다. 키는 이 브라우저에만 저장되고 파일에는 들어가지 않습니다. "
+    "나머지 화면은 키 없이도 모두 실제 수집 자료입니다."
 )
+
+# 화면은 Claude Design 런타임이 넣어 주는 window.claude.complete 를 부른다.
+# 파일로 떼어내면 그 함수가 없다. 대신 브라우저가 Anthropic API 를 직접 부르게
+# 한다. api.anthropic.com 은 anthropic-dangerous-direct-browser-access 헤더가
+# 있으면 access-control-allow-origin: * 를 돌려주므로 file:// 에서도 된다.
+#
+# 키는 파일에 넣지 않는다. 이 파일은 남에게 보내는 것이라 키를 넣으면 받은 사람
+# 누구나 꺼내 쓸 수 있고 과금은 파일을 만든 사람에게 간다. 보는 사람이 자기 키를
+# 넣게 하고 그 브라우저에만 저장한다.
+BROWSER_SHIM = """
+<script>
+(function () {
+  if (window.claude && window.claude.complete) return;   // Claude Design 안이면 둔다
+  var KEY = 'trendcheck-anthropic-key';
+  function ask() {
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    if (saved) return saved;
+    var k = window.prompt(
+      ['심층 검증을 쓰려면 Anthropic API 키를 넣어 주세요.',
+       'sk-ant- 로 시작합니다. 이 브라우저에만 저장되고 파일에는 들어가지 않습니다.',
+       '지우려면 비워서 확인을 누르세요.'].join(String.fromCharCode(10)));
+    if (k === null) return null;
+    k = k.trim();
+    try { k ? localStorage.setItem(KEY, k) : localStorage.removeItem(KEY); } catch (e) {}
+    return k || null;
+  }
+  window.claude = {
+    complete: async function (req) {
+      var key = ask();
+      if (!key) throw new Error('API 키가 없어 심층 검증을 실행하지 못했습니다.');
+      var res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: req.model, max_tokens: req.max_tokens,
+          system: req.system, messages: req.messages
+        })
+      });
+      if (res.status === 401) {
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        throw new Error('API 키가 거부됐습니다. 버튼을 다시 눌러 새 키를 넣어 주세요.');
+      }
+      if (!res.ok) throw new Error('API 호출이 실패했습니다 (HTTP ' + res.status + ').');
+      var data = await res.json();
+      if (data.stop_reason === 'refusal') throw new Error('모델이 응답을 거절했습니다.');
+      // 생각 블록은 본문이 비어 있다. 글자가 있는 블록만 모은다.
+      return (data.content || []).filter(function (b) { return b.type === 'text'; })
+        .map(function (b) { return b.text; })
+        .join(String.fromCharCode(10, 10));
+    }
+  };
+})();
+</script>
+"""
 
 # 화면은 추론이 실패하면 "다시 실행해 주세요" 라고 적는다. 사본에서는 몇 번을
 # 눌러도 되지 않으므로 이유를 적어 준다. 문구는 마크업에 두 번 들어 있다.
@@ -132,6 +193,11 @@ def soften_llm(html: str) -> tuple[str, int]:
              "? window.claude.complete : () => { throw new Error("
              + repr(OFFLINE_NOTE) + ") })(")
     html = html.replace(call, guard)
+    # 브라우저가 API 를 직접 부를 수 있게 shim 을 넣는다. 화면 스크립트보다 먼저
+    # 실행돼야 하므로 head 가 닫히기 전에 둔다.
+    if "</head>" not in html:
+        raise SystemExit("head 닫는 태그를 찾지 못했다. shim 을 넣을 자리가 없다")
+    html = html.replace("</head>", BROWSER_SHIM + "</head>", 1)
 
     n = sum(html.count(e) for e in GENERIC_ERRORS)
     if n == 0:
@@ -168,6 +234,7 @@ def main(argv=None) -> int:
     size = len(html.encode())
     print(f"CSS {stats['css']}개, JS {stats['js']}개, 폰트 {stats['font']}개를 넣었다")
     print(f"심층 검증 오류 문구 {n_err}곳을 사본용 설명으로 교체")
+    print("브라우저에서 API 를 직접 부르는 shim 을 넣었다 (키는 보는 사람이 입력)")
     print(f"상품 사진 {n_img}장을 파일 안에 넣었다")
     print(f"{before / 1024:.0f}KB -> {size / 1024 / 1024:.1f}MB")
     print(f"\n{args.out}")

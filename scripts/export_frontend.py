@@ -329,10 +329,15 @@ def main(argv=None) -> int:
     )
     # 화면은 "10/25에서 11/01" 같은 날짜를 다섯 군데에 글자로 박아 두었다. 주가
     # 바뀌면 그 글자도 같이 바뀌어야 하므로 날짜를 상수로 함께 내보낸다.
+    # base/detect/hold 는 화면에 찍는 "10/18" 꼴, 뒤의 ISO 는 날짜 비교용이다.
+    # 검색 자료가 충분히 최신인지 보는 G[a].last >= ... 비교가 baseISO 를 쓴다.
     week = {
         "base": base_d[5:].replace("-", "/"),
         "detect": detect_d[5:].replace("-", "/"),
         "hold": hold_d[5:].replace("-", "/"),
+        "baseISO": base_d,
+        "detectISO": detect_d,
+        "holdISO": hold_d,
     }
     args.out.write_text(
         head + js_literal("G", g) + js_literal("P", p) + js_literal("LEDGER", ledger)

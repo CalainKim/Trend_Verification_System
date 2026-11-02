@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+"""Trend Monitor 화면에 파이프라인 연동에 필요한 수정을 넣는다.
+
+Claude Design 에서 받은 .dc.html 을 받아 고친 사본을 낸다. 원본은 건드리지
+않는다. 손으로 고치면 열두 군데를 빠뜨리기 쉬워서 스크립트로 둔다.
+
+    ./scripts/patch_design.py v8.html -o v9.html
+
+하는 일은 넷이다.
+
+1. 데이터 상수 교체
+   G, P, LEDGER 를 build/frontend_data.js 내용으로 바꾸고 원본의 TYPE_SKIP
+   선언을 지운다. 생성 파일이 같은 이름을 선언하므로 둘 다 두면 const 중복
+   선언으로 스크립트가 통째로 죽는다.
+
+2. 할인 효과와 해외 선행 단계 연결
+   화면은 둘을 "연결 예정" 으로 비워 두었다. 자료는 있으므로 검사 결과를
+   채우되 후보를 떨구지는 않는다. 할인 급증은 지속성과 무관함을 자체 검증으로
+   확인했고(늘어난 상승 57.1% 유지, 변화 없던 상승 52.9% 유지), 해외 선행은
+   신뢰 판정 열넷 가운데 여덟이 한국 선행이라 통과 조건으로 쓰면 진짜 상승의
+   절반이 떨어진다. 그래서 측정만 하고 거르지 않는다.
+
+3. 신선도 문턱을 WEEK 로 바꾼다
+   G[a].last >= '2026-10-18' 비교가 여섯 군데 있다. 주가 바뀌는데 이 문자열이
+   그대로면 지난 주 기준으로 신선도를 재게 된다.
+
+4. 검증 기록 CSV 의 머리글과 파일명을 WEEK 로 바꾼다
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "build" / "frontend_data.js"
+
+# 화면이 각 상품에 붙이는 여섯 검사 가운데 넷째와 다섯째. 원본은 자리만 잡아
+# 두고 "연결 예정" 으로 비워 두었다.
+OLD_CHECKS = ("{ s: 'na', text: '[데이터 연결 예정] 정가와 할인율로 할인 때문에 오른 건지' }, "
+              "{ s: 'na', text: '[데이터 연결 예정] 미국 검색과 해외 커머스에서 먼저 올랐는지' }")
+NEW_CHECKS = "dc, ov"
+
+# dc 와 ov 를 p.checks 앞에서 만든다. 둘 다 s 가 'pass' 나 'info' 라서 드롭
+# 판정에 쓰이지 않는다. 드롭은 아래 [sr, br] 에서만 본다.
+COMPUTE = """    const dUp = p.prevDisc == null ? null : (p.disc || 0) - p.prevDisc;
+    const dc = p.disc == null ? { s: 'na', text: '할인율을 수집하지 못한 상품' }
+      : dUp == null ? { s: 'info', text: `할인 ${p.disc}%, 지난주 TOP100 밖이라 비교할 값 없음` }
+      : dUp >= 5 ? { s: 'info', text: `할인이 ${p.prevDisc}%에서 ${p.disc}%로 ${dUp}%p 늘며 올랐습니다. 자체 검증에서 할인 증가는 유지 여부와 차이가 없었으므로(57.1% 대 52.9%) 거르지 않고 표시만 합니다` }
+      : { s: 'pass', text: dUp <= -5 ? `할인을 ${-dUp}%p 줄이고도 올랐습니다` : `할인 ${p.disc}%로 지난주와 같은 수준입니다` };
+    const lead = p.attrs.map(a => G[a] && G[a].lead).find(Boolean);
+    const ov = !lead ? { s: 'na', text: '선행 판정이 신뢰 문턱을 넘지 못했습니다' }
+      : { s: 'info', text: lead.days > 0 ? `미국이 ${lead.days}일 앞섰습니다 (상관 ${lead.corr})`
+          : lead.days < 0 ? `한국이 ${-lead.days}일 앞섰습니다 (상관 ${lead.corr}). 해외 선행 가설과 반대이고 신뢰 판정 다수가 이쪽이라 거르지 않습니다`
+          : `한국과 미국이 같은 시점에 올랐습니다 (상관 ${lead.corr})` };
+"""
+
+
+def swap_data(src: str) -> str:
+    lines = src.split("\n")
+    skip = [i for i, l in enumerate(lines) if l.startswith("const TYPE_SKIP = ")]
+    if len(skip) != 1:
+        raise SystemExit(f"원본의 TYPE_SKIP 선언을 {len(skip)}개 찾았다. 1개여야 한다")
+    del lines[skip[0]]
+    try:
+        g0 = next(i for i, l in enumerate(lines) if l.startswith("const G = {"))
+        end = next(i for i, l in enumerate(lines) if l.startswith("const UP = "))
+    except StopIteration:
+        raise SystemExit("G 선언이나 그 뒤 경계를 찾지 못했다")
+    if not DATA.exists():
+        raise SystemExit(f"{DATA} 가 없다. ./scripts/export_frontend.py 를 먼저 돌려라")
+    data = DATA.read_text(encoding="utf-8").rstrip("\n").split("\n")
+    return "\n".join(lines[:g0] + data + lines[end:])
+
+
+def wire_stages(src: str) -> str:
+    # 단계 표에서 na 를 떼고 info 로 바꾼다. na 는 "자료 없음", info 는
+    # "쟀지만 거르지 않음" 이다. 화면이 둘을 다르게 적어야 한다.
+    for label in ("할인 효과", "해외 선행"):
+        old = f"{{ label: '{label}', desc: "
+        i = src.index(old)
+        j = src.index("\n", i)
+        line = src[i:j]
+        if ", na: true }" not in line:
+            raise SystemExit(f"{label} 단계가 na: true 가 아니다: {line}")
+        src = src[:i] + line.replace(", na: true }", ", info: true }") + src[j:]
+
+    old = ("desc: s.desc + (s.na ? ' (연결 예정, 지금은 통과)' : off ? ' (설정에서 꺼짐)' : '')")
+    new = ("desc: s.desc + (s.info ? ' (측정함, 거르지 않음)' : s.na ? ' (연결 예정, 지금은 통과)' "
+           ": off ? ' (설정에서 꺼짐)' : '')")
+    if src.count(old) != 1:
+        raise SystemExit("깔때기 설명 줄을 찾지 못했다")
+    src = src.replace(old, new)
+
+    # info 단계는 na 와 똑같이 아무도 떨구지 않는다.
+    old = "const out = s.na ? 0 : det.filter(p => p.dropAt === i).length;"
+    new = "const out = s.na || s.info ? 0 : det.filter(p => p.dropAt === i).length;"
+    if src.count(old) != 1:
+        raise SystemExit("깔때기 집계 줄을 찾지 못했다")
+    src = src.replace(old, new)
+
+    old = "funnel.push({ label: s.label, desc:"
+    new = "funnel.push({ label: s.label, desc:"
+    src = src.replace(
+        "drop: s.na || off ? '–' : (out ? '−' + out : '0'), na: s.na || off, out });",
+        "drop: s.na ? '–' : s.info ? '0' : off ? '–' : (out ? '−' + out : '0'), "
+        "na: s.na || off, out });")
+
+    if OLD_CHECKS not in src:
+        raise SystemExit("연결 예정 검사 두 개를 찾지 못했다")
+    src = src.replace(OLD_CHECKS, NEW_CHECKS)
+
+    # 상품 하나를 훑는 루프 맨 앞에 dc, ov 계산을 끼운다.
+    anchor = "    const com = { s: 'pass', text: p.prev == null ?"
+    if src.count(anchor) != 1:
+        raise SystemExit("검사 루프의 시작점을 찾지 못했다")
+    src = src.replace(anchor, COMPUTE + anchor)
+
+    # info 에 고유 마커를 준다. 안 주면 "–" 로 찍혀서 자료가 없는 것과 구별되지
+    # 않는다. 쟀는데 안 보이면 측정한 의미가 없다. ○ 는 화면이 이미 "관찰" 판정에
+    # 쓰는 기호라 "확인했으나 결론으로 쓰지 않음" 이라는 뜻이 그대로 통한다.
+    old = ("m: c.s === 'pass' ? '✓' : c.s === 'fail' ? '✗' : '–', "
+           "c: c.s === 'pass' ? OK : c.s === 'fail' ? BAD : MUTED })")
+    new = ("m: c.s === 'pass' ? '✓' : c.s === 'fail' ? '✗' : c.s === 'info' ? '○' : '–', "
+           "c: c.s === 'pass' ? OK : c.s === 'fail' ? BAD : c.s === 'info' ? INK : MUTED })")
+    if src.count(old) != 1:
+        raise SystemExit("검사 마커를 정하는 줄을 찾지 못했다")
+    src = src.replace(old, new)
+
+    # 할인율은 P 의 일곱째, 여덟째 값이다. 상품 객체를 만드는 자리에 붙인다.
+    old = ("map[x[3]] = { name: x[3], brand: x[2], rank: x[0], prev: x[1], "
+           "price: x[4], gender: x[5], attrs: [] };")
+    new = ("map[x[3]] = { name: x[3], brand: x[2], rank: x[0], prev: x[1], "
+           "price: x[4], gender: x[5], disc: x[6] ?? null, prevDisc: x[7] ?? null, attrs: [] };")
+    if src.count(old) != 1:
+        raise SystemExit("상품 객체를 만드는 줄을 찾지 못했다")
+    return src.replace(old, new)
+
+
+def fix_pending_text(src: str) -> int:
+    """연결이 끝난 항목을 아직 연결 예정이라고 적은 문구를 고친다.
+
+    문구를 안 고치면 화면이 자기가 가진 자료를 없다고 말한다. 보는 사람은
+    글자를 믿지 마커를 세지 않는다.
+    """
+    swaps = [
+        # 판매가 카드의 설명. 할인율은 필터 점검에 들어갔으므로 거기로 안내한다.
+        ('data-tip="정가와 할인율은 [데이터 연결 예정]"',
+         'data-tip="29CM 의 현재 판매가입니다. 할인율은 오른쪽 필터 점검의 할인에서 봅니다"'),
+        # 발주 검토 요청서의 판매가 줄. 실제 할인율을 적는다.
+        ("['판매가', rq.priceTxt + '원 (정가, 할인율 연결 예정)']",
+         "['판매가', rq.priceTxt + '원' + (rq.disc ? ` (할인 ${rq.disc}%)` : ' (정가)')]"),
+        # 설정 요약의 단계 수.
+        ("['필터 단계', '검색 교차, 브랜드 분산 외 연결 예정 3단계']",
+         "['필터 단계', '거르는 2단계, 측정만 2단계, 연결 예정 1단계']"),
+        # 데이터 출처 표시에서 정가를 연결됨으로 옮긴다.
+        ('연결됨: 29CM, Google 검색. 연결 예정: 일 단위 판매, 재고, 인플루언서, 해외 커머스, 정가',
+         '연결됨: 29CM 순위, 정가와 할인율, Google 검색(한국, 미국). '
+         '연결 예정: 일 단위 판매, 재고, 인플루언서, 해외 커머스'),
+    ]
+    swaps += [
+        # 설정의 단계 토글. info 를 그냥 두면 거르지 않는데도 "켜짐" 으로 보이고
+        # 끌 수 있는 것처럼 보인다. 끄고 켤 대상이 아니므로 토글을 막는다.
+        ("const on = !x.na && s.stageOn[i] !== false; return { label: x.label, desc: x.desc, "
+         "on, dis: !!x.na, op: x.na ? 0.55 : 1, sub: x.na ? '데이터 연결 예정' : on ? '켜짐' : '꺼짐', "
+         "sw: sw(on), go: () => { if (x.na) return;",
+         "const on = !x.na && !x.info && s.stageOn[i] !== false; return { label: x.label, "
+         "desc: x.desc, on, dis: !!(x.na || x.info), op: x.na || x.info ? 0.55 : 1, "
+         "sub: x.na ? '데이터 연결 예정' : x.info ? '측정만, 거르지 않음' : on ? '켜짐' : '꺼짐', "
+         "sw: sw(on), go: () => { if (x.na || x.info) return;"),
+        # 상태 줄의 연결 채널 수. 정가와 할인율이 연결됐으므로 하나 늘었다.
+        ('cursor:help">채널 2/7</span>', 'cursor:help">채널 3/7</span>'),
+    ]
+    n = 0
+    for old_s, new_s in swaps:
+        if src.count(old_s) != 1:
+            raise SystemExit(f"문구를 찾지 못했거나 여러 개다: {old_s[:40]}")
+        src = src.replace(old_s, new_s)
+        n += 1
+    return src, n
+
+
+def wire_week(src: str) -> tuple[str, int]:
+    # 신선도 문턱. 주가 바뀌면 같이 움직여야 한다.
+    src, n = re.subn(r"'2026-10-18'", "WEEK.baseISO", src)
+    # 검증 기록 CSV
+    src = src.replace("csv('검증기록_1101.csv', ['상품', '10/18', '10/25', '11/01', '결과']",
+                      "csv(`검증기록_${WEEK.hold.replace('/', '')}.csv`, "
+                      "['상품', WEEK.base, WEEK.detect, WEEK.hold, '결과']")
+    return src, n
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("source", type=Path, help="Claude Design 에서 받은 .dc.html")
+    ap.add_argument("-o", "--out", type=Path, required=True)
+    args = ap.parse_args(argv)
+
+    src = args.source.read_text(encoding="utf-8")
+    if "data-omelette-injected" in src.split("\n")[3]:
+        # 미리보기로 받은 파일에는 주입 스크립트가 들어 있다. 원본에는 없다.
+        lines = src.split("\n")
+        del lines[3:6]
+        src = "\n".join(lines)
+        print("미리보기 주입 스크립트 3줄 제거")
+
+    src = swap_data(src)
+    print("데이터 상수 교체, 원본 TYPE_SKIP 선언 제거")
+    src = wire_stages(src)
+    print("할인 효과와 해외 선행 단계 연결 (측정만, 거르지 않음)")
+    src, n = wire_week(src)
+    print(f"신선도 문턱 {n}곳과 검증 기록 CSV 를 WEEK 로 교체")
+    src, n = fix_pending_text(src)
+    print(f"연결이 끝났는데 연결 예정이라고 적힌 문구 {n}곳 수정")
+
+    args.out.write_text(src, encoding="utf-8")
+    print(f"\n{args.out}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

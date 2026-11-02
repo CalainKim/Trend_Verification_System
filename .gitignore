@@ -54,3 +54,4 @@ benchmark-index-long/labels.sealed.json
 
 # 시간별 수집 로그
 data/gtrends*.log
+runs/

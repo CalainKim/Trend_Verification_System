@@ -72,6 +72,14 @@ class RiseEvent:
     is_new: bool
     sold_out: bool
     brand_risers: int = 1          # 같은 창에서 동시 상승한 같은 브랜드 상품 수
+    # 기준 구간과 관측 구간의 일별 순위. 구간 평균만 주면 꾸준히 오른 것과
+    # 하루만 튄 것이 같은 숫자가 된다. 둘은 이후 유지 여부가 다를 수 있는데,
+    # 모델이 구분할 방법이 없으면 판단을 보류할 수밖에 없다.
+    rank_daily: Tuple[Optional[float], ...] = ()
+    # 이 상품의 속성이 작년 같은 시기에도 올랐는지. 계절성 반증용이다. 모델이
+    # 판정을 보류한 이유로 가장 많이 든 항목이 이것이었다. 커머스 수집은 37일뿐
+    # 이라 작년이 없지만, 속성 키워드의 검색 지수에는 5년치가 있다.
+    seasonality: Optional[dict] = None
 
     def evidence(self, w: "Window") -> List[dict]:
         """검증 파트가 인용할 근거 항목.
@@ -100,6 +108,31 @@ class RiseEvent:
              "observation": f"같은 창에서 브랜드 '{self.brand}' 의 상품 "
                             f"{self.brand_risers}개가 함께 올랐다"},
         ]
+        if self.rank_daily:
+            days = list(w.base) + list(w.detect)
+            pairs = ", ".join(
+                f"{d[5:]} {'결측' if v is None else f'{v:.0f}위'}"
+                for d, v in zip(days, self.rank_daily))
+            out.append({
+                "id": "rank_daily", "channel": "commerce_rank",
+                "observation": f"일별 순위는 {pairs} 다. 구간 평균만으로는 "
+                               f"꾸준히 오른 것과 하루만 튄 것을 구분할 수 없다"})
+        s = self.seasonality
+        if s and s.get("yoy") is not None:
+            out.append({
+                "id": "seasonality", "channel": "gtrends",
+                "observation": (
+                    f"이 상품의 속성 '{s['attribute']}' 의 한국 검색 지수는 "
+                    f"작년 같은 시기 대비 {s['yoy']:.2f} 배다. 1 에 가까우면 "
+                    f"해마다 같은 시기에 오르는 계절 움직임이고, 1 보다 크게 "
+                    f"높으면 올해만 오른 것이다. 상품 순위가 아니라 속성 검색의 "
+                    f"계절성이므로 간접 근거다")})
+        elif s and s.get("attribute"):
+            out.append({
+                "id": "seasonality", "channel": "gtrends",
+                "observation": (
+                    f"속성 '{s['attribute']}' 는 검색 지수가 있으나 작년 같은 "
+                    f"시기의 관측이 없어 계절성을 재지 못했다")})
         return out
 
     def features(self) -> Dict[str, object]:
@@ -178,7 +211,8 @@ def _latest(item: Dict[str, dict], days: Sequence[str], key: str, default=None):
 
 
 def rise_events(series: Dict[str, Dict[str, dict]], w: Window,
-                min_rise: float = MIN_RISE) -> List[RiseEvent]:
+                min_rise: float = MIN_RISE,
+                seasonality: Optional[Dict[str, dict]] = None) -> List[RiseEvent]:
     """관측 구간에서 순위가 오른 상품. 확인 구간은 쳐다보지 않는다.
 
     이 함수에 w.hold 를 쓰는 코드를 넣으면 안 된다. 특징이 정답을 보게 되고
@@ -196,6 +230,8 @@ def rise_events(series: Dict[str, Dict[str, dict]], w: Window,
         rev_b, rev_d = _avg(item, w.base, "review_count"), _avg(item, w.detect, "review_count")
         hb, hd = _avg(item, w.base, "heart_count"), _avg(item, w.detect, "heart_count")
         sb, sd = _avg(item, w.base, "sale"), _avg(item, w.detect, "sale")
+        daily = tuple((item.get(d) or {}).get("rank") for d in
+                      list(w.base) + list(w.detect))
         found.append(RiseEvent(
             item_key=key,
             name=_latest(item, seen, "name", "") or "",
@@ -205,6 +241,8 @@ def rise_events(series: Dict[str, Dict[str, dict]], w: Window,
             review_delta=(rev_d - rev_b) if None not in (rev_b, rev_d) else 0.0,
             heart_delta=(hd - hb) if None not in (hb, hd) else 0.0,
             sale_delta=(sd - sb) if None not in (sb, sd) else 0.0,
+            rank_daily=daily,
+            seasonality=(seasonality or {}).get(key),
             is_new=bool(_latest(item, seen, "is_new", False)),
             sold_out=bool(_latest(item, seen, "sold_out", False)),
         ))
@@ -356,6 +394,67 @@ def _mean(item: Dict[str, float], days: Sequence[str]) -> Tuple[Optional[float],
     if not vals:
         return None, 0.0
     return sum(vals) / len(vals), len(vals) / len(days)
+
+
+def window_yoy(item: Dict[str, float], days: Sequence[str],
+               years_back: int = 1, pad_days: int = 7) -> Optional[float]:
+    """날짜 구간으로 맞추는 작년 대비 비율.
+
+    yoy_ratio 는 양쪽이 같은 격자일 때 쓴다. 커머스 창은 일별이고 구글 트렌드는
+    주별이라 날짜가 겹치지 않아 그 함수로는 전부 빗나간다. 여기서는 구간을
+    범위로 보고, 그 범위 안이나 가까이에 있는 주별 관측을 모아 평균을 낸다.
+    """
+    from datetime import date, timedelta
+
+    def mean_in(lo: date, hi: date) -> Optional[float]:
+        vals = [v for k, v in item.items()
+                if lo - timedelta(days=pad_days) <= date.fromisoformat(k)
+                <= hi + timedelta(days=pad_days)]
+        return sum(vals) / len(vals) if vals else None
+
+    lo, hi = date.fromisoformat(days[0]), date.fromisoformat(days[-1])
+    back = timedelta(days=365 * years_back)
+    now, then = mean_in(lo, hi), mean_in(lo - back, hi - back)
+    if now is None or not then:
+        return None
+    return now / then
+
+
+def commerce_seasonality(conn: sqlite3.Connection,
+                         series: Dict[str, Dict[str, dict]],
+                         w: Window, attrs, colors,
+                         geo: str = "geo=KR") -> Dict[str, dict]:
+    """상품마다 그 속성의 검색 지수 계절성을 붙인다.
+
+    커머스 수집은 37일뿐이라 작년을 볼 수 없다. 속성 키워드의 검색 지수에는
+    5년치가 있으므로 그걸 간접 근거로 쓴다. 상품 순위의 계절성이 아니라 속성
+    검색의 계절성이라는 점을 근거 문장에 적어 둔다.
+
+    관측 구간까지만 본다. 확인 구간을 넣으면 정답이 새어 나간다.
+    """
+    index = load_index_series(conn, "gtrends", entities=(geo,))
+    by_kw = {split_series_key(k)[0]: v for k, v in index.items()}
+    out: Dict[str, dict] = {}
+    for key, item in series.items():
+        name = _latest(item, list(w.base) + list(w.detect), "name", "") or ""
+        if not name:
+            continue
+        for a in attrs_of(name, attrs, colors):
+            s = by_kw.get(a)
+            if s is None:
+                continue
+            out[key] = {"attribute": a, "yoy": window_yoy(s, w.detect)}
+            break
+    return out
+
+
+def attrs_of(name: str, attrs, colors) -> List[str]:
+    """상품명에서 뽑은 속성 이름. 사전 쪽 구현을 그대로 쓴다."""
+    import sys
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parents[2] / "scripts"))
+    import extract_attributes as ea
+    return [a["canonical"] for a in ea.extract(name, attrs, colors)]
 
 
 def yoy_ratio(item: Dict[str, float], days: Sequence[str],

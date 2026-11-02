@@ -69,7 +69,32 @@ def build_payload(bundle):
             "limitations", "historical_available_at", "experiment_type")
     context = {k: bundle[k] for k in keys if k in bundle}
     system = SYSTEM
-    if bundle.get("experiment_type") == "monthly-retrospective-v1":
+    if bundle.get("experiment_type") == "persistence-v1":
+        # 지속성 케이스는 묻는 것이 다르다. 기본 질문은 "관찰할 가치가 있는가"
+        # 인데 채점은 "상승이 유지되는가" 로 한다. 열계단 오른 상품이면 관찰
+        # 가치는 거의 다 있으므로 모델이 전부 WATCH 를 내고, 그러면 찍기와
+        # 구별되지 않는다. 실제로 30건 가운데 28건이 WATCH 였고 정확도가
+        # 기저율과 같은 46.4% 로 나왔다.
+        #
+        # 질문은 번들의 claim 에 이미 들어 있다. 그것을 쓰라고 못 박고 판정
+        # 세 값의 뜻도 그 질문에 맞게 다시 적는다.
+        system = SYSTEM.replace(
+            "질문은 '이 시점에 이 아이템을 이후 관찰할 후보로 삼을 근거가 있는가?'이다.",
+            "질문은 입력의 claim 에 적힌 것이다. 그 질문에만 답한다."
+        ).replace(
+            "WATCH는 후속 관찰 가치, HOLD는 자료/근거 부족, "
+            "NOT_SUPPORTED는 현재 관측이 후보 주장을 지지하지 않음이다.",
+            "WATCH 는 claim 이 묻는 일이 일어나겠다는 판단, NOT_SUPPORTED 는 "
+            "일어나지 않겠다는 판단, HOLD 는 어느 쪽도 고를 자료가 없다는 뜻이다. "
+            "'관찰할 가치는 있으나 유지 여부는 모르겠다' 는 WATCH 가 아니라 HOLD 다. "
+            "세 값은 기권을 포함해 모두 채점되므로, 확신이 없다고 WATCH 를 고르면 "
+            "찍은 것과 같아진다."
+        ) + (
+            "\n이번 입력은 특정 시점까지의 관측이고, 묻는 것은 그 이후 일정 기간의 "
+            "변화다. t_cut 이후 자료는 입력에 없다. 없는 기간을 추측하지 말고 "
+            "t_cut 까지의 관측이 그 변화를 가리키는지로만 답한다."
+        )
+    elif bundle.get("experiment_type") == "monthly-retrospective-v1":
         system = SYSTEM.replace("각 목록은 최대 3개", "각 목록은 최대 2개") + (
             "\n이번 입력은 3월·4월 월간 상대 지수다. 질문은 이후 확산 가능성이 있어 계속 관찰할 가치가 있는가이다. "
             "두 달만으로 지속 상승·계절성·구매·실제 유행을 확인했다고 쓰지 않는다. "
@@ -98,6 +123,12 @@ def validate_result(response, bundle):
         raise ValueError("AI 판단 요약이 없습니다.")
     ids = {e["id"] for e in bundle["evidence"]}
     limit = 2 if bundle.get("experiment_type") == "monthly-retrospective-v1" else 3
+    # 지지와 반대는 상한을 지켜야 한다. 늘리면 모델이 약한 근거를 채워 넣는다.
+    # 다만 unknowns 는 모델이 스스로 적는 빈칸 목록이라 번들이 얇을수록 늘어난다.
+    # 커머스 순위 번들은 순위, 리뷰, 좋아요, 할인뿐이어서 지적할 빈칸이 월간
+    # 번들보다 많다. 실제로 지속성 케이스 30건 가운데 8건이 넷을 적었다가
+    # 통째로 버려졌다. 돈을 치른 답을 비본질 항목 하나로 버리지 않는다.
+    unknown_limit = 5 if bundle.get("experiment_type") == "persistence-v1" else limit
     for key in ("support", "against"):
         if not isinstance(result[key], list) or len(result[key]) > limit:
             raise ValueError("AI 근거 목록 형식이 잘못됐습니다.")
@@ -109,7 +140,7 @@ def validate_result(response, bundle):
             refs = item["evidence_ids"]
             if not isinstance(refs, list) or not refs or any(not isinstance(x, str) or x not in ids for x in refs):
                 raise ValueError("AI 인용 ID가 실제 입력에 없습니다.")
-    if not isinstance(result["unknowns"], list) or len(result["unknowns"]) > limit or any(not isinstance(x, str) for x in result["unknowns"]):
+    if not isinstance(result["unknowns"], list) or len(result["unknowns"]) > unknown_limit or any(not isinstance(x, str) for x in result["unknowns"]):
         raise ValueError("AI 확인 필요 항목의 형식이 잘못됐습니다.")
     # Existence of citation IDs is verified; semantic entailment needs inspection.
     return result

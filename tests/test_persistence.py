@@ -345,3 +345,43 @@ def test_rebuild_removes_cases_from_old_window_config(idx_conn, tmp_path):
 
     assert second == labels            # 문제지와 정답이 어긋나지 않는다
     assert not (first - second) or first != second
+
+
+class TestWindowYoy:
+    """커머스 창(일별)과 검색 지수(주별)는 격자가 다르다.
+
+    yoy_ratio 를 그대로 쓰면 일별 날짜로 주별 자료를 찾아 전부 빗나간다.
+    조용히 None 만 돌려주므로 터지지 않고 넘어간다. 그래서 여기서 막는다.
+    """
+
+    def test_matches_weekly_data_from_daily_window(self):
+        from trend_pipeline.persistence import window_yoy
+
+        item = {"2025-10-05": 10.0, "2025-10-12": 10.0,
+                "2026-10-04": 20.0, "2026-10-11": 20.0}
+        days = [f"2026-10-{d:02d}" for d in range(6, 13)]
+        assert window_yoy(item, days) == pytest.approx(2.0)
+
+    def test_old_helper_misses_on_mismatched_grid(self):
+        from trend_pipeline.persistence import window_yoy, yoy_ratio
+
+        item = {"2025-10-05": 10.0, "2025-10-12": 10.0,
+                "2026-10-04": 20.0, "2026-10-11": 20.0}
+        days = [f"2026-10-{d:02d}" for d in range(6, 13)]
+        # 일별 날짜가 주별 자료에 없어 격자가 다른 쪽은 답을 못 낸다.
+        assert yoy_ratio(item, days) is None
+        assert window_yoy(item, days) is not None
+
+    def test_no_last_year_returns_none(self):
+        from trend_pipeline.persistence import window_yoy
+
+        item = {"2026-10-04": 20.0, "2026-10-11": 20.0}
+        days = [f"2026-10-{d:02d}" for d in range(6, 13)]
+        assert window_yoy(item, days) is None
+
+    def test_zero_last_year_is_not_infinite(self):
+        from trend_pipeline.persistence import window_yoy
+
+        item = {"2025-10-05": 0.0, "2026-10-04": 20.0}
+        days = [f"2026-10-{d:02d}" for d in range(6, 13)]
+        assert window_yoy(item, days) is None

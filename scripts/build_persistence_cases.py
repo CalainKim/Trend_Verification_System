@@ -108,6 +108,10 @@ def main(argv=None) -> int:
                    help="index 일 때 상승으로 볼 최소 비율")
     p.add_argument("--out", default=None, help="케이스를 저장할 경로")
     p.add_argument("--stats", action="store_true", help="통계만 출력")
+    p.add_argument("--no-seasonality", dest="seasonality", action="store_false",
+                   help="계절성 근거를 붙이지 않는다. 속성마다 검색 지수를 "
+                        "훑어서 느리다")
+    p.set_defaults(seasonality=True)
     p.add_argument("--keep-stale", action="store_true",
                    help="이전 설정으로 만든 케이스 파일을 지우지 않는다")
     args = p.parse_args(argv)
@@ -142,6 +146,14 @@ def main(argv=None) -> int:
           f"간격 {args.step}{unit}")
     print(f"  겹친 창 {len(wins)}개 / 독립 창 {len(indep)}개\n")
 
+    attrs = colors = None
+    if args.source == "commerce" and args.seasonality:
+        import sys as _s
+        _s.path.insert(0, str(ROOT / "scripts"))
+        import extract_attributes as ea
+        attrs, _stop, colors = ea.load_dictionary()
+        print("계절성 근거를 붙인다. 상품 속성의 검색 지수를 작년과 견준다")
+
     cases, labels = [], {}
     for wi, w in enumerate(wins):
         if args.source == "index":
@@ -149,7 +161,9 @@ def main(argv=None) -> int:
             cases += cases_w
             labels.update(labels_w)
             continue
-        events = ps.rise_events(series, w, args.min_rise)
+        season = ps.commerce_seasonality(conn, series, w, attrs, colors) \
+            if args.seasonality else None
+        events = ps.rise_events(series, w, args.min_rise, seasonality=season)
         got = ps.label_events(series, w, events)
         for e in events:
             if e.item_key not in got:

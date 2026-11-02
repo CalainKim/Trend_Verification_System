@@ -107,10 +107,58 @@ def test_snapshot_round_trip(conn, tmp_path):
     recs = [_rec("2024-10-01", 1), _rec("2024-10-02", 2)]
     storage.insert_raw(conn, recs)
     path = snapshots.write_snapshot(conn, tmp_path, "naver_datalab", "2024-10-01")
-    restored = list(snapshots.read_snapshot(path))
-    assert len(restored) == 1
-    assert restored[0].observed_at == "2024-10-01"
+    restored = sorted(snapshots.read_snapshot(path), key=lambda r: r.observed_at)
+    # naver_datalab 은 연도로 묶이므로 같은 해의 두 관측이 한 파일에 들어간다.
+    assert path.name == "2024.csv"
+    assert [r.observed_at for r in restored] == ["2024-10-01", "2024-10-02"]
     assert restored[0].keyword_raw == "발라클라바"
+
+
+def test_history_channel_partitions_by_year(conn, tmp_path):
+    """한 번 요청하면 몇 년치가 오는 채널은 연도로 묶는다.
+
+    관측일로 쪼개면 네 줄짜리 파일이 1,095개 생겨서 저장소가 감당하지 못한다.
+    """
+    from trend_pipeline import snapshots
+
+    recs = [_rec(f"2024-{m:02d}-01", m) for m in range(1, 13)]
+    recs.append(_rec("2025-01-01", 99))
+    storage.insert_raw(conn, recs)
+    paths = snapshots.write_snapshots_for(conn, tmp_path, recs)
+    assert [p.name for p in paths] == ["2024.csv", "2025.csv"]
+    assert len(list(snapshots.read_snapshot(paths[0]))) == 12
+
+
+def test_daily_channel_partitions_by_day(conn, tmp_path):
+    """그 시점의 순위만 주는 채널은 관측일 하나가 파일 하나다."""
+    from trend_pipeline import snapshots
+
+    recs = [_rank_rec("2024-10-01", 1, 1), _rank_rec("2024-10-02", 1, 2)]
+    storage.insert_raw(conn, recs)
+    paths = snapshots.write_snapshots_for(conn, tmp_path, recs)
+    assert [p.name for p in paths] == ["2024-10-01.csv", "2024-10-02.csv"]
+
+
+def test_snapshot_row_order_is_stable(conn, tmp_path):
+    """같은 자료를 두 번 내보내면 바이트까지 같아야 한다.
+
+    구글 트렌드는 같은 날 같은 지역에 키워드가 55개 들어 있어서 정렬 키에
+    keyword_raw 가 없으면 행 순서가 정해지지 않는다. 순서가 흔들리면 내용이
+    같은데도 저장소에 변경으로 잡혀 이력이 지저분해진다.
+    """
+    from trend_pipeline import snapshots
+
+    kws = ["헨리넥", "코튼", "레이어드", "스트라이프"]
+    recs = [_rec("2024-10-01", i, keyword=kw, channel="gtrends")
+            for i, kw in enumerate(kws)]
+    storage.insert_raw(conn, recs)
+    first = snapshots.write_snapshot(conn, tmp_path, "gtrends", "2024-10-01")
+    before = first.read_bytes()
+    after = snapshots.write_snapshot(conn, tmp_path, "gtrends", "2024-10-01").read_bytes()
+    assert before == after
+
+    order = [r.keyword_raw for r in snapshots.read_snapshot(first)]
+    assert order == sorted(kws), "동률일 때 keyword_raw 로 순서가 정해져야 한다"
 
 
 def _rank_rec(observed_at, item, rank):

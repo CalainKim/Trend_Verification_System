@@ -350,6 +350,7 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   python scripts/collect_daily.py             상의 카테고리 일간 랭킹 100위 수집
   python scripts/collect_daily.py --status    누적 현황 출력
   python scripts/load_snapshots.py            스냅샷으로부터 DB 재구성
+  python scripts/export_snapshots.py          DB 를 스냅샷 CSV 로 내보내기
   python scripts/report.py                    터미널 리포트
   bash scripts/serve.sh                       대시보드를 브라우저로 열기
   python scripts/build_dashboard.py           수집 현황 화면 생성
@@ -359,6 +360,48 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   python scripts/search_items.py "발라클라바"   유사 아이템 검색
   python -m pytest tests -q                   테스트
 ```
+
+
+## 9-1. 다른 컴퓨터에서 이어서 작업하기
+
+DB 는 저장소에 올리지 않는다. 90MB 짜리 바이너리라서 수집할 때마다 전체가
+다시 저장되고 git 이 변경분을 추려내지 못한다. 대신 `data/snapshots` 의 CSV 가
+원본이고 DB 는 거기서 다시 만드는 파생물이다.
+
+```
+  git clone https://github.com/CalainKim/Trend_Verification_System
+  cd Trend_Verification_System
+  python3.12 -m venv .venv && source .venv/bin/activate
+  pip install -r requirements.txt
+
+  python scripts/load_snapshots.py      CSV 에서 DB 복원 (127,667행, 1분쯤)
+  ./scripts/build_all_benchmarks.sh      벤치마크 세 종 재생성
+```
+
+복원이 제대로 됐는지는 봉인 해시로 확인한다. `benchmark-index/labels.digest.txt`
+가 저장소에 들어 있는 값과 같으면 같은 자료로 같은 문제지가 만들어진 것이다.
+2026-11-02 기준 `3d876642a5b0d03a` 로 시작한다.
+
+경로에 대괄호가 들어 있으면 pytest 가 돈다. 저장소를 `[자주프]` 같은 이름의
+디렉터리 안에 두면 테스트 ID 파싱이 실패하므로 clone 위치를 그렇게 잡지 않는다.
+
+### 스냅샷이 자동으로 쌓이는 구조
+
+수집기는 DB 에 넣는 즉시 같은 내용을 CSV 로도 쓴다. 한 속성을 받을 때마다
+쓰므로 중간에 구글 트렌드 한도에 걸려 끝나도 받은 만큼은 텍스트로 남는다.
+`scripts/collect_and_push.sh` 가 10시와 22시에 `data/snapshots` 를 커밋하고
+푸시하므로, 수집한 자료는 하루 두 번 저장소로 넘어간다.
+
+채널마다 파일을 쪼개는 단위가 다르다.
+
+    채널              단위      파일      이유
+    commerce_rank    관측일    36개      그 시점의 순위만 주므로 하루가 한 파일
+    gtrends          연도       6개      한 번 요청에 5년치가 와서 하루로 쪼개면 253개
+    naver_datalab    연도       4개      같은 이유. 하루로 쪼개면 네 줄짜리 1,095개
+    naver_shopping   연도       5개      같은 이유
+
+CSV 42MB 가 압축되면 1.7MB 다. metadata 열의 JSON 이 행마다 거의 같아서
+20:1 에서 35:1 까지 줄어든다.
 
 
 ## 10. 진행 상황

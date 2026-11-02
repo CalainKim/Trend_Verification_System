@@ -24,7 +24,11 @@ git add data/snapshots docs
 if git diff --staged --quiet; then
     echo "변경 없음"
 else
-    git commit -q -m "chore(data): 29CM 랭킹 스냅샷 $(date +%Y-%m-%d)"
+    # 구글 트렌드 수집기도 같은 디렉터리에 스냅샷을 쓰므로 29CM 만 바뀌는 게
+    # 아니다. 실제로 바뀐 채널을 메시지에 적는다.
+    CHANNELS=$(git diff --staged --name-only -- data/snapshots \
+               | awk -F/ '{print $3}' | sort -u | paste -sd', ' -)
+    git commit -q -m "chore(data): 스냅샷 갱신 $(date +%Y-%m-%d) (${CHANNELS:-없음})"
     git push -q origin main && echo "푸시 완료" || echo "푸시 실패 (다음 실행에서 함께 올라간다)"
 fi
 echo "=== 완료 ==="

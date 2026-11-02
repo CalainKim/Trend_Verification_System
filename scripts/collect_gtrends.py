@@ -30,7 +30,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from trend_pipeline import storage  # noqa: E402
+from trend_pipeline import snapshots, storage  # noqa: E402
 from trend_pipeline.collectors.gtrends import (  # noqa: E402
     GoogleTrendsCollector,
     GoogleTrendsUnavailable,
@@ -114,6 +114,9 @@ def main(argv=None) -> int:
                    help="건너뛸 속성. 기존 자료와 정규화 창이 달라질 때 쓴다")
     p.add_argument("--replace", action="store_true",
                    help="같은 키워드의 기존 자료를 지우고 다시 넣는다")
+    p.add_argument("--snapshot-dir", default=str(ROOT / "data" / "snapshots"),
+                   help="CSV 스냅샷 경로 (빈 문자열이면 기록 안 함). DB 는 "
+                        "저장소에서 제외되므로 여기 남은 것만 다른 컴퓨터로 넘어간다")
     args = p.parse_args(argv)
 
     end = args.end or utcnow_iso()[:10]
@@ -184,6 +187,10 @@ def main(argv=None) -> int:
                     break
                 continue
             n = storage.insert_raw(conn, recs) if recs else 0
+            if recs and args.snapshot_dir:
+                # DB 가 아니라 이 CSV 가 원본이다. 한 속성을 받을 때마다 써야
+                # 중간에 한도에 걸려 끝나도 받은 만큼은 텍스트로 남는다.
+                snapshots.write_snapshots_for(conn, Path(args.snapshot_dir), recs)
             total += len(recs)
             print(f"  {t['ko']:<10} {alias:<8} {len(recs):>5}행 수집, {n}행 저장")
 

@@ -114,6 +114,12 @@ BROWSER_SHIM = """
 GENERIC_ERRORS = ("추론 요청이 실패했습니다. 다시 실행해 주세요.",
                   "분석에 실패했습니다. 다시 실행해 주세요.")
 
+#: 가운뎃점을 지우는 자리에서 건드리면 안 되는 것들. 앞의 둘은 규칙을 적어
+#: 두거나 실행하는 코드이고, 셋째는 영문 수식의 내적 기호다.
+DOT_KEEP = (r"s.replace(/\s*·\s*/g, ', ')",
+            "가운뎃점(·)은 절대 쓰지 않는다",
+            "cursor·(1-k) + offset·k")
+
 
 def inline_fonts(css: str, css_dir: Path) -> tuple[str, int]:
     """CSS 의 url(...) 을 base64 로 바꾼다."""
@@ -393,6 +399,31 @@ def soften_llm(html: str) -> tuple[str, int]:
     return html, n
 
 
+def strip_middle_dot(html: str) -> tuple[str, int]:
+    """화면에 보이는 가운뎃점을 쉼표로 바꾼다.
+
+    저장소 규칙이지만 디자인 시스템 번들에 옛 예시 문구로 남아 있었고, 그
+    번들을 인라인하면서 산출물까지 따라 들어왔다. 손으로 지우면 디자인을
+    다시 받을 때 되살아나므로 빌드할 때마다 지운다.
+
+    화면 스크립트 안에 규칙 자체를 적어 둔 자리가 있어 그것은 건드리지
+    않는다. 지우면 모델 출력에 가운뎃점이 다시 돌아온다.
+    """
+    holes = {}
+    for i, keep in enumerate(DOT_KEEP):
+        if keep in html:
+            hole = f"\x00DOT{i}\x00"
+            holes[hole] = keep
+            html = html.replace(keep, hole)
+    n = html.count("·")
+    html = re.sub(r"\s*·\s*", ", ", html)
+    for hole, keep in holes.items():
+        html = html.replace(hole, keep)
+    if "\x00DOT" in html:
+        raise SystemExit("가운뎃점 자리표시자가 남았다. 복원이 안 됐다")
+    return html, n
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path, help="패치가 끝난 .html")
@@ -423,6 +454,7 @@ def main(argv=None) -> int:
     html, stats = bundle(html, args.assets)
     html, n_err = soften_llm(html)
     html, n_img = inline_remote_images(html)
+    html, n_dot = strip_middle_dot(html)
 
     # {{ }} 는 화면이 그릴 때 채우는 자리표시자지 바깥 파일이 아니다.
     left = [u for u in re.findall(r'(?:src|href)="(?!data:|http|#)([^"]+)"', html)
@@ -457,6 +489,7 @@ def main(argv=None) -> int:
     print("브라우저에서 API 를 직접 부르는 shim 을 넣었다 (키는 보는 사람이 입력)")
     print("판정 패널을 넣었다 (문제지를 돌리고 verdicts.json 으로 내려받기)")
     print(f"상품 사진 {n_img}장을 파일 안에 넣었다")
+    print(f"가운뎃점 {n_dot}곳을 쉼표로 바꿨다")
     print(f"{before / 1024:.0f}KB -> {size / 1024 / 1024:.1f}MB")
     print(f"\n{args.out}")
     return 0

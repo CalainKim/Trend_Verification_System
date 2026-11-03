@@ -7,6 +7,23 @@
 이 저장소는 검증 단계에 넘길 입력값을 만드는 데까지만 책임진다.
 
 
+## 검증 파트는 여기서 시작한다
+
+순서대로 넷만 보면 된다.
+
+    1. docs/verification-handoff.md      무엇을 받고 무엇을 만드나
+    2. benchmark/cases/                  문제지 139건. 바로 읽힌다
+    3. verification/examples/            판정 출력 예시 3건과 읽는 법
+    4. benchmark/scorecard.md            넘어야 할 선
+
+정답(labels.sealed.json)은 저장소에 없다. 수집 파트만 가지고 있고 봉인
+해시로 바뀌지 않았음을 증명한다. 채점은 판정 파일을 넘기면 된다.
+
+    python scripts/score_verdicts.py --verdicts <판정 경로>
+
+API 키가 없어도 문제지는 다 읽힌다. 수집을 직접 돌릴 때만 키가 필요하다.
+
+
 ## 1. 아키텍처
 
 두 개의 트랙으로 구성한다.
@@ -257,6 +274,7 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
   benchmark-index/       검색 지수 벤치마크 (한국, 확인 28일)
   benchmark-index-long/  검색 지수 벤치마크 (3개 지역, 확인 84일)
   verification/          검증 파트 인터페이스 (판정 결과 스키마)
+    examples/            판정 출력 실제 예시 3건과 읽는 법
   docs/                  GitHub Pages 대시보드와 근거 문서
                          verification-handoff.md 는 검증 파트 인수인계 문서
   tests/                 저장 및 누수 차단 계약 테스트

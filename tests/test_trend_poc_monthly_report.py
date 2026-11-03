@@ -184,7 +184,7 @@ def test_pending_followup_shows_model_reasons_first_without_empty_future_chart()
     assert '첫 근거' in review and '확인할 조건' in review
     assert '3~4월 자료로 본 판단' in review
     assert '4월 상승을 미리 예측한 결과는 아닙니다' in review
-    assert page.index('class="review-summary"') < page.index('02 · 이후 결과와 비교')
+    assert page.index('class="review-summary"') < page.index('02. 이후 결과와 비교')
     assert '5~10월 미조회' in page
     assert "확인 전" in page
     assert data==before  # No initial/follow-up normalization mixing on export.

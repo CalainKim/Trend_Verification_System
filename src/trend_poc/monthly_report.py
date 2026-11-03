@@ -133,12 +133,12 @@ def _external_marks(references, start, end, x, top, height, publication_y, publi
         if first and last and first <= last:
             a, b = max(first, start), min(last + timedelta(days=1), end)
             if a < b:
-                label = f'{title} · 기록이 관측한 기간 {first}–{last}'
+                label = f'{title}, 기록이 관측한 기간 {first}–{last}'
                 result.append(f'<rect class="external-observation" data-reference="{_esc(ref_id)}" x="{x(a):.2f}" y="{top}" width="{max(x(b)-x(a),1):.2f}" height="{height}" fill="#eebf65" fill-opacity=".14"><title>{_esc(label)}</title></rect>')
         elif publications:
             published = _date(reference.get("published_at"))
             if published and start <= published < end:
-                label = f'{title} · 게시일 {published}, 관측 기간 미확인'
+                label = f'{title}, 게시일 {published}, 관측 기간 미확인'
                 result.append(f'<circle class="publication-only" data-reference="{_esc(ref_id)}" cx="{x(published):.2f}" cy="{publication_y}" r="3.8" fill="#bd8637" stroke="white" stroke-width="1.2"><title>{_esc(label)}</title></circle>')
     return ''.join(result)
 
@@ -158,7 +158,7 @@ def monthly_chart(case, year):
     keyword = case.get("keyword") or "후보"
     bits = [f'<svg class="monthly-chart" viewBox="0 0 {width} {height}" role="img" aria-label="{_esc(keyword)}: {year}년 3월부터 10월까지 쇼핑과 검색의 월별 상대 지수. 결측월은 선을 끊고 외부 관측 기간과 게시일을 구분합니다.">',
             '<title>항목별 축. 선정 수치는 3~4월 요청, 그래프는 3~10월 요청. 서로 다른 요청의 지수 크기는 직접 비교하지 않습니다.</title>']
-    panels = (("shopping", "쇼핑 클릭", "#2867c7", 35), ("search", "검색 · 보조", "#398a81", 168))
+    panels = (("shopping", "쇼핑 클릭", "#2867c7", 35), ("search", "검색 (보조)", "#398a81", 168))
     for key,label,color,top in panels:
         ph = 76
         values = [row[key] for row in series.values() if row[key] is not None]
@@ -206,7 +206,7 @@ def monthly_chart(case, year):
     for month in range(3,11):
         bits.append(f'<text x="{centers[month]:.2f}" y="263" text-anchor="middle" class="axis-label">{month}월</text>')
     # Publication dots are on their own source timeline, not on the metric line.
-    bits.append('<text x="33" y="306" class="axis-label">음영: 외부 기록의 관측 기간 · 점: 게시일만 확인</text>')
+    bits.append('<text x="33" y="306" class="axis-label">음영: 외부 기록의 관측 기간, 점: 게시일만 확인</text>')
     bits.append('</svg>')
     return ''.join(bits)
 
@@ -229,7 +229,7 @@ def _missing_note(case, year):
         months=[m for m in range(3,11) if (series.get(m) or {}).get("shopping") is None]
     if not months:
         return ""
-    return '·'.join(str(m) for m in sorted(set(months))) + "월 자료 부족"
+    return ', '.join(str(m) for m in sorted(set(months))) + "월 자료 부족"
 
 
 def _reasons(items):
@@ -243,7 +243,7 @@ def _reasons(items):
             text,original,ids=item,item,[]
         # Compact copy is supplied by the caller; never cut a later negation off
         # the model's explanation just to make it fit a fixed-height card.
-        tooltip=_text(original)+(f' · 근거: {" · ".join(map(str,ids))}' if ids else '')
+        tooltip=_text(original)+(f', 근거: {", ".join(map(str,ids))}' if ids else '')
         values.append(f'<li title="{_esc(tooltip)}">{_esc(_text(text))}</li>')
     return '<ul>'+''.join(values)+'</ul>' if values else '<p class="empty">작성된 항목 없음</p>'
 
@@ -262,7 +262,7 @@ def _reference(reference):
     population=reference.get("population") or "대상 집단 미기록"
     return (f'<article class="source"><div class="source-title">{heading}</div>'
             f'<p>{_esc(_short(reference.get("summary"),190))}</p>'
-            f'<small>{_esc(timing)}<br>{_esc(publication)} · 대상 {_esc(population)}</small></article>')
+            f'<small>{_esc(timing)}<br>{_esc(publication)}, 대상 {_esc(population)}</small></article>')
 
 
 def _comparison(case):

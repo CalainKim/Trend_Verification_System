@@ -408,6 +408,11 @@ def build_score(benchmark: Path, verdicts: Optional[Path]) -> Optional[dict]:
         "base_rate": round(card.base_rate_all, 3) if card.base_rate_all else None,
         "base_rate_answered": (round(card.base_rate_answered, 3)
                                if card.base_rate_answered else None),
+        # 기저율은 다수 쪽 비율이라 어느 쪽이 다수인지에 따라 뜻이 달라진다.
+        # 문제지를 다시 만들면서 지속에서 소멸로 뒤집힌 적이 있다. 화면이
+        # "전부 남는다고 했을 때" 로 못 박으면 그때부터 거짓말이 된다.
+        "base_side": (None if card.persist_rate_all is None
+                      else "persist" if card.persist_rate_all >= 0.5 else "fade"),
         "ci": [round(card.ci[0], 3), round(card.ci[1], 3)],
         "beats_base_rate": card.beats_base_rate,
         # 화면이 숫자만 보여 주면 표본이 몇인지 안 보인다. 단서를 같이 낸다.

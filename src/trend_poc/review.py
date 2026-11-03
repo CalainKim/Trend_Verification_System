@@ -96,10 +96,10 @@ def build_payload(bundle):
         )
     elif bundle.get("experiment_type") == "monthly-retrospective-v1":
         system = SYSTEM.replace("각 목록은 최대 3개", "각 목록은 최대 2개") + (
-            "\n이번 입력은 3월·4월 월간 상대 지수다. 질문은 이후 확산 가능성이 있어 계속 관찰할 가치가 있는가이다. "
-            "두 달만으로 지속 상승·계절성·구매·실제 유행을 확인했다고 쓰지 않는다. "
+            "\n이번 입력은 3월, 4월 월간 상대 지수다. 질문은 이후 확산 가능성이 있어 계속 관찰할 가치가 있는가이다. "
+            "두 달만으로 지속 상승, 계절성, 구매, 실제 유행을 확인했다고 쓰지 않는다. "
             "지지에는 실제 증가나 동반 움직임만 쓰고, 자료가 있다는 사실을 지지 근거로 쓰지 않는다. "
-            "수치·비율은 제공된 features에 있는 값만 쓴다. 문장은 짧고 구체적으로 쓴다. "
+            "수치, 비율은 제공된 features에 있는 값만 쓴다. 문장은 짧고 구체적으로 쓴다. "
             "고객군 차이와 두 채널이 함께 움직였는지 확인하고, 설명할 근거가 없으면 미확인으로 남긴다."
         )
     return {"model": MODEL, "max_tokens": 4096, "output_config": {"effort": "low"},
@@ -158,7 +158,7 @@ def run_review(root, run_dir, bundle, client=None):
         return old  # Failed or interrupted calls must not be billed again automatically.
     record = {"status": "running", "input_sha256": input_hash, "started_at": now(),
               "model": MODEL, "effort": "low", "max_tokens": 4096, "call_limit": 1,
-              "validation_scope": "JSON 형식·존재하는 인용 ID·정상 종료. 의미 적합성은 사람 검토 필요."}
+              "validation_scope": "JSON 형식, 존재하는 인용 ID, 정상 종료. 의미 적합성은 사람 검토 필요."}
     run_dir.mkdir(parents=True, exist_ok=True)
     # Exclusive creation claims this run before constructing a network client.
     try:

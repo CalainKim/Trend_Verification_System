@@ -489,3 +489,48 @@ class TestReviewPanelSettings:
         assert f"max_tokens: {pd.MAX_TOKENS}" in panel
         assert f"output_config: {{ effort: '{pd.EFFORT}' }}" in panel
         assert f"model: '{pd.MODEL}'" in panel
+
+
+class TestNoMiddleDotInOutput:
+    """산출물에 가운뎃점이 남지 않는다.
+
+    저장소 규칙인데 디자인 시스템 번들에 옛 예시 문구로 남아 있었고, 번들을
+    인라인하면서 내보낼 파일까지 따라 들어왔다. 손으로 지우면 디자인을 다시
+    받을 때 되살아나므로 빌드할 때마다 지운다.
+
+    다만 전부 지우면 안 된다. 화면 스크립트가 모델에게 가운뎃점을 쓰지 말라고
+    지시하는 문장과 그것을 실행하는 함수가 들어 있다. 그 둘을 지우면 모델
+    출력에 가운뎃점이 다시 돌아온다.
+    """
+
+    def _strip(self, html):
+        import bundle_design as bd
+
+        return bd.strip_middle_dot(html)
+
+    def test_visible_text_loses_the_dot(self):
+        out, n = self._strip("<p>검색 · 판매 · 소셜</p>")
+        assert out == "<p>검색, 판매, 소셜</p>"
+        assert n == 2
+
+    def test_keeps_the_rule_sentence(self):
+        rule = "- 가운뎃점(·)은 절대 쓰지 않는다. 나열은 쉼표로 한다."
+        out, _ = self._strip(f"<script>const SYS = `{rule}`;</script>")
+        assert rule in out
+
+    def test_keeps_the_sanitizer(self):
+        fn = r"const nodot = s => s.replace(/\s*·\s*/g, ', ');"
+        out, _ = self._strip(f"<script>{fn}</script>")
+        assert fn in out
+
+    def test_counts_only_what_it_changed(self):
+        rule = "가운뎃점(·)은 절대 쓰지 않는다"
+        out, n = self._strip(f"<p>검색 · 판매</p><script>{rule}</script>")
+        assert n == 1
+        assert rule in out
+        assert "검색, 판매" in out
+
+    def test_leaves_no_placeholder_behind(self):
+        out, _ = self._strip("<p>가운뎃점(·)은 절대 쓰지 않는다</p><p>가 · 나</p>")
+        assert "DOT" not in out
+        assert "\x00" not in out

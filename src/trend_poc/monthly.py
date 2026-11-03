@@ -31,7 +31,7 @@ def validate_manifest(manifest):
     ids = set()
     for case in manifest["cases"]:
         if not case.get("definition"):
-            raise ValueError("각 키워드의 포함·제외 범위가 필요합니다.")
+            raise ValueError("각 키워드의 포함, 제외 범위가 필요합니다.")
         for ref in case.get("references", []):
             if not ref.get("id") or ref["id"] in ids:
                 raise ValueError("출처 ID는 전체 사례에서 고유해야 합니다.")
@@ -45,7 +45,7 @@ def validate_manifest(manifest):
             if start and not date.fromisoformat(start) <= date.fromisoformat(end) <= published:
                 raise ValueError("관측 기간과 게시일 순서를 확인하세요.")
             if not all(ref.get(k) for k in ("title", "summary", "population", "kind")):
-                raise ValueError("출처의 제목·내용·고객군·자료 종류가 필요합니다.")
+                raise ValueError("출처의 제목, 내용, 고객군, 자료 종류가 필요합니다.")
     return manifest
 
 
@@ -58,13 +58,13 @@ def validate_record(record, channel, keywords, end):
             or record.get("request_sha256") != digest({"url": record["url"], "payload": payload})
             or record.get("response_sha256") != digest(record["response"])
             or record.get("record_sha256") != digest({k: v for k, v in record.items() if k != "record_sha256"})):
-        raise ValueError("월별 원자료의 해시·출처가 일치하지 않습니다.")
+        raise ValueError("월별 원자료의 해시, 출처가 일치하지 않습니다.")
     if (payload.get("startDate") != "2025-03-01" or payload.get("endDate") != end
             or payload.get("timeUnit") != "month" or payload.get("gender") != "m"
             or payload.get("ages") != (["20"] if channel == "shopping" else ["3", "4"])
             or payload.get("device") not in (None, "")
             or (channel == "shopping" and payload.get("category") != "50000169")):
-        raise ValueError("기간·월간 집계·고객군·분야 조건이 다릅니다.")
+        raise ValueError("기간, 월간 집계, 고객군, 분야 조건이 다릅니다.")
     groups = ([{"name": k, "param": [k]} for k in keywords] if channel == "shopping"
               else [{"groupName": k, "keywords": [k]} for k in keywords])
     if payload.get("keyword" if channel == "shopping" else "keywordGroups") != groups:
@@ -113,8 +113,8 @@ def build_monthly_bundle(case, records):
             "limitations": ["현재 조회한 2025년 자료이며 당시 버전의 가용 시점은 확인하지 못함.",
                             "월간 관측 두 개로 지속 추세나 계절성 원인을 확정할 수 없음.",
                             "쇼핑은 20~29세 남성, 검색은 19~29세 남성. 네이버 두 지표는 완전히 독립적이지 않음.",
-                            "같은 요청의 3월 대비 4월 20% 증가를 관찰 기준으로 사용. 실제 구매·유행의 확정 기준이 아님.",
-                            "광고·판매량·실제 착용·전년 동월 자료 없음. 모델의 과거 학습 지식은 검증 근거로 쓰지 않음."]}
+                            "같은 요청의 3월 대비 4월 20% 증가를 관찰 기준으로 사용. 실제 구매, 유행의 확정 기준이 아님.",
+                            "광고, 판매량, 실제 착용, 전년 동월 자료 없음. 모델의 과거 학습 지식은 검증 근거로 쓰지 않음."]}
 
 
 def monthly_outcome(case, records):
@@ -139,7 +139,7 @@ def monthly_outcome(case, records):
         label, summary = "후속 자료 부족", "5~10월 쇼핑 지수가 없어 이후 흐름을 판단할 수 없습니다."
     elif missing:
         label = "일부 기간 미확인"
-        summary = "·".join(str(int(m[5:])) + "월" for m in missing) + " 쇼핑 자료가 없습니다. 확인된 월만 그래프에 표시했습니다."
+        summary = ", ".join(str(int(m[5:])) + "월" for m in missing) + " 쇼핑 자료가 없습니다. 확인된 월만 그래프에 표시했습니다."
     elif measured:
         label, summary = "플랫폼 반응 확인", "해당 플랫폼에서 측정한 반응 기록이 있습니다. 20대 남성 전체의 유행 여부와는 구분합니다."
     elif april is not None and april > 0 and all(row["shopping"] < april for row in followup):
@@ -192,7 +192,7 @@ class MonthlyService:
                 "selection_method": "외부 기록을 참고해 고른 과거 사례. 결과를 알고 구성한 설명용 사례이며 무작위 성능 평가가 아님."}
         existing = self.load("plan.json")
         if existing and existing != plan:
-            raise ValueError("기존 사례·기간·정책을 바꾸지 않습니다. 새 실행 폴더를 사용하세요.")
+            raise ValueError("기존 사례, 기간, 정책을 바꾸지 않습니다. 새 실행 폴더를 사용하세요.")
         sources = self.load("sources.json")
         if sources and sources != manifest:
             raise ValueError("출처 선정 기록이 변경됐습니다. 새 실행 폴더를 사용하세요.")
@@ -204,7 +204,7 @@ class MonthlyService:
     def _records(self, name, end):
         records = self.load(name)
         if not isinstance(records, dict) or set(records) != {"shopping", "search"}:
-            raise ValueError("검색·쇼핑 요청 기록이 필요합니다.")
+            raise ValueError("검색, 쇼핑 요청 기록이 필요합니다.")
         keywords = [c["keyword"] for c in self.load("plan.json")["cases"]]
         for ch, record in records.items():
             validate_record(record, ch, keywords, end)
@@ -243,7 +243,7 @@ class MonthlyService:
             bundle = read_json(self.case_dir(i) / "bundle.json")
             if (bundle != build_monthly_bundle(case, records) or digest(bundle) != frozen["bundle_sha256"][i]
                     or digest(build_payload(bundle)) != frozen["payload_sha256"][i]):
-                raise ValueError("초기 근거·AI 입력이 고정 이후 달라졌습니다.")
+                raise ValueError("초기 근거, AI 입력이 고정 이후 달라졌습니다.")
         return frozen
 
     def review(self, client=None):
@@ -263,7 +263,7 @@ class MonthlyService:
         case = self.case_dir(index)
         old = read_json(case / "review.json", {})
         if old.get("status") != "failed":
-            raise ValueError("실패 상태가 아닙니다. 정상·진행 중 응답은 재호출하지 않습니다.")
+            raise ValueError("실패 상태가 아닙니다. 정상, 진행 중 응답은 재호출하지 않습니다.")
         from uuid import uuid4
         archive = case / "attempts" / uuid4().hex
         archive.mkdir(parents=True, exist_ok=False)
@@ -336,7 +336,7 @@ class MonthlyService:
             annotation = read_json(self.case_dir(i) / "assessment.json")
             if annotation:
                 if annotation.get("review_sha256") != digest(review) or annotation.get("followup_sha256") != digest(records):
-                    raise ValueError("사후 검토가 현재 원자료·AI 응답과 연결되지 않습니다.")
+                    raise ValueError("사후 검토가 현재 원자료, AI 응답과 연결되지 않습니다.")
                 comparison.update({k: annotation[k] for k in ("contribution", "assessment", "checks")})
             presentation = read_json(self.case_dir(i) / "presentation.json")
             if presentation:

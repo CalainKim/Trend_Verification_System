@@ -173,8 +173,8 @@ def _case_card(case, year, index, single=False, report=None):
     bits = [f'<article class="case-card" id="case-{index}" aria-labelledby="case-title-{index}">',
             '<header class="case-head"><div>',
             f'<h2 id="case-title-{index}">{_esc(case.get("keyword"))}</h2><p class="definition">{_esc(_first_sentence(case.get("definition")))}</p></div>',
-            f'<div class="head-metric">{_pct(selection.get("growth_pct"))}<small>4월 쇼핑 · 전월 대비</small></div></header>',
-            '<div class="workspace"><section class="block review-block"><div class="block-label">01 · 선정 근거 — 3~4월 자료로 본 판단</div><div class="review-state"><h3>모델은 왜 이렇게 판단했나</h3>',
+            f'<div class="head-metric">{_pct(selection.get("growth_pct"))}<small>4월 쇼핑 (전월 대비)</small></div></header>',
+            '<div class="workspace"><section class="block review-block"><div class="block-label">01. 선정 근거 — 3~4월 자료로 본 판단</div><div class="review-state"><h3>모델은 왜 이렇게 판단했나</h3>',
             _badge(result.get("verdict")) if actual else _badge(review.get("status") or "미실행"), '</div>']
     if actual:
         # Never truncate a sentence that may contain a qualification or negation.
@@ -184,7 +184,7 @@ def _case_card(case, year, index, single=False, report=None):
     else:
         bits.append('<p class="unrun">완료된 모델 응답이 없습니다.</p>')
     bits += ['<p class="metric-note">4월까지의 변화를 보고 내린 판단입니다. 4월 상승을 미리 예측한 결과는 아닙니다.</p>',
-             '</section></div><section class="block result-block"><div class="result-top"><h3>02 · 이후 결과와 비교</h3>',
+             '</section></div><section class="block result-block"><div class="result-top"><h3>02. 이후 결과와 비교</h3>',
              '<span class="missing">5~10월 미조회</span>' if pending else f'<span class="missing">{_esc(_missing_note(case, year))}</span>',
              '</div><div class="comparison-strip"><div class="comparison-cell"><small>수치 기준 판단</small>',
              _badge(selection.get("status")), '</div><div class="comparison-cell"><small>AI 판단</small>',
@@ -195,21 +195,21 @@ def _case_card(case, year, index, single=False, report=None):
         bits += ['<div class="followup-chart">', monthly_chart(case, year), '</div>',
                  f'<p class="result-note">{_esc(outcome.get("summary") or "")}</p>']
     elif not pending:
-        bits.append('<p class="result-note">월별 자료 부족 · 결과 비교 불가</p>')
+        bits.append('<p class="result-note">월별 자료 부족, 결과 비교 불가</p>')
     if pending:
         bits.append('<p class="result-note">후속 자료가 연결되면 월별 흐름과 설명의 도움 여부를 비교합니다.</p>')
     else:
         bits += ['<details><summary>AI 설명과 이후 사실 비교</summary>', _comparison(case), '</details>']
     refs = [ref for ref in outcome.get("references") or [] if isinstance(ref, dict)]
     bits += ['</section><section class="resources">',
-             f'<details><summary>확인 자료 · 외부 기록 {len(refs)}건</summary><div class="sources-grid">',
+             f'<details><summary>확인 자료, 외부 기록 {len(refs)}건</summary><div class="sources-grid">',
              *[_reference(ref) for ref in refs], '</div></details>',
-             '<details><summary>수치·원문·실행 기록</summary>',
+             '<details><summary>수치, 원문, 실행 기록</summary>',
              _monthly_details(case, year) if has_series else '',
-             _details("정의·선정 수치", {"definition": case.get("definition"), "selection": selection,
+             _details("정의, 선정 수치", {"definition": case.get("definition"), "selection": selection,
                  "note": "선정 수치는 3~4월 요청, 그래프는 3~10월 요청. 서로 다른 요청의 지수 크기는 직접 비교하지 않습니다."}),
              _details("모델 응답 원문과 미확인 사항", review),
-             _details("출처·조건·실행 기록", case.get("provenance") or {}),
+             _details("출처, 조건, 실행 기록", case.get("provenance") or {}),
              _details("사례 전체 데이터", case), '</details><div class="case-links">']
     if not single and report:
         bits.append(_download(render_dashboard(report, index - 1), "text/html;charset=utf-8", f"case-{index:02}.html", "사례 HTML ↓"))
@@ -224,14 +224,14 @@ def render_dashboard(report, index=None):
     year = int(report.get("year", 2025))
     cases = report.get("cases") or []
     single = index is not None
-    title = f'{cases[index].get("keyword")} · 트렌드 후보 검증' if single else '트렌드 후보 검증'
+    title = f'{cases[index].get("keyword")} 트렌드 후보 검증' if single else '트렌드 후보 검증'
     complete = sum(c.get("review", {}).get("status") == "complete" for c in cases)
     # Start on a usable review without changing the stored order or classifications.
     default = next((i for i, c in enumerate(cases, 1) if c.get("review", {}).get("status") == "complete" and c.get("selection", {}).get("status") == "WATCH"), 1)
     switch_css = ''.join(f'#pick-{i}:checked~.panels>#case-{i}{{display:block}}#pick-{i}:checked~.case-options>label[for="pick-{i}"]{{background:#edf3ff;border-color:#315fd1;box-shadow:inset 0 0 0 1px #315fd1}}#pick-{i}:checked~.case-options>label[for="pick-{i}"] .option-name:after{{content:"●";color:#315fd1;font-size:11px}}' for i in range(1, len(cases)+1))
     bits = ['<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
             f'<title>{_esc(title)}</title><style>{CSS}{switch_css}</style></head><body'+(' class="single"' if single else '')+'><main>',
-            f'<header class="topbar"><div><p class="eyebrow">{year} · 패션 관심 지표</p><h1>{_esc(title)}</h1><p class="scope">3~4월 근거 검토 → 관찰 여부와 이유 → 이후 변화 비교</p></div>',
+            f'<header class="topbar"><div><p class="eyebrow">{year} 패션 관심 지표</p><h1>{_esc(title)}</h1><p class="scope">3~4월 근거 검토 → 관찰 여부와 이유 → 이후 변화 비교</p></div>',
             f'<p class="status"><span class="status-dot"></span>저장된 결과<br><b>AI 검토 {complete}/{len(cases)}</b></p></header>']
     if not single:
         bits.append('<fieldset class="picker"><legend>아이템을 선택해 근거와 판단을 확인하세요</legend>')
@@ -241,7 +241,7 @@ def render_dashboard(report, index=None):
         for i, case in enumerate(cases, 1):
             selection = case.get("selection") or {}
             label = {"WATCH": "수치 기준 충족", "NOT_SUPPORTED": "수치 기준 미충족", "HOLD": "자료 확인 필요"}.get(selection.get("status"), "미확인")
-            bits.append(f'<label class="option" for="pick-{i}"><span class="option-name">{_esc(case.get("keyword"))}</span><span class="option-metric">{_pct(selection.get("growth_pct"))}</span><span class="option-note">4월 쇼핑 · 3월 대비</span><span class="option-status">{label}</span></label>')
+            bits.append(f'<label class="option" for="pick-{i}"><span class="option-name">{_esc(case.get("keyword"))}</span><span class="option-metric">{_pct(selection.get("growth_pct"))}</span><span class="option-note">4월 쇼핑 (3월 대비)</span><span class="option-status">{label}</span></label>')
         bits.append('</div><div class="panels">')
         bits.extend(_case_card(case, year, i, report=report) for i, case in enumerate(cases, 1))
         bits.append('</div></fieldset>')
@@ -249,7 +249,7 @@ def render_dashboard(report, index=None):
         bits.append(_case_card(cases[index], year, index+1, True, report))
     bits += ['<details class="method"><summary>비교 기준과 해석 범위</summary><p>관찰 기준: 4월 쇼핑 지수가 3월보다 20% 이상 증가. 유행 확정 기준은 아닙니다.</p>',
              f'<p>{_esc(report.get("retrospective_note") or "")}</p><p>상대 관심 지표이며 실제 판매량을 뜻하지 않습니다. 초기 판단에는 3~4월 자료만 사용합니다.</p></details>',
-             '<footer class="footer"><span>네이버 월간 지수 · 저장된 응답 기준</span><div class="footer-links">',
+             '<footer class="footer"><span>네이버 월간 지수, 저장된 응답 기준</span><div class="footer-links">',
              f'<a href="" download="{"index.html" if not single else f"case-{index+1:02}.html"}">보고서 HTML ↓</a>']
     if not single:
         bits += [_download(_json(report), "application/json", "suite.json", "전체 JSON ↓"),

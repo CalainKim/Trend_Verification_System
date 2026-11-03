@@ -326,9 +326,11 @@ def wire_score(src: str) -> str:
            "tip: SCORE ? '실제로 지속한 것 가운데 미리 짚은 비율. ' + SCORE.note "
            ": '놓친 급등까지 세야 계산됩니다' }, "
            "{ label: '기준 비율', "
-           "value: SCORE ? Math.round(SCORE.base_rate * 1000) / 10 + '%' : '54.1%', "
-           "c: INK, tip: '전부 남는다고 했을 때의 비율. 모델 성적은 이 값을 "
-           "넘어야 뜻이 있습니다' }")
+           "value: SCORE ? Math.round(SCORE.base_rate * 1000) / 10 + '%' : '–', "
+           "c: SCORE ? INK : MUTED, tip: SCORE ? "
+           "(SCORE.base_side === 'fade' ? '전부 소멸한다고 ' : '전부 남는다고 ') "
+           "+ '했을 때의 비율. 모델 성적은 이 값을 넘어야 뜻이 있습니다' "
+           ": '아직 채점하지 않았습니다' }")
     if src.count(old) != 1:
         raise SystemExit("검증 기록 타일을 찾지 못했다")
     src = src.replace(old, new)

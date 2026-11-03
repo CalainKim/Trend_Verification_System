@@ -169,7 +169,7 @@ def _validate_response(channel, payload, response):
                 raise NaverError("INVALID_OBSERVATION", "응답 관측 행의 형식이 올바르지 않습니다.")
             day, ratio = point.get("period"), point.get("ratio")
             if not isinstance(day, str) or day not in requested_dates or day in observed:
-                raise NaverError("INVALID_OBSERVATION_DATE", "응답에 중복 또는 조회 기간·집계 단위에 맞지 않는 관측일이 있습니다.")
+                raise NaverError("INVALID_OBSERVATION_DATE", "응답에 중복 또는 조회 기간, 집계 단위에 맞지 않는 관측일이 있습니다.")
             if (isinstance(ratio, bool) or not isinstance(ratio, (int, float))
                     or not math.isfinite(ratio) or not 0 <= ratio <= 100):
                 raise NaverError("INVALID_OBSERVATION_RATIO", "응답 지수가 유한한 0~100 수치가 아닙니다.")

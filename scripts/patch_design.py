@@ -25,6 +25,10 @@ Claude Design 에서 받은 .dc.html 을 받아 고친 사본을 낸다. 원본�
    그대로면 지난 주 기준으로 신선도를 재게 된다.
 
 4. 검증 기록 CSV 의 머리글과 파일명을 WEEK 로 바꾼다
+
+5. 추론 설정 교체
+   화면이 박아 둔 claude-sonnet-4-5 는 API 에서 사라져 404 가 난다. 모델과
+   한도와 effort 를 채점에 쓴 설정과 같게 맞춘다.
 """
 
 from __future__ import annotations
@@ -36,6 +40,25 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "build" / "frontend_data.js"
+
+# 화면이 추론에 쓰는 모델 이름. Claude Design 안에서는 런타임이 모델을 붙여
+# 주지만, 파일 사본은 Anthropic API 를 직접 부른다. 거기서는 claude-sonnet-4-5
+# 가 더 이상 제공되지 않아 404 not_found_error 가 났다. 화면은 catch 로 묶어
+# "다시 실행해 주세요" 만 적으므로 몇 번을 눌러도 같은 자리에서 멈췄다.
+#
+# 채점한 모델과 같은 것을 쓴다. 검증 기록 화면이 보여 주는 성적은
+# src/trend_poc/client.py 의 모델로 낸 값이라, 버튼이 다른 모델을 부르면
+# 화면이 한 모델의 성적을 걸어 두고 다른 모델을 돌리는 꼴이 된다.
+STALE_MODEL = "claude-sonnet-4-5"
+MODEL = "claude-opus-5-5"
+# 채점에 쓴 설정과 같은 값이다. src/trend_poc/review.py 를 보라. 화면이 보여
+# 주는 성적은 이 설정으로 낸 것이라 버튼도 같은 설정으로 불러야 한다.
+#
+# effort 를 안 주면 모델이 알아서 길게 생각하고, 생각 분량이 max_tokens 에서
+# 깎인다. 실제로 "유행 찾기" 는 생각에만 3,347 토큰을 쓰다 한도 3,000 에
+# 걸려 본문이 한 글자도 안 나왔다.
+MAX_TOKENS = 4096
+EFFORT = "low"
 
 # 화면이 각 상품에 붙이는 여섯 검사 가운데 넷째와 다섯째. 원본은 자리만 잡아
 # 두고 "연결 예정" 으로 비워 두었다.
@@ -347,6 +370,32 @@ def wire_week(src: str) -> tuple[str, int]:
     return src, n
 
 
+def fix_model(src: str) -> tuple[str, int]:
+    """사라진 모델 이름을 지금 부를 수 있는 것으로 바꾸고, 실패를 드러낸다.
+
+    생각 분량이 max_tokens 에서 깎이므로 한도와 effort 도 같이 맞춘다. 안
+    맞추면 호출은 200 으로 돌아오는데 본문이 비어 JSON 파싱에서 깨진다.
+
+    화면의 네 추론은 전부 catch 안에서 끝나 브라우저 콘솔에도 아무것도 남지
+    않았다. 다음에 또 막히면 원인을 못 찾으므로 콘솔에 적게 한다.
+    """
+    src, n = re.subn(
+        rf"model: '{re.escape(STALE_MODEL)}', max_tokens: \d+,",
+        f"model: '{MODEL}', max_tokens: {MAX_TOKENS}, "
+        f"output_config: {{ effort: '{EFFORT}' }},", src)
+    if not n:
+        raise SystemExit(
+            f"모델 이름 {STALE_MODEL} 을 찾지 못했다. 화면이 다른 이름을 쓰게 "
+            f"바뀌었으면 scripts/patch_design.py 의 STALE_MODEL 을 고쳐라")
+
+    m = src.count("} catch (e) { upd(")
+    if m != 4:
+        raise SystemExit(f"추론 실패를 받는 자리가 넷이 아니라 {m} 개다")
+    src = src.replace("} catch (e) { upd(",
+                      "} catch (e) { console.error('추론 실패', e); upd(")
+    return src, n
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path, help="Claude Design 에서 받은 .dc.html")
@@ -375,6 +424,9 @@ def main(argv=None) -> int:
     print(f"연결이 끝났는데 연결 예정이라고 적힌 문구 {n}곳 수정")
     src, n = fix_llm_prompt(src)
     print(f"LLM 에게 알려 주는 없는 데이터에서 {n}곳 제거, 날짜를 WEEK 로 교체")
+    src, n = fix_model(src)
+    print(f"추론 {n}곳을 {MODEL}, max_tokens {MAX_TOKENS}, "
+          f"effort {EFFORT} 로 교체하고 실패를 콘솔에 남김")
 
     args.out.write_text(src, encoding="utf-8")
     print(f"\n{args.out}")

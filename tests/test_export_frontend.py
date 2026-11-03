@@ -363,3 +363,129 @@ class TestLocalCopyGuard:
         with _pt.raises(SystemExit):
             self._main([str(src), "--assets", str(tmp_path),
                         "-o", str(tmp_path / "로컬.html"), "--embed-key"])
+
+
+class TestInferenceSettings:
+    """화면이 부르는 모델과 한도가 채점에 쓴 것과 같아야 한다.
+
+    두 가지로 깨졌다. 화면에 박혀 있던 claude-sonnet-4-5 는 API 에서 사라져
+    404 가 났고, 그 다음에는 한도가 모자라 잘렸다. Opus 5.5 는 effort 를 주지
+    않으면 알아서 길게 생각하는데 그 생각 분량이 max_tokens 에서 깎인다.
+    "유행 찾기" 는 생각에만 3,347 토큰을 쓰다 한도 3,000 에 걸려 본문이 한
+    글자도 안 나왔고, 화면은 그걸 JSON 오류로 받아 "다시 실행해 주세요" 만
+    적었다. 몇 번을 눌러도 같은 자리에서 멈춘다.
+    """
+
+    SCREEN = (
+        "const a = await window.claude.complete({ model: 'claude-sonnet-4-5', "
+        "max_tokens: 2500, system: S, messages: m });\n"
+        "} catch (e) { upd(() => ({ phase: 'error' })); return; }\n"
+        "const b = await window.claude.complete({ model: 'claude-sonnet-4-5', "
+        "max_tokens: 3000, system: S, messages: m });\n"
+        "} catch (e) { upd(() => ({ phase: 'error' })); return; }\n"
+        "} catch (e) { upd(() => ({ phase: 'error' })); return; }\n"
+        "} catch (e) { upd(() => ({ phase: 'error' })); return; }\n")
+
+    def _fix(self, screen: str):
+        import patch_design as pd
+
+        return pd.fix_model(screen)
+
+    def test_replaces_stale_model(self):
+        import patch_design as pd
+
+        out, n = self._fix(self.SCREEN)
+        assert n == 2
+        assert pd.STALE_MODEL not in out
+        assert out.count(f"model: '{pd.MODEL}'") == 2
+
+    def test_pins_budget_and_effort(self):
+        """한도와 effort 를 둘 다 주어야 한다.
+
+        한도만 올리면 생각이 길어진 날 또 잘리고, effort 만 주면 원래 한도가
+        2,500 이라 긴 답에서 잘린다.
+        """
+        import patch_design as pd
+
+        out, _ = self._fix(self.SCREEN)
+        assert out.count(f"max_tokens: {pd.MAX_TOKENS}") == 2
+        assert out.count(f"output_config: {{ effort: '{pd.EFFORT}' }}") == 2
+        assert "max_tokens: 2500" not in out and "max_tokens: 3000" not in out
+
+    def test_matches_the_scored_settings(self):
+        """채점에 쓴 설정과 같아야 한다.
+
+        화면은 검증 기록에 성적을 걸어 둔다. 버튼이 다른 설정으로 부르면
+        한 모델의 성적을 걸고 다른 모델을 돌리는 꼴이 된다.
+        """
+        import re
+        from pathlib import Path
+
+        import patch_design as pd
+
+        review = Path(pd.ROOT / "src" / "trend_poc" / "review.py").read_text(
+            encoding="utf-8")
+        assert f'"max_tokens": {pd.MAX_TOKENS}' in review
+        assert f'"effort": "{pd.EFFORT}"' in review
+        client = Path(pd.ROOT / "src" / "trend_poc" / "client.py").read_text(
+            encoding="utf-8")
+        assert re.search(rf'^MODEL = "{re.escape(pd.MODEL)}"$', client, re.M)
+
+    def test_refuses_when_model_name_moved(self):
+        import pytest as _pt
+
+        with _pt.raises(SystemExit):
+            self._fix("const a = await window.claude.complete({ model: 'other' });")
+
+    def test_refuses_when_catch_count_changed(self):
+        """실패를 받는 자리가 넷이 아니면 화면이 바뀐 것이다."""
+        import pytest as _pt
+
+        trimmed = "\n".join(self.SCREEN.split("\n")[:4])
+        with _pt.raises(SystemExit):
+            self._fix(trimmed)
+
+    def test_leaves_a_trace_in_the_console(self):
+        out, _ = self._fix(self.SCREEN)
+        assert out.count("console.error('추론 실패', e)") == 4
+
+
+class TestShimSurfacesFailures:
+    """shim 이 조용히 실패하면 화면은 "다시 실행해 주세요" 만 적는다.
+
+    부르는 쪽은 전부 catch 로 묶여 있어서, 여기서 이유를 담아 던지지 않으면
+    브라우저 콘솔에도 아무것도 안 남는다.
+    """
+
+    def _shim(self) -> str:
+        import bundle_design as bd
+
+        return bd.BROWSER_SHIM
+
+    def test_sends_effort(self):
+        # 안 보내면 모델이 알아서 길게 생각하고 그 분량이 한도에서 깎인다.
+        assert "output_config" in self._shim()
+
+    def test_reports_truncation(self):
+        # 잘린 본문을 그대로 넘기면 부르는 쪽에서 JSON 오류로 보여 못 찾는다.
+        assert "max_tokens" in self._shim() and "잘렸습니다" in self._shim()
+
+    def test_reports_missing_model(self):
+        assert "모델을 찾지 못했습니다" in self._shim()
+
+
+class TestReviewPanelSettings:
+    """판정 패널도 채점에 쓴 설정과 같아야 한다.
+
+    패널은 61건을 돌려 verdicts.json 을 만든다. 한도가 모자라면 전부 잘려서
+    판정이 하나도 안 쌓이고, 버튼은 0/61 에 머문다.
+    """
+
+    def test_same_budget_and_effort_as_the_benchmark(self):
+        import bundle_design as bd
+        import patch_design as pd
+
+        panel = bd.REVIEW_PANEL
+        assert f"max_tokens: {pd.MAX_TOKENS}" in panel
+        assert f"output_config: {{ effort: '{pd.EFFORT}' }}" in panel
+        assert f"model: '{pd.MODEL}'" in panel

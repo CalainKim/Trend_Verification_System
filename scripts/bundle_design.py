@@ -72,6 +72,9 @@ BROWSER_SHIM = """
         },
         body: JSON.stringify({
           model: req.model, max_tokens: req.max_tokens,
+          // 생각 분량도 max_tokens 에서 깎인다. effort 를 넘기지 않으면 모델이
+          // 알아서 길게 생각하다 한도에 걸려 본문이 한 글자도 안 나온다.
+          output_config: req.output_config || { effort: 'low' },
           system: req.system, messages: req.messages
         })
       });
@@ -79,9 +82,19 @@ BROWSER_SHIM = """
         try { localStorage.removeItem(KEY); } catch (e) {}
         throw new Error('API 키가 거부됐습니다. 버튼을 다시 눌러 새 키를 넣어 주세요.');
       }
+      if (res.status === 404) {
+        var d4 = await res.json().catch(function () { return {}; });
+        throw new Error('모델을 찾지 못했습니다 (' + req.model + '). ' +
+          ((d4.error || {}).message || ''));
+      }
       if (!res.ok) throw new Error('API 호출이 실패했습니다 (HTTP ' + res.status + ').');
       var data = await res.json();
       if (data.stop_reason === 'refusal') throw new Error('모델이 응답을 거절했습니다.');
+      // 한도에 걸리면 본문이 잘린 채로 온다. 그대로 넘기면 부르는 쪽에서
+      // JSON 파싱이 깨지고, 원인이 "JSON 이 이상하다" 로 보여서 못 찾는다.
+      if (data.stop_reason === 'max_tokens') {
+        throw new Error('응답이 max_tokens(' + req.max_tokens + ')에서 잘렸습니다.');
+      }
       // 생각 블록은 본문이 비어 있다. 글자가 있는 블록만 모은다.
       return (data.content || []).filter(function (b) { return b.type === 'text'; })
         .map(function (b) { return b.text; })
@@ -187,7 +200,8 @@ REVIEW_PANEL = r"""
       btn.textContent = (i + 1) + '/' + todo.length;
       try {
         var text = await window.claude.complete({
-          model: 'claude-opus-5-5', max_tokens: 1000, system: SYS,
+          model: 'claude-opus-5-5', max_tokens: 4096,
+          output_config: { effort: 'low' }, system: SYS,
           messages: [{ role: 'user', content: JSON.stringify(c) }]
         });
         var m = text.match(/[{][^]*[}]/);

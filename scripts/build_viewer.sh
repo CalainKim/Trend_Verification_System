@@ -21,7 +21,7 @@ WEEK="${1:-}"
 # 판정 파일이 있으면 성적표도 함께 낸다. 없으면 검증 기록 타일이 빈 채로
 # 남는다. 화면이 최종 산출물이라 채점 결과가 여기 없으면 채점한 적이 없는
 # 것과 같아 보인다.
-VERDICTS="${VERDICTS:-runs/benchmark-model-v4/verdicts.json}"
+VERDICTS="${VERDICTS:-runs/benchmark-model-v6/verdicts.json}"
 SCORE_ARG=""
 if [ -f "$VERDICTS" ]; then
     SCORE_ARG="--verdicts $VERDICTS"

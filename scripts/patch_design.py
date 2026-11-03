@@ -6,7 +6,7 @@ Claude Design 에서 받은 .dc.html 을 받아 고친 사본을 낸다. 원본�
 
     ./scripts/patch_design.py v8.html -o v9.html
 
-하는 일은 넷이다.
+하는 일은 다섯이다.
 
 1. 데이터 상수 교체
    G, P, LEDGER 를 build/frontend_data.js 내용으로 바꾸고 원본의 TYPE_SKIP
@@ -387,6 +387,12 @@ def fix_model(src: str) -> tuple[str, int]:
         raise SystemExit(
             f"모델 이름 {STALE_MODEL} 을 찾지 못했다. 화면이 다른 이름을 쓰게 "
             f"바뀌었으면 scripts/patch_design.py 의 STALE_MODEL 을 고쳐라")
+    # 일부만 바뀌면 안 바뀐 자리가 404 를 내는데, 그 기능을 눌러 보기 전에는
+    # 모른다. 하나라도 남아 있으면 멈춘다.
+    if STALE_MODEL in src:
+        raise SystemExit(
+            f"{n}곳을 바꿨는데 {STALE_MODEL} 이 아직 남아 있다. max_tokens 를 "
+            f"적지 않은 호출이 있는지 보라")
 
     m = src.count("} catch (e) { upd(")
     if m != 4:

@@ -414,15 +414,34 @@ class TestMissingDayMeaning:
     def test_absent_day_is_called_out_of_top100(self):
         e, w = self._event([80, None, 78, 50, 52, 48, None, None, None])
         assert e is not None
+        import re
+
         line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
         assert "TOP100 밖" in line["observation"]
-        assert "결측" not in line["observation"]
+        # 날짜에 붙는 꼬리표로 결측 을 쓰지 않는다. 설명문에서 "결측과는
+        # 다르다" 처럼 대비로 쓰는 것은 괜찮다.
+        assert not re.search(r"\d\d-\d\d 결측", line["observation"])
 
     def test_says_why_it_is_not_missing_data(self):
         """단어만 바꾸면 모델이 또 자료 없음으로 읽는다. 이유를 적는다."""
         e, w = self._event([80, None, 78, 50, 52, 48, None, None, None])
         line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
-        assert "수집이 있었던" in line["observation"]
+        assert "수집이 돌았던" in line["observation"]
+        assert "결측과는 다르다" in line["observation"]
+
+    def test_does_not_claim_the_item_fell_out(self):
+        """단정하지 않는다. 목록에 없었다 까지만 말한다.
+
+        랭킹 호출이 100 개를 다 주지 못하고 돌아오는 일이 드물게 있다. 수집
+        실행 126 건 가운데 4 건이 97 개에서 99 개를 받았다. 그 실행에서는
+        순위 안에 있던 상품 하나가 목록에서 빠지므로, "TOP100 밖으로
+        떨어졌다" 는 그날에 한해 거짓이 된다. 틀린 절대 진술을 또 하나 적어
+        보내지 않으려고 "그날 수집한 목록에 없었다" 까지만 말한다.
+        """
+        e, w = self._event([80, None, 78, 50, 52, 48, None, None, None])
+        line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
+        assert "수집한 상위 100 위 목록에" in line["observation"]
+        assert "떨어진" not in line["observation"]
 
     def test_does_not_look_at_the_hold_window(self):
         """확인 구간은 근거에도 특징에도 들어가면 안 된다. 그게 정답이다."""

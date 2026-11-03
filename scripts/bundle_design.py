@@ -82,12 +82,16 @@ BROWSER_SHIM = """
         try { localStorage.removeItem(KEY); } catch (e) {}
         throw new Error('API 키가 거부됐습니다. 버튼을 다시 눌러 새 키를 넣어 주세요.');
       }
-      if (res.status === 404) {
-        var d4 = await res.json().catch(function () { return {}; });
-        throw new Error('모델을 찾지 못했습니다 (' + req.model + '). ' +
-          ((d4.error || {}).message || ''));
+      if (!res.ok) {
+        // 이유를 적지 않으면 화면이 "다시 실행해 주세요" 만 적고 끝난다.
+        // 실제로 모델 이름이 사라져 404 가 나던 것을 그래서 못 찾았다.
+        var err = await res.json().catch(function () { return {}; });
+        var why = (err.error || {}).message || '';
+        if (res.status === 404) {
+          throw new Error('모델을 찾지 못했습니다 (' + req.model + '). ' + why);
+        }
+        throw new Error('API 호출이 실패했습니다 (HTTP ' + res.status + '). ' + why);
       }
-      if (!res.ok) throw new Error('API 호출이 실패했습니다 (HTTP ' + res.status + ').');
       var data = await res.json();
       if (data.stop_reason === 'refusal') throw new Error('모델이 응답을 거절했습니다.');
       // 한도에 걸리면 본문이 잘린 채로 온다. 그대로 넘기면 부르는 쪽에서
@@ -195,6 +199,7 @@ REVIEW_PANEL = r"""
     if (!todo.length) { alert('모든 케이스를 판정했습니다. 내려받아 보내 주세요.'); return; }
     var btn = box.querySelector('[data-go]');
     btn.disabled = true;
+    var bad = [], run_of_bad = 0;
     for (var i = 0; i < todo.length; i++) {
       var c = todo[i];
       btn.textContent = (i + 1) + '/' + todo.length;
@@ -215,10 +220,23 @@ REVIEW_PANEL = r"""
           btn.textContent = (i + 1) + '/' + todo.length;
         }
       } catch (e) {
-        alert('판정이 멈췄습니다: ' + e.message + String.fromCharCode(10) +
-              '받은 만큼은 저장됐습니다. 다시 누르면 이어서 합니다.');
-        break;
+        // 한 건이 실패해도 배치를 멈추지 않는다. 멈추면 다음에 눌러도 같은
+        // 케이스부터 다시 시작해서 같은 자리에서 또 멈춘다. 되풀이해서
+        // 실패하는 케이스 하나가 나머지 전부를 영영 막는다.
+        bad.push(c.case_id + ': ' + e.message);
+        run_of_bad++;
+        if (run_of_bad >= 3) {
+          alert('연달아 3건이 실패해 멈춥니다. 마지막 오류: ' + e.message +
+                String.fromCharCode(10) +
+                '받은 만큼은 저장됐습니다. 다시 누르면 이어서 합니다.');
+          break;
+        }
+        continue;
       }
+      run_of_bad = 0;
+    }
+    if (bad.length) {
+      console.warn('판정하지 못한 케이스 ' + bad.length + '건', bad);
     }
     render();
   }

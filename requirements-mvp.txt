@@ -1,0 +1,5 @@
+# Snapshot-based detection demo. No embedding download, LLM, or API key required.
+requests>=2.31,<3
+PyYAML>=6.0,<7
+sqlite-vec>=0.1.9
+tzdata>=2025.1

@@ -143,6 +143,12 @@ def search(
     min_similarity 미만은 버린다. 결과가 비는 것은 정상이며 "우리가 수집한
     범위에 해당하는 상품이 없다"는 뜻이다. 억지로 채우면 판정이 오염된다.
     """
+    # 스냅샷만 적재한 새 DB에는 벡터 색인이 없다. 결과가 나올 수 없는
+    # 검색 때문에 임베딩 모델을 내려받지 않는다. 다른 채널만 색인한
+    # 경우도 마찬가지다. 어휘 매칭 경로는 모델 없이 계속 사용할 수 있다.
+    where, params = (" WHERE channel = ?", (channel,)) if channel else ("", ())
+    if conn.execute(f"SELECT 1 FROM {META_TABLE}{where} LIMIT 1", params).fetchone() is None:
+        return []
     vector = embeddings.encode_query(embeddings.normalize_for_embedding(query), model_name)
     return search_vector(conn, vector, limit, channel, min_similarity)
 

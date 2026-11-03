@@ -270,7 +270,7 @@ REVIEW_PANEL = r"""
 """
 
 
-def inline_remote_images(html: str, timeout: float = 15.0) -> int:
+def inline_remote_images(html: str, timeout: float = 15.0) -> tuple[str, int]:
     """화면에 박힌 29CM 사진 주소를 base64 로 바꾼다.
 
     주소를 그대로 두면 파일이 인터넷 없이는 사진을 못 띄운다. 미팅에서 와이파이가
@@ -282,7 +282,7 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> int:
 
     urls = sorted(set(re.findall(r'"(https://img\.29cm\.co\.kr/[^"]+)"', html)))
     if not urls:
-        return 0
+        return html, 0
     print(f"  사진 {len(urls)}장을 받는다")
     s = requests.Session()
     done = fail = 0
@@ -338,6 +338,25 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> int:
 def bundle(html: str, assets: Path) -> tuple[str, dict]:
     stats = {"css": 0, "js": 0, "font": 0}
 
+    # helmet은 DC가 다시 컴파일하는 템플릿이다. 그 안에 JS를 인라인하면
+    # encodeCase가 코드의 camelCase까지 속성 이름으로 바꿔 실행을 깨뜨린다.
+    # 외부 스크립트는 문서 head로 순서대로 옮긴 뒤 인라인한다.
+    hoisted = []
+
+    def move_script(m):
+        hoisted.append(m.group(0))
+        return ""
+
+    html = re.sub(
+        r"<helmet(?:\s[^>]*)?>.*?</helmet>",
+        lambda m: re.sub(r'<script src="([^"]+)"></script>', move_script, m.group(0)),
+        html, flags=re.S,
+    )
+    if hoisted:
+        if "</head>" not in html:
+            raise SystemExit("helmet 스크립트를 옮길 head 닫는 태그가 없다")
+        html = html.replace("</head>", "\n".join(hoisted) + "\n</head>", 1)
+
     def css_tag(m):
         href = m.group(1)
         f = (assets / href).resolve()
@@ -360,6 +379,11 @@ def bundle(html: str, assets: Path) -> tuple[str, dict]:
         stats["js"] += 1
         # </script> 가 글자로 들어 있으면 거기서 태그가 닫힌다.
         body = f.read_text(encoding="utf-8").replace("</script>", "<\\/script>")
+        # DC 런타임은 현재 HTML을 다시 읽고 첫 <x-dc>부터 템플릿을 찾는다.
+        # 외부 support.js를 인라인으로 옮기면 오류 문구 속 태그가 먼저
+        # 잡힌다. JS 문자열/정규식에서 같은 문자로 해석되는 이스케이프로
+        # 바꿔, 런타임 코드를 화면 템플릿으로 오인하지 않게 한다.
+        body = re.sub(r"<(?=/?x-dc(?:\s|>))", lambda _: r"\x3c", body)
         return f"<script>\n{body}\n</script>"
 
     html = re.sub(r'<script src="([^"]+)"></script>', js_tag, html)
@@ -403,6 +427,9 @@ def main(argv=None) -> int:
                     help="환경변수 ANTHROPIC_API_KEY 를 파일에 넣는다. 내 컴퓨터에서 "
                          "바로 쓰려는 사본에만 쓴다. 이 파일은 절대 남에게 보내지 "
                          "않는다. 파일 이름에 로컬 이 들어가야 한다")
+    ap.add_argument("--skip-images", action="store_true",
+                    help="상품 사진을 다운로드하지 않는다. 숫자와 화면은 오프라인으로 "
+                         "만들고 사진은 원래 URL로 남긴다")
     args = ap.parse_args(argv)
 
     if args.embed_key:
@@ -422,7 +449,11 @@ def main(argv=None) -> int:
     before = len(html.encode())
     html, stats = bundle(html, args.assets)
     html, n_err = soften_llm(html)
-    html, n_img = inline_remote_images(html)
+    if args.skip_images:
+        n_img = 0
+        print("상품 사진 다운로드 생략 (--skip-images)")
+    else:
+        html, n_img = inline_remote_images(html)
 
     # {{ }} 는 화면이 그릴 때 채우는 자리표시자지 바깥 파일이 아니다.
     left = [u for u in re.findall(r'(?:src|href)="(?!data:|http|#)([^"]+)"', html)

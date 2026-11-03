@@ -20,9 +20,9 @@ Claude Design 에서 받은 .dc.html 을 받아 고친 사본을 낸다. 원본�
    신뢰 판정 열넷 가운데 여덟이 한국 선행이라 통과 조건으로 쓰면 진짜 상승의
    절반이 떨어진다. 그래서 측정만 하고 거르지 않는다.
 
-3. 신선도 문턱을 WEEK 로 바꾼다
-   G[a].last >= '2026-10-18' 비교가 여섯 군데 있다. 주가 바뀌는데 이 문자열이
-   그대로면 지난 주 기준으로 신선도를 재게 된다.
+3. 신선도 문턱과 화면 날짜를 WEEK 로 바꾼다
+   개요, 요약, 알림, 상태 줄도 같은 스냅샷 날짜를 쓴다. 수집 시각이나 다음
+   수집 일정은 내보낸 자료에 없으므로 추정해서 표시하지 않는다.
 
 4. 검증 기록 CSV 의 머리글과 파일명을 WEEK 로 바꾼다
 
@@ -292,7 +292,7 @@ def fix_llm_prompt(src: str) -> tuple[str, int]:
     # 날짜도 주마다 바뀐다.
     src = src.replace("오늘: '2026-11-02', 다음채점: '2026-11-08'",
                       "오늘: WEEK.holdISO, 다음채점: WEEK.nextISO")
-    src = src.replace("오늘: '2026-11-02'", "오늘: WEEK.holdISO")
+    src = re.sub(r"오늘: '\d{4}-\d{2}-\d{2}'", "오늘: WEEK.holdISO", src)
     return src, n
 
 
@@ -367,6 +367,30 @@ def wire_week(src: str) -> tuple[str, int]:
     src = src.replace("csv('검증기록_1101.csv', ['상품', '10/18', '10/25', '11/01', '결과']",
                       "csv(`검증기록_${WEEK.hold.replace('/', '')}.csv`, "
                       "['상품', WEEK.base, WEEK.detect, WEEK.hold, '결과']")
+
+    # 템플릿은 뷰모델의 값만 읽는다. 스크립트 안의 WEEK를 마크업에서
+    # 직접 참조하면 런타임의 스코프가 달라 날짜가 비어 보인다.
+    swaps = [
+        ("29CM 상의 TOP100, 10/25에서 11/01",
+         "29CM 상의 TOP100, {{ snapshotRange }}"),
+        ('data-tip="29CM 상의 TOP100 주 1회 수집"',
+         'data-tip="화면에 사용한 29CM 스냅샷 날짜. 수집 일정은 연결되지 않았습니다"'),
+        ("29CM 11/01 22:00 수집", "29CM {{ snapshotDate }} 기준"),
+        ("다음 수집 11/08 22:00", "다음 수집 일정 미연결"),
+        ("      bench, tr, scoreRows,", "      snapshotRange: `${WEEK.detect}에서 ${WEEK.hold}`, "
+         "snapshotDate: WEEK.holdISO,\n      bench, tr, scoreRows,"),
+    ]
+    for old, new in swaps:
+        if src.count(old) != 1:
+            raise SystemExit(f"화면 날짜 표시 자리를 찾지 못했거나 여러 개다: {old}")
+        src = src.replace(old, new)
+
+    # 나머지는 JavaScript 템플릿 리터럴 또는 값이다. 현재 관측 날짜를
+    # 알림 생성 시각으로 둔갑시키지 않도록 '관측 기준'임을 적는다.
+    src = src.replace("10/25에서 11/01", "${WEEK.detect}에서 ${WEEK.hold}")
+    src = src.replace("time: '11/01 22:05'", "time: WEEK.holdISO + ' 관측 기준'")
+    src = src.replace("`10/25 ${rq.prev", "`${WEEK.detect} ${rq.prev")
+    src = src.replace("에서 11/01 ${rq.rank}", "에서 ${WEEK.hold} ${rq.rank}")
     return src, n
 
 
@@ -425,7 +449,7 @@ def main(argv=None) -> int:
     src = wire_score(src)
     print("검증 기록 타일에 채점 결과 연결")
     src, n = wire_week(src)
-    print(f"신선도 문턱 {n}곳과 검증 기록 CSV 를 WEEK 로 교체")
+    print(f"신선도 문턱 {n}곳, 화면 날짜와 검증 기록 CSV 를 WEEK 로 교체")
     src, n = fix_pending_text(src)
     print(f"연결이 끝났는데 연결 예정이라고 적힌 문구 {n}곳 수정")
     src, n = fix_llm_prompt(src)

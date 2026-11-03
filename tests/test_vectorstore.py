@@ -96,6 +96,18 @@ def test_search_floor_can_return_nothing(conn):
     assert vectorstore.search(conn, "발라클라바", limit=3, min_similarity=1.01) == []
 
 
+@pytest.mark.parametrize("other_channel", [False, True])
+def test_empty_search_scope_never_loads_embedding_model(conn, monkeypatch, other_channel):
+    if other_channel:
+        vectorstore.index_texts(conn, [("검색어", "naver_datalab", "")])
+
+    def unexpected_encode(*args, **kwargs):
+        raise AssertionError("An empty search scope must not load an embedding model")
+
+    monkeypatch.setattr(embeddings, "encode_query", unexpected_encode)
+    assert vectorstore.search(conn, "후드티", channel="commerce_rank") == []
+
+
 def test_normalization_collapses_variant_markers():
     """색상, 차수, 품번은 상품이 무엇인지와 무관하므로 임베딩 전에 걷어낸다."""
     n = embeddings.normalize_for_embedding

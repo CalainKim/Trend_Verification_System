@@ -14,12 +14,23 @@
     1. docs/verification-handoff.md      무엇을 받고 무엇을 만드나
     2. benchmark/cases/                  문제지 139건. 바로 읽힌다
     3. verification/examples/            판정 출력 예시 3건과 읽는 법
-    4. benchmark/scorecard.md            넘어야 할 선
+    4. benchmark-index-long/LABELS.md    혼자 채점하며 반복하는 방법
 
-정답(labels.sealed.json)은 저장소에 없다. 수집 파트만 가지고 있고 봉인
-해시로 바뀌지 않았음을 증명한다. 채점은 판정 파일을 넘기면 된다.
+문제지가 셋이고 역할이 다르다.
 
-    python scripts/score_verdicts.py --verdicts <판정 경로>
+    benchmark-index-long/   352건   공개   혼자 채점하며 반복한다
+    benchmark/              139건   봉인   최종 숫자를 여기서 낸다
+    benchmark-index/        207건   봉인   둘째 도메인
+
+공개 쪽은 정답이 저장소에 있어 바로 채점된다.
+
+    python scripts/score_verdicts.py --benchmark benchmark-index-long \
+        --verdicts <판정 경로>
+
+봉인 쪽은 정답이 없다. 판정을 묶어서 수집 파트에 넘기면 채점해 돌려준다.
+볼 때마다 홀드아웃이 닳으므로 횟수를 기록한다.
+
+    python scripts/score_verdicts.py --verdicts <판정 경로> --pack verdicts.json
 
 API 키가 없어도 문제지는 다 읽힌다. 수집을 직접 돌릴 때만 키가 필요하다.
 

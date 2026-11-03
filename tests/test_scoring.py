@@ -242,3 +242,60 @@ class TestResultVerdictShapeIsRead:
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         assert mod._verdict_from({"result": {"verdict": "WATCH"}}) == "WATCH"
+
+
+class TestSealedSetSubmissionsAreCounted:
+    """봉인 세트에 몇 번 채점했는지 남긴다.
+
+    홀드아웃은 볼 때마다 닳는다. 열 번 넣고 제일 좋은 것을 고르면 보고하는
+    값이 "열 번 중 최댓값" 이라서 실제보다 높다. 봉인을 더 세게 해서 막을
+    수 없고, 횟수를 적어 읽는 사람이 할인해 보게 하는 것이 맞다.
+
+    정답을 저장소에 둔 연습용 벤치마크는 세지 않는다. 마음껏 돌리라고
+    열어 둔 것이라 세면 쓸 수 없게 된다.
+    """
+
+    def _mod(self):
+        import importlib.util
+        root = Path(__file__).resolve().parents[1]
+        spec = importlib.util.spec_from_file_location(
+            "score_verdicts", root / "scripts" / "score_verdicts.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_counts_up_on_a_sealed_set(self, tmp_path):
+        mod = self._mod()
+        bench = tmp_path / "benchmark"
+        bench.mkdir()
+        first = mod.log_submission(bench, Path("a.json"), 95, 0.779)
+        second = mod.log_submission(bench, Path("b.json"), 95, 0.801)
+        assert (first, second) == (1, 2)
+        rows = (bench / "submissions.tsv").read_text(encoding="utf-8").splitlines()
+        assert len(rows) == 3           # 머리글 한 줄 + 제출 두 줄
+        assert "0.801" in rows[2]
+
+    def test_does_not_count_an_open_set(self, tmp_path):
+        mod = self._mod()
+        bench = tmp_path / "benchmark-index-long"
+        bench.mkdir()
+        assert mod.log_submission(bench, Path("a.json"), 300, 0.7) == 0
+        assert not (bench / "submissions.tsv").exists()
+
+    def test_records_an_unscorable_run(self, tmp_path):
+        """전부 기권이어도 봉인 세트를 본 것은 본 것이다."""
+        mod = self._mod()
+        bench = tmp_path / "benchmark"
+        bench.mkdir()
+        assert mod.log_submission(bench, Path("a.json"), 0, None) == 1
+        assert "\t-\n" in (bench / "submissions.tsv").read_text(encoding="utf-8")
+
+    def test_first_submission_says_nothing_is_spent(self):
+        assert "닳지 않았다" in self._mod().submission_note(1)
+
+    def test_later_submission_warns_the_number_is_optimistic(self):
+        note = self._mod().submission_note(3)
+        assert "3번" in note and "높게" in note
+
+    def test_fifth_submission_adds_a_louder_warning(self):
+        assert "5회차를 넘었다" in self._mod().submission_note(5)

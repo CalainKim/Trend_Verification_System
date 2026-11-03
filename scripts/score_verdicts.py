@@ -21,6 +21,7 @@ import hashlib
 import json
 import random
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Dict
 
@@ -109,6 +110,45 @@ def baselines_from_digest(d: dict) -> str:
             f"> 넘어야 할 선은 {base:.1%} 다. "
             f"{'전부 소멸' if persist < 0.5 else '전부 지속'}로 찍었을 때 나온다."]
     return "\n".join(out)
+
+
+#: 정답을 저장소에 두지 않는 벤치마크. 여기 채점하는 것이 제출이다.
+SEALED = ("benchmark", "benchmark-index")
+
+
+def log_submission(bench: Path, verdicts: Path, n: int, acc) -> int:
+    """봉인 세트에 채점한 횟수를 남기고 지금이 몇 회차인지 돌려준다.
+
+    홀드아웃은 볼 때마다 닳는다. 열 번 넣고 제일 좋은 것을 고르면 보고하는
+    값이 "열 번 중 최댓값" 이라서 실제보다 높다. 막는 방법은 봉인을 더 세게
+    하는 것이 아니라 횟수를 적는 것이다. 읽는 사람이 알아서 할인해 본다.
+
+    연습용 벤치마크(정답이 저장소에 있는 것)는 세지 않는다. 그쪽은 마음껏
+    돌리라고 열어 둔 것이다.
+    """
+    if bench.name not in SEALED:
+        return 0
+    f = bench / "submissions.tsv"
+    if not f.exists():
+        f.write_text("회차\t날짜\t판정 경로\t건수\t정확도\n", encoding="utf-8")
+    rows = [r for r in f.read_text(encoding="utf-8").splitlines()[1:] if r.strip()]
+    nth = len(rows) + 1
+    shown = "-" if acc is None else f"{acc:.3f}"
+    with f.open("a", encoding="utf-8") as fh:
+        fh.write(f"{nth}\t{date.today().isoformat()}\t{verdicts}\t{n}\t{shown}\n")
+    return nth
+
+
+def submission_note(nth: int) -> str:
+    """회차를 성적표에 적을 문장. 늘어나면 경고를 붙인다."""
+    if nth <= 1:
+        return f"> 봉인 세트 {nth}회차 제출이다. 아직 홀드아웃이 닳지 않았다"
+    s = (f"> 봉인 세트 {nth}회차 제출이다. 같은 문제지를 {nth}번 봤으므로 "
+         f"이 숫자는 한 번만 봤을 때보다 높게 나온다")
+    if nth >= 5:
+        s += ("\n\n> 주의. 5회차를 넘었다. 여러 번 중 제일 좋은 것을 고르는 "
+              "셈이 되므로 보고할 때 회차를 반드시 함께 적어야 한다")
+    return s
 
 
 def _verdict_from(obj) -> str:
@@ -253,7 +293,12 @@ def main(argv=None) -> int:
     if args.verdicts:
         verdicts = load_verdicts(Path(args.verdicts))
         card = sc.score(labels, verdicts)
-        parts.insert(0, render(card, args.label))
+        body = render(card, args.label)
+        nth = log_submission(bench, Path(args.verdicts),
+                             card.n_answered, card.accuracy)
+        if nth:
+            body += "\n\n" + submission_note(nth)
+        parts.insert(0, body)
     elif not args.baselines:
         parts.append("\n판정 경로를 주지 않았다. --verdicts 로 지정한다.")
 

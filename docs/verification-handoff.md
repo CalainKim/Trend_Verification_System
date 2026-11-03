@@ -123,6 +123,17 @@ limitations 를 함께 싣는다. 모델이 이것을 넘어선 주장을 하면
     검증 파트   판정을 만든다 -> --pack 으로 묶는다 -> verdicts.json 을 넘긴다
     수집 파트   채점한다 -> 성적표를 돌려준다 (benchmark/scorecard.md)
 
+### 봉인 세트는 볼 때마다 닳는다
+
+채점할 때마다 횟수를 benchmark/submissions.tsv 에 남기고 성적표에 적는다.
+
+열 번 넣고 제일 좋은 것을 고르면, 보고하는 값이 "열 번 중 최댓값" 이라서
+실제보다 높다. 봉인을 더 세게 해서 막을 수 없고, 횟수를 적어 읽는 사람이
+할인해 보게 하는 것이 맞다. 논문에 쓸 때도 회차를 함께 적는다.
+
+그래서 **반복은 공개 벤치마크에서 하고, 봉인 세트는 설계가 굳은 뒤에
+넣는다.** 공개 쪽은 몇 번 돌려도 세지 않는다.
+
 수집 파트 쪽에서 쓰는 명령이다.
 
     python scripts/score_verdicts.py --baselines
@@ -219,9 +230,17 @@ limitations 를 함께 싣는다. 모델이 이것을 넘어선 주장을 하면
 
 ### 벤치마크가 셋이다
 
-    benchmark/              29CM 순위     확인  7일   139건   기저율 59.7% (소멸 다수)
-    benchmark-index/        검색 한국     확인 28일   207건   기저율 61.8% (지속 다수)
-    benchmark-index-long/   검색 3개 지역  확인 84일   352건   기저율 50.3% (소멸 다수)
+    benchmark/              29CM 순위     확인  7일   139건   기저율 59.7%   봉인
+    benchmark-index/        검색 한국     확인 28일   207건   기저율 61.8%   봉인
+    benchmark-index-long/   검색 3개 지역  확인 84일   352건   기저율 50.3%   공개
+
+**장기 쪽은 정답이 저장소에 있다.** 혼자 채점하며 반복하는 데 쓴다. 왜
+이것만 공개했는지는 benchmark-index-long/LABELS.md 에 있다.
+
+    python scripts/score_verdicts.py --benchmark benchmark-index-long \
+        --verdicts <판정 경로>
+
+나머지 둘은 정답이 없고 채점은 수집 파트가 한다.
 
 번들 형식과 채점기는 셋이 같다.
 

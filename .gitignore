@@ -43,14 +43,20 @@ build/
 docs/images/figures/
 docs/report-figures.html
 
-# 벤치마크 정답. 검증 파트가 보면 블라인드가 깨진다. 해시만 저장소에 둔다.
+# 벤치마크 정답. 봉인한 것은 검증 파트가 보면 블라인드가 깨진다. 해시만 둔다.
+#
+#   benchmark/              봉인. 최종 숫자를 여기서 낸다 (커머스 139건)
+#   benchmark-index/        봉인. 둘째 도메인 (검색 한국 207건)
+#   benchmark-index-long/   공개. 검증 파트 연습용 (검색 장기 352건)
+#
+# 장기 쪽만 공개한 이유는 benchmark-index-long/LABELS.md 에 있다. 요약하면
+# 커머스를 쪼개면 유의성을 잃고, 검증 파트가 혼자 채점할 수 없으면 반복이
+# 막히기 때문이다. 셋 중 산업체 문제와 가장 먼 것을 내준다.
 benchmark/labels.sealed.json
+benchmark-index/labels.sealed.json
 
 # 속성 매핑은 DB 와 사전에서 다시 만들 수 있다
 data/attribute_map.csv
-
-benchmark-index/labels.sealed.json
-benchmark-index-long/labels.sealed.json
 
 # 시간별 수집 로그
 data/gtrends*.log

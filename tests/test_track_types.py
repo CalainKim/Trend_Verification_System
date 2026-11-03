@@ -73,6 +73,9 @@ class TestDirection:
 
 
 class TestWeeklyChain:
+    def test_empty_collection_has_no_weeks(self):
+        assert weekly_chain([], weeks=3) == []
+
     def test_picks_nearest_collection_day(self):
         days = ["2026-10-04", "2026-10-12", "2026-10-19", "2026-10-26"]
         got = weekly_chain(days, weeks=3)

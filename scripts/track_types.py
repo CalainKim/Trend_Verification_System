@@ -53,6 +53,8 @@ def weekly_chain(days: List[str], weeks: int, span: int = 7,
     slack 일보다 더 벌어지면 거기서 끊는다. 억지로 이으면 2주 간격을 1주로
     읽어 궤적이 거짓말을 한다.
     """
+    if not days:
+        return []
     chain = [days[-1]]
     cur = date.fromisoformat(days[-1])
     while len(chain) < weeks + 1:

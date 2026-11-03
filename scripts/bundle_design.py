@@ -270,7 +270,7 @@ REVIEW_PANEL = r"""
 """
 
 
-def inline_remote_images(html: str, timeout: float = 15.0) -> int:
+def inline_remote_images(html: str, timeout: float = 15.0) -> tuple[str, int]:
     """화면에 박힌 29CM 사진 주소를 base64 로 바꾼다.
 
     주소를 그대로 두면 파일이 인터넷 없이는 사진을 못 띄운다. 미팅에서 와이파이가
@@ -282,7 +282,7 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> int:
 
     urls = sorted(set(re.findall(r'"(https://img\.29cm\.co\.kr/[^"]+)"', html)))
     if not urls:
-        return 0
+        return html, 0
     print(f"  사진 {len(urls)}장을 받는다")
     s = requests.Session()
     done = fail = 0
@@ -403,6 +403,9 @@ def main(argv=None) -> int:
                     help="환경변수 ANTHROPIC_API_KEY 를 파일에 넣는다. 내 컴퓨터에서 "
                          "바로 쓰려는 사본에만 쓴다. 이 파일은 절대 남에게 보내지 "
                          "않는다. 파일 이름에 로컬 이 들어가야 한다")
+    ap.add_argument("--skip-images", action="store_true",
+                    help="상품 사진을 다운로드하지 않는다. 숫자와 화면은 오프라인으로 "
+                         "만들고 사진은 원래 URL로 남긴다")
     args = ap.parse_args(argv)
 
     if args.embed_key:
@@ -422,7 +425,11 @@ def main(argv=None) -> int:
     before = len(html.encode())
     html, stats = bundle(html, args.assets)
     html, n_err = soften_llm(html)
-    html, n_img = inline_remote_images(html)
+    if args.skip_images:
+        n_img = 0
+        print("상품 사진 다운로드 생략 (--skip-images)")
+    else:
+        html, n_img = inline_remote_images(html)
 
     # {{ }} 는 화면이 그릴 때 채우는 자리표시자지 바깥 파일이 아니다.
     left = [u for u in re.findall(r'(?:src|href)="(?!data:|http|#)([^"]+)"', html)

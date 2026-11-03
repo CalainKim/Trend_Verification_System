@@ -1,0 +1,40 @@
+name: offline-tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONUTF8: "1"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-mvp.txt
+            requirements-test.txt
+      - name: Install offline test dependencies
+        run: python -m pip install -r requirements-test.txt
+      - name: Reproduce detection from committed snapshots
+        run: |
+          python scripts/load_snapshots.py
+          python scripts/export_frontend.py --json --no-lead
+          python scripts/extract_attributes.py --out build/attribute_map.csv --top 5
+          python scripts/track_types.py --json build/type-tracks.json
+          python scripts/patch_design.py 'design/Trend Monitor v8.dc.html' -o build/mvp-patched.html
+          python scripts/bundle_design.py build/mvp-patched.html --assets design/runtime -o build/trend-monitor-mvp.html --skip-images
+      - name: Run tests without model downloads
+        run: python -m pytest tests -q

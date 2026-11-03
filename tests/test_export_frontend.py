@@ -294,6 +294,32 @@ class TestImageDedup:
     못 줄인다.
     """
 
+    def test_no_remote_images_preserves_return_shape(self):
+        import bundle_design as bd
+
+        html = "<html><body>상품 사진 없음</body></html>"
+        assert bd.inline_remote_images(html) == (html, 0)
+
+    def test_skip_images_builds_without_network(self, tmp_path, monkeypatch):
+        import bundle_design as bd
+        import requests
+
+        def blocked(*args, **kwargs):
+            raise AssertionError("The offline bundle must not download photos")
+
+        monkeypatch.setattr(requests.Session, "get", blocked)
+        url = "https://img.29cm.co.kr/example.webp"
+        source, output = tmp_path / "source.html", tmp_path / "output.html"
+        source.write_text(
+            '<html><head></head><body><script>async function go() {'
+            'const text = await window.claude.complete({});}</script>'
+            + f'<img src="{url}"><p>{bd.GENERIC_ERRORS[0]}</p></body></html>',
+            encoding="utf-8",
+        )
+        assert bd.main([str(source), "--assets", str(tmp_path),
+                        "-o", str(output), "--skip-images"]) == 0
+        assert f'<img src="{url}">' in output.read_text(encoding="utf-8")
+
     def test_shared_photos_are_counted_once(self):
         import json
 

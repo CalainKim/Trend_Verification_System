@@ -287,6 +287,24 @@ class TestBrowserShim:
 
 
 class TestStandaloneRuntime:
+    def test_helmet_scripts_are_not_recompiled_as_template(self, tmp_path):
+        import re
+        import bundle_design as bd
+
+        for name in ("boot", "first", "second"):
+            (tmp_path / f"{name}.js").write_text(f"const {name}Value = 1;", encoding="utf-8")
+        source = ('<html><head><script src="boot.js"></script></head><body><x-dc>'
+                  '<helmet><meta name="test" content="kept">'
+                  '<script src="first.js"></script><script src="second.js"></script>'
+                  '</helmet><main>화면</main></x-dc></body></html>')
+        out, stats = bd.bundle(source, tmp_path)
+        head = out[:out.index("</head>")]
+        assert head.index("bootValue") < head.index("firstValue") < head.index("secondValue")
+        helmet = re.search(r"<helmet>.*?</helmet>", out, re.S).group(0)
+        assert "<script" not in helmet
+        assert '<meta name="test" content="kept">' in helmet
+        assert stats["js"] == 3
+
     def test_refetched_bundle_starts_at_the_real_component(self):
         import re
         import bundle_design as bd

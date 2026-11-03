@@ -338,6 +338,25 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> tuple[str, int]:
 def bundle(html: str, assets: Path) -> tuple[str, dict]:
     stats = {"css": 0, "js": 0, "font": 0}
 
+    # helmet은 DC가 다시 컴파일하는 템플릿이다. 그 안에 JS를 인라인하면
+    # encodeCase가 코드의 camelCase까지 속성 이름으로 바꿔 실행을 깨뜨린다.
+    # 외부 스크립트는 문서 head로 순서대로 옮긴 뒤 인라인한다.
+    hoisted = []
+
+    def move_script(m):
+        hoisted.append(m.group(0))
+        return ""
+
+    html = re.sub(
+        r"<helmet(?:\s[^>]*)?>.*?</helmet>",
+        lambda m: re.sub(r'<script src="([^"]+)"></script>', move_script, m.group(0)),
+        html, flags=re.S,
+    )
+    if hoisted:
+        if "</head>" not in html:
+            raise SystemExit("helmet 스크립트를 옮길 head 닫는 태그가 없다")
+        html = html.replace("</head>", "\n".join(hoisted) + "\n</head>", 1)
+
     def css_tag(m):
         href = m.group(1)
         f = (assets / href).resolve()

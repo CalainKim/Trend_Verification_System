@@ -101,6 +101,11 @@ def render(card: sc.Scorecard, title: str) -> str:
              f"기권 {card.n_abstained}건 (커버리지 {card.coverage:.1%})")
     if card.accuracy is None:
         L.append("- 답한 케이스가 없어 채점할 수 없다")
+        # 전부 기권으로 나오는 흔한 원인은 판정이 아니라 case_id 가 안 맞는
+        # 것이다. 그 사실은 notes 에 있으니 여기서도 반드시 내보낸다.
+        # 빼면 "모델이 전부 기권했다" 로 읽혀서 엉뚱한 곳을 보게 된다.
+        for n in card.notes:
+            L.append(f"\n> {n}")
         return "\n".join(L)
     L.append(f"- 정확도 {card.accuracy:.1%} "
              f"(95% 신뢰구간 {card.ci[0]:.1%} ~ {card.ci[1]:.1%})")

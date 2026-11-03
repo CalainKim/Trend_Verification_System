@@ -162,3 +162,32 @@ class TestBaseRateIsTheBestGuess:
         labels = self._labels(4, 6)
         card = sc.score(labels, {k: sc.PERSIST for k in labels})
         assert any("전부 소멸" in n for n in card.notes)
+
+
+class TestAllAbstainedStillExplainsWhy:
+    """전부 기권으로 나왔을 때 원인을 숨기지 않는다.
+
+    흔한 원인은 모델이 기권한 것이 아니라 case_id 가 안 맞는 것이다.
+    판정 폴더를 그대로 넘기면 파일 이름이 review.json 이라 키가 'review' 로
+    잡히고, 정답과 한 건도 겹치지 않아 139건 전부 기권으로 집계된다.
+    성적표가 그 사실을 적지 않으면 모델을 의심하며 엉뚱한 곳을 보게 된다.
+    """
+
+    def _render(self, verdicts):
+        import importlib.util
+        root = Path(__file__).resolve().parents[1]
+        spec = importlib.util.spec_from_file_location(
+            "score_verdicts", root / "scripts" / "score_verdicts.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        labels = {f"c{i}": PERSIST for i in range(5)}
+        return mod.render(sc.score(labels, verdicts), "판정 결과")
+
+    def test_names_the_unmatched_id(self):
+        out = self._render({"review": PERSIST})
+        assert "채점할 수 없다" in out
+        assert "review" in out
+
+    def test_says_how_many_got_no_verdict(self):
+        out = self._render({"review": PERSIST})
+        assert "판정이 오지 않은 케이스 5건" in out

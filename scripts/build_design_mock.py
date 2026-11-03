@@ -128,6 +128,10 @@ def base_rate_29cm():
     """커머스 벤치마크의 기저율. 봉인 파일에서 읽는다.
 
     손으로 적어 두면 벤치마크를 다시 만들 때 시안 쪽만 옛 숫자로 남는다.
+
+    봉인 파일의 base 는 지속 비율이고 기저율이 아니다. 기저율은 아무 생각
+    없이 한쪽으로 다 찍었을 때 나오는 점수라서 다수 쪽 비율이다. 지속이
+    소수가 되면 두 값이 갈라지므로 여기서 다수 쪽으로 바꿔 준다.
     """
     digest = ROOT / "benchmark" / "labels.digest.txt"
     if not digest.exists():
@@ -136,7 +140,9 @@ def base_rate_29cm():
         return None
     for line in digest.read_text(encoding="utf-8").splitlines():
         if line.startswith("base"):
-            return round(float(line.split()[1]), 3)
+            persist = float(line.split()[1])
+            return {"persist": round(persist, 3),
+                    "base_rate": round(max(persist, 1 - persist), 3)}
     return None
 
 

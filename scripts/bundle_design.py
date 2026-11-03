@@ -360,6 +360,11 @@ def bundle(html: str, assets: Path) -> tuple[str, dict]:
         stats["js"] += 1
         # </script> 가 글자로 들어 있으면 거기서 태그가 닫힌다.
         body = f.read_text(encoding="utf-8").replace("</script>", "<\\/script>")
+        # DC 런타임은 현재 HTML을 다시 읽고 첫 <x-dc>부터 템플릿을 찾는다.
+        # 외부 support.js를 인라인으로 옮기면 오류 문구 속 태그가 먼저
+        # 잡힌다. JS 문자열/정규식에서 같은 문자로 해석되는 이스케이프로
+        # 바꿔, 런타임 코드를 화면 템플릿으로 오인하지 않게 한다.
+        body = re.sub(r"<(?=/?x-dc(?:\s|>))", lambda _: r"\x3c", body)
         return f"<script>\n{body}\n</script>"
 
     html = re.sub(r'<script src="([^"]+)"></script>', js_tag, html)

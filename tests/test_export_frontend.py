@@ -286,6 +286,49 @@ class TestBrowserShim:
         assert "if (window.claude && window.claude.complete) return;" in self._shim()
 
 
+class TestStandaloneRuntime:
+    def test_refetched_bundle_starts_at_the_real_component(self):
+        import re
+        import bundle_design as bd
+
+        # The runtime refetches its HTML and finds x-dc with a raw-text regex.
+        # Its own error message contains that marker before the real template.
+        source = ('<html><head><script src="./support.js"></script></head>'
+                  '<body><x-dc><main id="actual-component">본문</main></x-dc>'
+                  '</body></html>')
+        out, _ = bd.bundle(source, ROOT / "design" / "runtime")
+        opening = re.search(r"<x-dc(?:\s[^>]*)?>", out)
+        assert opening is not None
+        template = out[opening.end():out.rindex("</x-dc>")]
+        assert template == '<main id="actual-component">본문</main>'
+        assert r"has no \x3cx-dc> block" in out
+
+    def test_screen_dates_follow_exported_snapshot_week(self, tmp_path, monkeypatch):
+        import patch_design as pd
+
+        data = tmp_path / "data.js"
+        data.write_text(
+            'const WEEK = {base: "12/01", detect: "12/08", hold: "12/15", '
+            'baseISO: "2026-12-01", holdISO: "2026-12-15", nextISO: "2026-12-22"};\n',
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(pd, "DATA", data)
+        out = tmp_path / "patched.html"
+        assert pd.main([str(ROOT / "design" / "Trend Monitor v8.dc.html"),
+                        "-o", str(out)]) == 0
+        html = out.read_text(encoding="utf-8")
+        assert 'detect: "12/08", hold: "12/15"' in html
+        assert "29CM 상의 TOP100, {{ snapshotRange }}" in html
+        assert "snapshotRange: `${WEEK.detect}에서 ${WEEK.hold}`" in html
+        assert "snapshotDate: WEEK.holdISO" in html
+        assert "29CM {{ snapshotDate }} 기준" in html
+        assert "다음 수집 일정 미연결" in html
+        assert "time: WEEK.holdISO + ' 관측 기준'" in html
+        for stale in ("10/25에서 11/01", "11/01 22:00", "11/08 22:00",
+                      "11/01 22:05", "오늘: '2026-11-03'"):
+            assert stale not in html
+
+
 class TestImageDedup:
     """같은 사진이 여러 자리에 나오면 한 번만 담아야 한다.
 

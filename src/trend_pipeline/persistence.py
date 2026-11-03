@@ -26,6 +26,23 @@ from typing import Dict, Iterator, List, Optional, Sequence, Tuple
 
 #: 상승으로 볼 최소 순위 변화. 랭킹 100위 안에서 10계단은 눈에 띄는 변화다.
 MIN_RISE = 10.0
+#: 그날 TOP100 목록에 없던 상품의 순위로 쓰는 값. 목록이 100위까지이므로 밖에
+#: 있었다는 것은 "101위보다 나쁘다" 는 뜻이고, 101 은 그 경계값이다.
+#:
+#: 전에는 없는 날을 그냥 빼고 평균했다. 그러면 이레 중 하루만 목록에 있던
+#: 상품이 그 하루 순위로 평균을 내서 크게 오른 것으로 잡힌다. 오른 것이 아니라
+#: 평균을 낸 날이 하루인 것이다. 61건 가운데 19건이 이레 중 이틀 이하였고,
+#: 하나는 하루 7위로 "42계단 올랐다" 가 됐다.
+#:
+#: 커버리지 문턱으로 거르는 방법도 재 봤으나 더 나빴다. 0.5 로 자르면 80건이
+#: 29건으로 줄고 기저율이 51.2% 에서 65.5% 로 뛴다. 목록에 꾸준히 있던 상품만
+#: 남으니 버틸 것들만 고른 꼴이다. 경계값으로 채우면 50건이 남고 기저율은
+#: 60.0% 이며, 하루만 있던 18건 가운데 17건이 상승 문턱에서 자연히 떨어진다.
+#: 거르는 것이 아니라 제대로 재니 상승이 아니었던 것이다.
+#:
+#: 101 은 실제보다 후하다. 밖에 있던 상품이 300위였을 수도 있다. 그 방향의
+#: 오차는 상승폭을 작게 보이게 하므로 안전한 쪽이다.
+OUT_OF_LIST_RANK = 101.0
 
 #: 확인 구간에서 상승폭의 이만큼이 남아 있으면 지속으로 본다.
 KEEP_RATIO = 0.5
@@ -87,6 +104,9 @@ class RiseEvent:
     # 실제로 순위 안에 있던 상품 하나가 목록에서 빠진다. 그래서 문장은 "그날
     # 수집한 목록에 없었다" 까지만 말한다. 이것은 어느 쪽이든 참이다.
     rank_daily: Tuple[Optional[float], ...] = ()
+    #: 구간 평균이 며칠을 쓴 것인지. 1.0 이면 창의 모든 날에 목록 안에 있었다.
+    coverage_base: float = 1.0
+    coverage_detect: float = 1.0
     # 이 상품의 속성이 작년 같은 시기에도 올랐는지. 계절성 반증용이다. 모델이
     # 판정을 보류한 이유로 가장 많이 든 항목이 이것이었다. 커머스 수집은 37일뿐
     # 이라 작년이 없지만, 속성 키워드의 검색 지수에는 5년치가 있다.
@@ -129,6 +149,11 @@ class RiseEvent:
                     f"상품이 없었다는 뜻이다. 수집이 걸러진 결측과는 다르다. "
                     f"구간 평균만으로는 꾸준히 오른 것과 하루만 튄 것을 구분할 "
                     f"수 없다")
+            note += (f". 목록에 없던 날은 {OUT_OF_LIST_RANK:.0f} 위로 쳐서 평균에 "
+                     f"넣었다. 목록이 100 위까지이므로 밖에 있었다는 것은 그보다 "
+                     f"나쁘다는 뜻이고, 빼고 평균하면 하루만 높았던 상품이 크게 "
+                     f"오른 것으로 보인다. 목록 안에 있던 날은 기준 구간 "
+                     f"{self.coverage_base:.0%}, 관측 구간 {self.coverage_detect:.0%} 다")
             gaps = _calendar_gaps(days)
             if gaps:
                 note += (f". 다만 {', '.join(gaps)} 은 수집 자체가 없어 "
@@ -235,8 +260,23 @@ def windows(days: Sequence[str], base: int, detect: int, hold: int,
 
 
 def _avg(item: Dict[str, dict], days: Sequence[str], key: str) -> Optional[float]:
+    """있는 날만 평균한다. 몇 날을 썼는지는 _avg_cov 로 따로 받는다."""
     vals = [item[d][key] for d in days if d in item and key in item[d]]
     return sum(vals) / len(vals) if vals else None
+
+
+def _avg_rank(item: Dict[str, dict],
+              days: Sequence[str]) -> Tuple[float, float]:
+    """순위의 구간 평균과, 그 구간에서 목록 안에 있었던 날의 비율.
+
+    목록에 없던 날은 빼지 않고 OUT_OF_LIST_RANK 로 채운다. 빼면 남은 날만으로
+    평균이 나서 하루짜리 반짝 진입이 큰 상승으로 보인다. 창은 수집이 있었던
+    날로만 만들므로 없는 날은 자료가 없는 것이 아니라 밖에 있었던 것이다.
+    """
+    vals = [(item.get(d) or {}).get("rank") for d in days]
+    seen = sum(1 for v in vals if v is not None)
+    filled = [OUT_OF_LIST_RANK if v is None else v for v in vals]
+    return sum(filled) / len(filled), seen / len(days)
 
 
 def _latest(item: Dict[str, dict], days: Sequence[str], key: str, default=None):
@@ -257,9 +297,10 @@ def rise_events(series: Dict[str, Dict[str, dict]], w: Window,
     seen = w.base + w.detect
     found: List[RiseEvent] = []
     for key, item in series.items():
-        rb, rd = _avg(item, w.base, "rank"), _avg(item, w.detect, "rank")
-        if rb is None or rd is None:
-            continue
+        rb, cb = _avg_rank(item, w.base)
+        rd, cd = _avg_rank(item, w.detect)
+        if not cb and not cd:
+            continue                        # 두 구간 모두 목록에 없던 상품
         rise = rb - rd                      # 순위는 숫자가 작아질수록 상승이다
         if rise < min_rise:
             continue
@@ -278,6 +319,7 @@ def rise_events(series: Dict[str, Dict[str, dict]], w: Window,
             heart_delta=(hd - hb) if None not in (hb, hd) else 0.0,
             sale_delta=(sd - sb) if None not in (sb, sd) else 0.0,
             rank_daily=daily,
+            coverage_base=cb, coverage_detect=cd,
             seasonality=(seasonality or {}).get(key),
             is_new=bool(_latest(item, seen, "is_new", False)),
             sold_out=bool(_latest(item, seen, "sold_out", False)),
@@ -301,9 +343,11 @@ def label_events(series: Dict[str, Dict[str, dict]], w: Window,
     out: Dict[str, str] = {}
     for e in events:
         item = series[e.item_key]
-        rh = _avg(item, w.hold, "rank")
-        if rh is None:
-            continue                       # 확인 구간에 자료가 없으면 채점 불가
+        # 확인 구간 내내 목록에 없으면 rh 가 경계값이 되어 자연히 fade 가
+        # 된다. 전에는 _avg 가 None 을 돌려줬고 그것을 채점 불가로 버렸다.
+        # 가장 확실하게 버티지 못한 것들이 정답에서 빠져 기저율이 살아남은
+        # 쪽으로 올라갔다. 실제로 80건 중 18건이 그렇게 빠졌다.
+        rh, _ = _avg_rank(item, w.hold)
         kept = e.rank_base - rh
         out[e.item_key] = PERSIST if kept >= e.rise * keep_ratio else FADE
     return out
@@ -433,19 +477,25 @@ def _mean(item: Dict[str, float], days: Sequence[str]) -> Tuple[Optional[float],
 
 
 def window_yoy(item: Dict[str, float], days: Sequence[str],
-               years_back: int = 1, pad_days: int = 7) -> Optional[float]:
+               years_back: int = 1, pad_days: int = 14) -> Optional[float]:
     """날짜 구간으로 맞추는 작년 대비 비율.
 
     yoy_ratio 는 양쪽이 같은 격자일 때 쓴다. 커머스 창은 일별이고 구글 트렌드는
     주별이라 날짜가 겹치지 않아 그 함수로는 전부 빗나간다. 여기서는 구간을
-    범위로 보고, 그 범위 안이나 가까이에 있는 주별 관측을 모아 평균을 낸다.
+    범위로 보고, 그 범위 안이나 앞쪽 가까이에 있는 주별 관측을 모아 평균을 낸다.
+
+    패딩은 뒤로는 붙이지 않는다. 부르는 쪽이 days 에 관측 구간을 주므로 뒤쪽
+    패딩은 곧 확인 구간이고, 그러면 t_cut 이후 자료가 특징에 섞인다. 처음에는
+    앞뒤로 7일씩 붙여서 실제로 그렇게 됐다. 계절성 근거가 붙은 48건 가운데
+    47건이 확인 구간의 주간 관측 한 점을 평균에 넣고 있었다. 지금은 같은 길이를
+    앞쪽으로만 가져간다. 구간 길이가 같으므로 들어오는 주간 관측 수는 거의
+    같고, 작년 쪽도 똑같이 앞으로만 늘어나므로 비율의 뜻이 변하지 않는다.
     """
     from datetime import date, timedelta
 
     def mean_in(lo: date, hi: date) -> Optional[float]:
         vals = [v for k, v in item.items()
-                if lo - timedelta(days=pad_days) <= date.fromisoformat(k)
-                <= hi + timedelta(days=pad_days)]
+                if lo - timedelta(days=pad_days) <= date.fromisoformat(k) <= hi]
         return sum(vals) / len(vals) if vals else None
 
     lo, hi = date.fromisoformat(days[0]), date.fromisoformat(days[-1])

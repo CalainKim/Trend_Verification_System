@@ -124,3 +124,41 @@ def test_confusion_matrix_adds_up(labels):
     assert card.confusion[f"{FADE}->{PERSIST}"] == 1
     assert card.confusion[f"{FADE}->{FADE}"] == 1
     assert card.correct == 2
+
+
+class TestBaseRateIsTheBestGuess:
+    """넘어야 할 기준은 전부 지속이 아니라 제일 잘 찍었을 때다.
+
+    전부 지속만 기준으로 두면, 지속이 드문 문제지에서 모델이 아무 생각 없이
+    전부 소멸이라고 찍는 것보다 못하면서도 기저율을 넘었다고 나온다. 누수를
+    막고 문제지를 다시 만들자 지속이 40.3% 가 되어 이 구멍이 실제로 열렸다.
+    전부 소멸이 59.7% 인데 기저율은 40.3% 로 찍히고 있었다.
+    """
+
+    def _labels(self, n_persist, n_fade):
+        d = {f"p{i}": sc.PERSIST for i in range(n_persist)}
+        d.update({f"f{i}": sc.FADE for i in range(n_fade)})
+        return d
+
+    def test_uses_the_bigger_side(self):
+        labels = self._labels(4, 6)              # 지속 40%, 소멸 60%
+        card = sc.score(labels, {k: sc.PERSIST for k in labels})
+        assert card.base_rate_all == pytest.approx(0.6)
+        assert card.persist_rate_all == pytest.approx(0.4)
+
+    def test_always_fade_cannot_beat_the_base_rate(self):
+        """전부 소멸로 찍는 판정기가 기준을 넘으면 기준이 틀린 것이다."""
+        labels = self._labels(4, 6)
+        card = sc.score(labels, {k: sc.FADE for k in labels})
+        assert card.accuracy == pytest.approx(0.6)
+        assert not card.beats_base_rate
+
+    def test_always_persist_cannot_beat_it_either(self):
+        labels = self._labels(6, 4)
+        card = sc.score(labels, {k: sc.PERSIST for k in labels})
+        assert not card.beats_base_rate
+
+    def test_says_which_side_is_the_bar(self):
+        labels = self._labels(4, 6)
+        card = sc.score(labels, {k: sc.PERSIST for k in labels})
+        assert any("전부 소멸" in n for n in card.notes)

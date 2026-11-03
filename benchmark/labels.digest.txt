@@ -1,3 +1,3 @@
-sha256  9cef9adadd3a4b3ceb709eb72e3c8b429093bc3e47ad803bbea511f411d004e8
-n       61
-base    0.540984
+sha256  abb50ca0bcfb9ad8f8b9405c1b01e68c6d9c077f2128f9f0aa15b8a07143ead5
+n       139
+base    0.402878

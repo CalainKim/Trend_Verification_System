@@ -1,0 +1,78 @@
+{
+  "case_id": "rise_2026-10-12_29cm_4149650",
+  "window_id": 0,
+  "experiment_type": "persistence-v1",
+  "candidate": {
+    "keyword": "LOGO AIR LONG SLEEVE (Red Bean)",
+    "definition": "29CM 상의 카테고리 랭킹에 오른 개별 상품이다. 브랜드는 '케일' 다. 품목 키워드가 아니라 상품 하나이므로, 같은 속성을 가진 다른 상품의 움직임은 이 번들에 들어 있지 않다."
+  },
+  "claim": "2026-10-12 까지의 자료로 볼 때, 이 상품의 순위 상승이 이후 7일 동안 절반 이상 유지되겠는가?",
+  "horizon_days": 7,
+  "simulated_cutoff": "2026-10-12",
+  "t_cut": "2026-10-12",
+  "historical_available_at": null,
+  "item": {
+    "key": "29cm:4149650",
+    "name": "LOGO AIR LONG SLEEVE (Red Bean)",
+    "brand": "케일"
+  },
+  "features": {
+    "rank_base": 76.43,
+    "rank_at_cut": 62.57,
+    "rank_rise": 13.86,
+    "review_delta": 1.5,
+    "heart_delta": 13.75,
+    "sale_percent_delta": 10.0,
+    "is_new": false,
+    "sold_out": false,
+    "brand_simultaneous_risers": 2
+  },
+  "evidence": [
+    {
+      "id": "rank_change",
+      "channel": "commerce_rank",
+      "observation": "순위 평균이 2026-09-29~2026-10-05 구간 76.4위에서 2026-10-06~2026-10-12 구간 62.6위로 13.9계단 올랐다"
+    },
+    {
+      "id": "review_change",
+      "channel": "commerce_rank",
+      "observation": "같은 기간 리뷰 수가 +1.5건 변했다. 리뷰는 구매를 거쳐야 쌓이므로 조작 여지가 적다"
+    },
+    {
+      "id": "heart_change",
+      "channel": "commerce_rank",
+      "observation": "좋아요가 +13.8 변했다. 구매 없이도 늘 수 있는 지표다"
+    },
+    {
+      "id": "sale_change",
+      "channel": "commerce_rank",
+      "observation": "할인율이 +10.0%p 변했다. 할인이 늘었다면 순위 상승의 대체 설명이 된다"
+    },
+    {
+      "id": "item_flags",
+      "channel": "commerce_rank",
+      "observation": "신상품 표시 False, 품절 False"
+    },
+    {
+      "id": "brand_context",
+      "channel": "commerce_rank",
+      "observation": "같은 창에서 브랜드 '케일' 의 상품 2개가 함께 올랐다"
+    },
+    {
+      "id": "rank_daily",
+      "channel": "commerce_rank",
+      "observation": "일별 순위는 09-29 TOP100 밖, 09-30 TOP100 밖, 10-01 62위, 10-02 32위, 10-03 70위, 10-04 68위, 10-05 TOP100 밖, 10-06 TOP100 밖, 10-07 63위, 10-08 TOP100 밖, 10-09 21위, 10-10 30위, 10-11 21위, 10-12 TOP100 밖 다. 여기 적힌 날은 모두 수집이 돌았던 날이고, 'TOP100 밖' 은 그날 수집한 상위 100 위 목록에 이 상품이 없었다는 뜻이다. 수집이 걸러진 결측과는 다르다. 구간 평균만으로는 꾸준히 오른 것과 하루만 튄 것을 구분할 수 없다. 목록에 없던 날은 101 위로 쳐서 평균에 넣었다. 목록이 100 위까지이므로 밖에 있었다는 것은 그보다 나쁘다는 뜻이고, 빼고 평균하면 하루만 높았던 상품이 크게 오른 것으로 보인다. 목록 안에 있던 날은 기준 구간 57%, 관측 구간 57% 다"
+    },
+    {
+      "id": "seasonality",
+      "channel": "gtrends",
+      "observation": "이 상품의 속성 '긴팔' 의 한국 검색 지수는 작년 같은 시기 대비 1.24 배다. 1 에 가까우면 해마다 같은 시기에 오르는 계절 움직임이고, 1 보다 크게 높으면 올해만 오른 것이다. 상품 순위가 아니라 속성 검색의 계절성이므로 간접 근거다"
+    }
+  ],
+  "limitations": [
+    "순위가 오른 원인은 관측할 수 없다. 광고 집행과 노출 알고리즘은 쇼핑몰 내부에만 있어 외부에서 볼 수 없다. 원인을 지목하지 말고 관측된 사실과 배제되는 설명만 쓴다.",
+    "리뷰와 좋아요는 플랫폼 내부 지표다. 쇼핑몰 밖의 수요를 직접 재지 않는다.",
+    "관측 구간이 짧아 계절성을 분리할 수 없다. 작년 같은 시기와 비교한 자료가 번들에 없다.",
+    "순위는 같은 카테고리 안의 상대 위치다. 판매량의 절대 크기가 아니다."
+  ]
+}

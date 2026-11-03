@@ -66,10 +66,14 @@ class Scorecard:
     n_answered: int
     n_abstained: int
     correct: int
+    #: 제일 잘 찍었을 때의 정확도. 전부 지속과 전부 소멸 가운데 높은 쪽이다.
     base_rate_all: Optional[float]
     base_rate_answered: Optional[float]
     accuracy: Optional[float]
     ci: Tuple[float, float]
+    #: 지속이 실제로 얼마나 흔한지. 기준이 아니라 문제지의 성질이다.
+    persist_rate_all: Optional[float] = None
+    persist_rate_answered: Optional[float] = None
     confusion: Dict[str, int] = field(default_factory=dict)
     notes: list = field(default_factory=list)
 
@@ -128,9 +132,28 @@ def score(labels: Mapping[str, str],
 
     n = len(labels)
     n_ans = len(answered)
-    base_all = (sum(1 for v in labels.values() if v == PERSIST) / n) if n else None
-    base_ans = (sum(1 for v in answered if v == PERSIST) / n_ans) if n_ans else None
+    # 기저율은 "전부 지속이라고 찍었을 때" 가 아니라 "제일 잘 찍었을 때" 다.
+    # 전부 지속만 보면, 지속이 드문 문제지에서 모델이 아무 생각 없이 전부
+    # 소멸이라고 찍는 것보다 못하면서도 기저율을 넘었다고 나온다. 실제로
+    # 누수를 막고 문제지를 다시 만들자 지속이 40.3% 가 되어, 전부 소멸이
+    # 59.7% 로 가장 센 기준이 됐다.
+    def _majority(vals) -> Optional[float]:
+        vals = list(vals)
+        if not vals:
+            return None
+        share = sum(1 for v in vals if v == PERSIST) / len(vals)
+        return max(share, 1 - share)
+
+    base_all = _majority(labels.values())
+    base_ans = _majority(answered)
+    persist_all = (sum(1 for v in labels.values() if v == PERSIST) / n) if n else None
+    persist_ans = (sum(1 for v in answered if v == PERSIST) / n_ans) if n_ans else None
     acc = (correct / n_ans) if n_ans else None
+
+    if persist_ans is not None and base_ans is not None and persist_ans < base_ans:
+        notes.append(
+            f"답한 부분에서 지속은 {persist_ans:.1%} 뿐이다. 넘어야 할 기준은 "
+            f"전부 소멸로 찍었을 때의 {base_ans:.1%} 다")
 
     if base_all is not None and base_ans is not None and abs(base_ans - base_all) > 0.1:
         notes.append(
@@ -141,4 +164,5 @@ def score(labels: Mapping[str, str],
     return Scorecard(
         n_cases=n, n_answered=n_ans, n_abstained=abstained, correct=correct,
         base_rate_all=base_all, base_rate_answered=base_ans, accuracy=acc,
+        persist_rate_all=persist_all, persist_rate_answered=persist_ans,
         ci=wilson(correct, n_ans), confusion=confusion, notes=notes)

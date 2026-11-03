@@ -85,13 +85,20 @@ def test_min_rise_threshold(win):
     assert len(ps.rise_events(small, w, min_rise=3)) == 1
 
 
-def test_unobserved_in_hold_is_not_labeled(win):
-    """확인 구간에 자료가 없으면 채점할 수 없으므로 케이스가 아니다."""
+def test_absent_through_hold_is_fade(win):
+    """확인 구간 내내 목록에 없으면 가장 확실한 fade 다.
+
+    전에는 채점 불가로 버렸다. 자료가 없는 것으로 읽은 것인데, 창은 수집이
+    있었던 날로만 만들므로 그 이레 동안 목록에 없었다는 뜻이다. 즉 TOP100
+    밖으로 완전히 밀려났다. 가장 분명하게 안 버틴 것들을 정답에서 빼면
+    기저율이 살아남은 쪽으로 올라간다. 실제 창에서 80건 중 18건이 이렇게
+    빠졌고 기저율이 51.2% 대신 66.1% 로 나왔다.
+    """
     w, d = win
     gone = mkseries({"x": [(d[i], 50 if i < 3 else 20, 10) for i in range(6)]})
     ev = ps.rise_events(gone, w)
     assert len(ev) == 1
-    assert ps.label_events(gone, w, ev) == {}
+    assert ps.label_events(gone, w, ev) == {"x": ps.FADE}
 
 
 def test_brand_simultaneous_risers(win):
@@ -499,3 +506,106 @@ class TestCalendarGaps:
         line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
         assert "10-05" in line["observation"]
         assert "수집 자체가 없어" in line["observation"]
+
+
+class TestNoHoldLeakInSeasonality:
+    """계절성 비율이 확인 구간을 보면 안 된다.
+
+    window_yoy 가 앞뒤로 7일씩 패딩을 붙였다. 부르는 쪽이 days 에 관측 구간을
+    주므로 뒤쪽 패딩은 곧 확인 구간이고, 구글 트렌드는 주 단위라 거기 보통
+    관측 한 점이 들어온다. 평균에 쓰이는 점이 세 개쯤이니 삼분의 일이 t_cut
+    이후 자료였다. commerce_seasonality 의 설명에는 "관측 구간까지만 본다.
+    확인 구간을 넣으면 정답이 새어 나간다" 라고 적혀 있었다. 적어 놓고 샜다.
+
+    실제 벤치마크에서 계절성 근거가 붙은 48건 가운데 47건의 값이 달라졌다.
+    블라우스 1.85 가 1.06, 오버사이즈 1.31 이 1.85 였다.
+    """
+
+    def _series(self):
+        # 주 단위 관측. 관측 구간은 10-06~10-12, 확인 구간은 10-13~10-19 다.
+        return {"2025-09-29": 10.0, "2025-10-06": 10.0, "2025-10-13": 10.0,
+                "2026-09-29": 20.0, "2026-10-06": 20.0,
+                "2026-10-13": 999.0}        # t_cut 이후. 닿으면 안 된다
+    DETECT = ["2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09",
+              "2026-10-10", "2026-10-11", "2026-10-12"]
+
+    def test_ignores_points_after_the_cut(self):
+        got = ps.window_yoy(self._series(), self.DETECT)
+        assert got is not None
+        # 확인 구간의 999 가 섞이면 비율이 20배를 넘는다.
+        assert got < 3, f"확인 구간이 새어 들어왔다: {got}"
+
+    def test_value_does_not_move_when_the_future_changes(self):
+        """t_cut 이후 값을 바꿔도 결과가 그대로여야 한다. 이게 누수의 정의다."""
+        a = dict(self._series())
+        b = dict(self._series())
+        b["2026-10-13"] = 1.0
+        b["2026-10-20"] = 5000.0
+        assert ps.window_yoy(a, self.DETECT) == ps.window_yoy(b, self.DETECT)
+
+    def test_still_reaches_back_far_enough(self):
+        """뒤를 막는 대신 앞을 늘렸다. 주간 관측을 못 잡으면 쓸모가 없다."""
+        assert ps.window_yoy(self._series(), self.DETECT) is not None
+
+    def test_commerce_seasonality_keeps_its_promise(self):
+        """함수 설명이 약속한 것을 실제로 지키는지 끝에서 끝까지 본다."""
+        import inspect
+
+        src = inspect.getsource(ps.commerce_seasonality)
+        assert "w.detect" in src and "w.hold" not in src
+
+
+class TestOutOfListIsCounted:
+    """목록에 없던 날을 빼지 않고 경계값으로 채워 평균한다.
+
+    빼고 평균하면 이레 중 하루만 목록에 있던 상품이 그 하루 순위로 평균을
+    내서 크게 오른 것으로 잡힌다. 오른 것이 아니라 평균을 낸 날이 하루인
+    것이다. 실제 벤치마크 61건 가운데 19건이 이레 중 이틀 이하였고, 하나는
+    하루 7위로 잡혀 "42계단 올랐다" 가 됐다.
+
+    커버리지 문턱으로 거르는 방법도 재 봤으나 더 나빴다. 0.5 로 자르면 80건이
+    29건으로 줄고 기저율이 51.2% 에서 65.5% 로 뛴다. 목록에 꾸준히 있던
+    상품만 남아 버틸 것들을 고른 꼴이 된다. 경계값으로 채우면 50건이 남고
+    기저율은 60.0% 이며, 하루만 있던 18건 가운데 17건이 상승 문턱에서 자연히
+    떨어진다. 거르는 것이 아니라 제대로 재니 상승이 아니었던 것이다.
+    """
+
+    def _series(self, detect_days_present: int):
+        d = days_from("2026-10-01", 9)
+        pts = [(d[i], 60, 10) for i in range(3)]                 # 기준 구간 사흘
+        pts += [(d[3 + i], 10, 10) for i in range(detect_days_present)]
+        # 매일 있는 상품을 하나 둬야 그날 수집이 있었던 것이 된다.
+        return mkseries({"A": pts, "B": [(x, 50, 10) for x in d]}), \
+            ps.Window(base=d[:3], detect=d[3:6], hold=d[6:])
+
+    def test_one_good_day_is_not_a_rise(self):
+        """사흘 중 하루만 10위였으면 상승이 아니다. 나머지 이틀은 밖이었다."""
+        series, w = self._series(1)
+        assert "A" not in {e.item_key for e in ps.rise_events(series, w)}
+
+    def test_filtered_by_measurement_not_by_exclusion(self):
+        """거른 것이 아니라 제대로 재니 문턱에 못 미친 것이어야 한다."""
+        series, w = self._series(1)
+        rb, cb = ps._avg_rank(series["A"], w.base)
+        rd, cd = ps._avg_rank(series["A"], w.detect)
+        assert cd == pytest.approx(1 / 3)
+        # 하루 10위, 이틀 밖이면 (10 + 101 + 101) / 3 이다
+        assert rd == pytest.approx((10 + 2 * ps.OUT_OF_LIST_RANK) / 3)
+        assert rb - rd < ps.MIN_RISE
+
+    def test_steady_rise_survives(self):
+        series, w = self._series(3)
+        assert "A" in {e.item_key for e in ps.rise_events(series, w)}
+
+    def test_evidence_says_the_absent_days_were_filled(self):
+        """보간했다고 적지 않으면 모델이 평균을 잘못 읽는다."""
+        series, w = self._series(2)
+        e = next(x for x in ps.rise_events(series, w) if x.item_key == "A")
+        line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
+        assert "101 위로 쳐서" in line["observation"]
+        assert "67%" in line["observation"]
+
+    def test_absent_everywhere_is_not_a_case(self):
+        """두 구간 모두 밖이면 상승도 아니고 케이스도 아니다."""
+        series, w = self._series(0)
+        assert "A" not in {e.item_key for e in ps.rise_events(series, w)}

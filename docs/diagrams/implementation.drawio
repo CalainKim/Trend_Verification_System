@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Trend MVP documentation" version="32.6.1">
+  <diagram id="implementation" name="현재 구현은 데이터에서 화면까지 연결돼 있다">
+    <mxGraphModel dx="1440" dy="1180" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1440" pageHeight="1180" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="n2" value="" style="rounded=0;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#FFFFFF;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1440" height="1180" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="" style="rounded=0;arcSize=14;whiteSpace=wrap;html=0;fillColor=#107E80;strokeColor=#107E80;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="64" y="56" width="7" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="TREND MONITOR  /  1차 MVP" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=14;fontColor=#107E80;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="92" y="43" width="1100" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="현재 구현은 데이터에서 화면까지 연결돼 있다" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=34;fontColor=#172D46;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="82" width="1250" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="주 탐지는 29CM 랭킹으로 계산한다. Google Trends는 후보를 이해하는 보조 자료로 붙인다." style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="90" y="145" width="1250" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=none;html=0;rounded=0;strokeColor=#DCE5EF;strokeWidth=1;endArrow=none;endFill=1;dashed=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="64" y="204" as="sourcePoint" />
+            <mxPoint x="1376" y="204" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n8" value="주 탐지 경로  ·  구현됨" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=14;fontColor=#3267CF;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="64" y="234" width="500" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#F5F8FE;strokeColor=#DFE7F3;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="64" y="274" width="1312" height="305" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="88" y="290" width="260" height="248" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" value="SOURCE" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#3267CF;fontStyle=1;" vertex="1" parent="n10">
+          <mxGeometry x="22.0" y="17.0" width="216" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n12" value="29CM 랭킹" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n10">
+          <mxGeometry x="22.0" y="49.0" width="216" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="n13" value="남·여 상의 각 TOP100&#10;상품 · 브랜드 · 순위&#10;관측 시각" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n10">
+          <mxGeometry x="22.0" y="95.0" width="216" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="n14" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="407" y="290" width="260" height="248" as="geometry" />
+        </mxCell>
+        <mxCell id="n15" value="STORE" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#3267CF;fontStyle=1;" vertex="1" parent="n14">
+          <mxGeometry x="22.0" y="17.0" width="216" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n16" value="공통 관측 저장" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n14">
+          <mxGeometry x="22.0" y="49.0" width="216" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="n17" value="RawRecord&#10;CSV 스냅샷 + SQLite&#10;관측·수집 시각 구분" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n14">
+          <mxGeometry x="22.0" y="95.0" width="216" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="n18" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="726" y="290" width="292" height="248" as="geometry" />
+        </mxCell>
+        <mxCell id="n19" value="DETECT" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#3267CF;fontStyle=1;" vertex="1" parent="n18">
+          <mxGeometry x="22.0" y="17.0" width="248" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n20" value="유형과 주별 변화" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n18">
+          <mxGeometry x="22.0" y="49.0" width="248" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="n21" value="type_of 상품명 규칙&#10;track_types.py&#10;후보 · 방향 · 관측 점수" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n18">
+          <mxGeometry x="22.0" y="95.0" width="248" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="n22" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="1077" y="290" width="275" height="248" as="geometry" />
+        </mxCell>
+        <mxCell id="n23" value="OUTPUT" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#3267CF;fontStyle=1;" vertex="1" parent="n22">
+          <mxGeometry x="22.0" y="17.0" width="231" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n24" value="Trend Monitor" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n22">
+          <mxGeometry x="22.0" y="49.0" width="231" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="n25" value="유형 목록 + 관련 상품&#10;선정 근거 + 주별 궤적&#10;조회 기간 표시" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n22">
+          <mxGeometry x="22.0" y="95.0" width="231" height="138" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" style="edgeStyle=none;html=0;rounded=0;strokeColor=#3267CF;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=0;exitX=1.0;exitY=0.5080645161290323;exitPerimeter=1;entryX=0.0;entryY=0.5080645161290323;entryPerimeter=1;" edge="1" parent="1" source="n10" target="n14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="348" y="416" as="sourcePoint" />
+            <mxPoint x="407" y="416" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e27" style="edgeStyle=none;html=0;rounded=0;strokeColor=#3267CF;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=0;exitX=1.0;exitY=0.5080645161290323;exitPerimeter=1;entryX=0.0;entryY=0.5080645161290323;entryPerimeter=1;" edge="1" parent="1" source="n14" target="n18">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="667" y="416" as="sourcePoint" />
+            <mxPoint x="726" y="416" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e28" style="edgeStyle=none;html=0;rounded=0;strokeColor=#3267CF;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=0;exitX=1.0;exitY=0.5080645161290323;exitPerimeter=1;entryX=0.0;entryY=0.5080645161290323;entryPerimeter=1;" edge="1" parent="1" source="n18" target="n22">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1018" y="416" as="sourcePoint" />
+            <mxPoint x="1077" y="416" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n29" value="화면 데이터: export_frontend.py → patch_design.py → bundle_design.py" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n9">
+          <mxGeometry x="660.0" y="273.0" width="630" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n30" value="보조 자료 경로  ·  구현됨" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=14;fontColor=#107E80;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="64" y="614" width="500" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="n31" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#F0F7F7;strokeColor=#D7E7E5;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="64" y="654" width="1312" height="216" as="geometry" />
+        </mxCell>
+        <mxCell id="n32" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="88" y="674" width="390" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n33" value="CONTEXT" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#107E80;fontStyle=1;" vertex="1" parent="n32">
+          <mxGeometry x="22.0" y="17.0" width="346" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n34" value="Google Trends" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n32">
+          <mxGeometry x="22.0" y="49.0" width="346" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="n35" value="지역별 키워드 관심도&#10;검색 시계열을 공통 저장소에 적재" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n32">
+          <mxGeometry x="22.0" y="95.0" width="346" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n36" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="525" y="674" width="370" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n37" value="JOIN" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#107E80;fontStyle=1;" vertex="1" parent="n36">
+          <mxGeometry x="22.0" y="17.0" width="326" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n38" value="속성 키워드와 연결" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n36">
+          <mxGeometry x="22.0" y="49.0" width="326" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="n39" value="extract_attributes.py / 속성 사전&#10;export_frontend.py로 화면 자료 생성" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n36">
+          <mxGeometry x="22.0" y="95.0" width="326" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n40" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="942" y="674" width="410" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n41" value="DISPLAY" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#107E80;fontStyle=1;" vertex="1" parent="n40">
+          <mxGeometry x="22.0" y="17.0" width="366" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="n42" value="검색과 상품을 함께 확인" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n40">
+          <mxGeometry x="22.0" y="49.0" width="366" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="n43" value="검색 비교 · 할인 정보 · 출처&#10;검색량을 판매량으로 해석하지 않음" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n40">
+          <mxGeometry x="22.0" y="95.0" width="366" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e44" style="edgeStyle=none;html=0;rounded=0;strokeColor=#107E80;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=1;exitX=1.0;exitY=0.5058823529411764;exitPerimeter=1;entryX=0.0;entryY=0.5058823529411764;entryPerimeter=1;" edge="1" parent="1" source="n32" target="n36">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="478" y="760" as="sourcePoint" />
+            <mxPoint x="525" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e45" style="edgeStyle=none;html=0;rounded=0;strokeColor=#107E80;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=1;exitX=1.0;exitY=0.5058823529411764;exitPerimeter=1;entryX=0.0;entryY=0.5058823529411764;entryPerimeter=1;" edge="1" parent="1" source="n36" target="n40">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="760" as="sourcePoint" />
+            <mxPoint x="942" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e46" style="edgeStyle=none;html=0;rounded=0;strokeColor=#107E80;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=1;exitX=0.6536585365853659;exitY=0.0;exitPerimeter=1;entryX=0.48363636363636364;entryY=1.0;entryPerimeter=1;" edge="1" parent="1" source="n40" target="n22">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1210" y="674" as="sourcePoint" />
+            <mxPoint x="1210" y="538" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1210" y="579" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n47" value="" style="rounded=1;arcSize=14;whiteSpace=wrap;html=0;fillColor=#F4F7FB;strokeColor=#E1E8F0;strokeWidth=1.2;" vertex="1" parent="1">
+          <mxGeometry x="64" y="904" width="1312" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="n48" value="NAVER  ·  수집·저장 구현 / 현재 기본 화면에는 미연결" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=19;fontColor=#172D46;fontStyle=1;" vertex="1" parent="n47">
+          <mxGeometry x="24.0" y="13.0" width="1260" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="n49" value="현재 모니터의 검색 시계열은 gtrends 채널만 읽는다. NAVER 수집기가 있다는 사실과 화면 연결 상태를 구분한다." style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=16;fontColor=#61748A;fontStyle=0;" vertex="1" parent="n47">
+          <mxGeometry x="24.0" y="47.0" width="1260" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="n50" value="관측 범위: 커머스 상품 카테고리는 소비자의 나이·성별을 증명하지 않는다.&#10;단일 브랜드 집중을 표시할 수 있지만, 광고 원인이나 실제 구매 증가를 판별하는 기능은 아니다." style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#61748A;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="64" y="1020" width="1312" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="e51" style="edgeStyle=none;html=0;rounded=0;strokeColor=#DCE5EF;strokeWidth=1;endArrow=none;endFill=1;dashed=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="64" y="1116" as="sourcePoint" />
+            <mxPoint x="1376" y="1116" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n52" value="2026.11.03  ·  현재 코드 기준  ·  관측 지표와 선정 규칙을 설명하는 MVP" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#61748A;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="64" y="1134" width="1150" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="n53" value="02 / 03" style="text;html=0;whiteSpace=wrap;overflow=hidden;fillColor=none;strokeColor=none;align=right;verticalAlign=middle;spacing=0;fontFamily=Malgun Gothic;fontSize=13;fontColor=#61748A;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="1134" width="96" height="23" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

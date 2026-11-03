@@ -104,6 +104,27 @@ limitations 를 함께 싣는다. 모델이 이것을 넘어선 주장을 하면
 
 ## 2-2. 채점 방식
 
+### 검증 파트가 돌릴 수 있는 것, 돌릴 수 없는 것
+
+정답이 저장소에 없으므로 **채점은 수집 파트가 한다.** 검증 파트 쪽에서는
+점수가 나오지 않고, 대신 무엇을 하라는 안내가 나온다.
+
+    돌아간다    python scripts/score_verdicts.py --baselines
+                넘어야 할 선을 본다. 봉인 해시의 두 숫자로 계산한다
+
+    돌아간다    python scripts/score_verdicts.py --verdicts <경로> --pack verdicts.json
+                판정을 한 덩어리로 묶는다. 이 파일을 넘기면 된다
+
+    안 된다     python scripts/score_verdicts.py --verdicts <경로>
+                정답이 없어 점수가 안 나온다. 안내만 나온다
+
+넘기고 받는 흐름은 이렇다.
+
+    검증 파트   판정을 만든다 -> --pack 으로 묶는다 -> verdicts.json 을 넘긴다
+    수집 파트   채점한다 -> 성적표를 돌려준다 (benchmark/scorecard.md)
+
+수집 파트 쪽에서 쓰는 명령이다.
+
     python scripts/score_verdicts.py --baselines
     python scripts/score_verdicts.py --verdicts <판정 경로> --out benchmark/scorecard.md
 

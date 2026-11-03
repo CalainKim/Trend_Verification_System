@@ -32,6 +32,23 @@ from trend_pipeline.persistence import FADE, PERSIST  # noqa: E402
 
 DEFAULT_BENCH = ROOT / "benchmark"
 
+#: 정답이 없는 쪽에서 채점을 시도할 때 내보내는 안내. 전에는 "정답 파일이
+#: 없다, build_persistence_cases.py 로 먼저 만든다" 고만 했다. 그 길은 DB 가
+#: 있어야 하고 검증 파트는 DB 를 받지 않으므로, 막힌 길로 안내하는 셈이었다.
+HANDOVER = """## 채점은 수집 파트가 한다
+
+판정 {n}건을 {path} 에서 읽었다. 형식은 문제없다.
+
+정답(labels.sealed.json)이 이 저장소에 없어서 여기서는 점수를 낼 수 없다.
+일부러 뺀 것이다. 정답을 보면서 판정기를 고치면 성적이 뜻을 잃는다.
+
+판정 파일을 수집 파트에 넘기면 채점해서 성적표를 돌려준다. 여러 파일을
+한 덩어리로 만들어 보내면 받는 쪽에서 손댈 것이 없다.
+
+    python scripts/score_verdicts.py --verdicts {path} --pack verdicts.json
+
+아래 기준 전략은 정답 없이도 계산된다. 넘어야 할 선을 미리 보는 용도다."""
+
 
 def load_labels(bench: Path = DEFAULT_BENCH) -> Dict[str, str]:
     """정답을 읽고 봉인 해시를 확인한다.
@@ -54,13 +71,54 @@ def load_labels(bench: Path = DEFAULT_BENCH) -> Dict[str, str]:
     return json.loads(raw)["labels"]
 
 
+def load_digest(bench: Path = DEFAULT_BENCH):
+    """봉인 해시 파일에서 건수와 지속 비율만 읽는다.
+
+    정답 파일은 검증 파트에 주지 않는다. 그래도 넘어야 할 선은 알아야
+    하므로, 해시 파일에 함께 적어 둔 두 숫자로 기준 전략을 낸다. 이 둘로는
+    어느 케이스가 지속인지 알 수 없어 블라인드가 깨지지 않는다.
+    """
+    f = bench / "labels.digest.txt"
+    if not f.exists():
+        return None
+    out = {}
+    for line in f.read_text(encoding="utf-8").splitlines():
+        k, _, v = line.partition(" ")
+        v = v.strip()
+        if k == "n":
+            out["n"] = int(v)
+        elif k == "base":
+            out["persist"] = float(v)
+    return out if {"n", "persist"} <= out.keys() else None
+
+
+def baselines_from_digest(d: dict) -> str:
+    """정답 없이 기준 전략을 낸다. 무작위는 기댓값이라 그렇게 적는다."""
+    persist, n = d["persist"], d["n"]
+    base = max(persist, 1 - persist)
+    rows = [("전부 지속", persist), ("전부 소멸", 1 - persist)]
+    out = ["## 기준 전략", "",
+           f"정답 파일 없이 봉인 해시의 두 숫자로 계산했다 (케이스 {n}건, "
+           f"지속 {persist:.1%}).", "",
+           "| 전략 | 커버리지 | 정확도 | 기저율 대비 |", "|---|---|---|---|"]
+    for name, acc in rows:
+        out.append(f"| {name} | 100% | {acc:.1%} | {(acc - base) * 100:+.1f}%p |")
+    out.append(f"| 무작위 | 100% | 50.0% (기댓값) | {(0.5 - base) * 100:+.1f}%p |")
+    out.append("| 전부 보류 | 0% | - | - |")
+    out += ["",
+            f"> 넘어야 할 선은 {base:.1%} 다. "
+            f"{'전부 소멸' if persist < 0.5 else '전부 지속'}로 찍었을 때 나온다."]
+    return "\n".join(out)
+
+
 def _verdict_from(obj) -> str:
     """여러 산출물 형식에서 판정 값을 꺼낸다."""
     if isinstance(obj, str):
         return obj
     if not isinstance(obj, dict):
         raise ValueError(f"판정을 읽을 수 없는 형식이다: {type(obj).__name__}")
-    for path in (("verdict",), ("review", "verdict"), ("review", "status"),
+    for path in (("verdict",), ("result", "verdict"),
+                 ("review", "verdict"), ("review", "status"),
                  ("selection", "status"), ("status",)):
         cur = obj
         for key in path:
@@ -156,9 +214,40 @@ def main(argv=None) -> int:
     p.add_argument("--label", default="판정 결과", help="성적표 제목")
     p.add_argument("--baselines", action="store_true", help="기준 전략만 출력")
     p.add_argument("--out", default=None, help="성적표를 쓸 경로")
+    p.add_argument("--pack", default=None,
+                   help="판정을 {case_id: verdict} 한 덩어리로 묶어 쓸 경로")
     args = p.parse_args(argv)
 
-    labels = load_labels(Path(args.benchmark))
+    if args.pack:
+        if not args.verdicts:
+            raise SystemExit("--pack 은 --verdicts 와 함께 쓴다.")
+        got = load_verdicts(Path(args.verdicts))
+        Path(args.pack).write_text(
+            json.dumps(got, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8")
+        print(f"판정 {len(got)}건을 {args.pack} 에 묶었다. 이 파일을 넘기면 된다.")
+        return 0
+
+    bench = Path(args.benchmark)
+    sealed = bench / "labels.sealed.json"
+
+    # 정답은 수집 파트만 가진다. 검증 파트가 돌릴 때는 여기로 온다.
+    if not sealed.exists():
+        d = load_digest(bench)
+        if d is None:
+            raise SystemExit(f"정답도 봉인 해시도 없다: {bench}")
+        parts = [baselines_from_digest(d)]
+        if args.verdicts:
+            got = load_verdicts(Path(args.verdicts))
+            parts.insert(0, HANDOVER.format(n=len(got), path=args.verdicts))
+        text = "\n\n".join(parts)
+        print(text)
+        if args.out:
+            Path(args.out).write_text(text + "\n", encoding="utf-8")
+            print(f"\n{args.out} 에 저장했다.")
+        return 0
+
+    labels = load_labels(bench)
     parts = [baselines(labels)]
 
     if args.verdicts:

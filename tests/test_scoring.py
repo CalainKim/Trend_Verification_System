@@ -191,3 +191,54 @@ class TestAllAbstainedStillExplainsWhy:
     def test_says_how_many_got_no_verdict(self):
         out = self._render({"review": PERSIST})
         assert "판정이 오지 않은 케이스 5건" in out
+
+
+class TestVerificationPartCanRunWithoutLabels:
+    """정답 없이도 넘어야 할 선은 보여야 한다.
+
+    정답은 블라인드 때문에 저장소에 없다. 그런데 기준 전략까지 막히면 검증
+    파트는 자기 성적이 찍기보다 나은지조차 알 수 없다. 봉인 해시에 건수와
+    지속 비율이 함께 적혀 있어 그 둘로 계산한다. 어느 케이스가 지속인지는
+    알 수 없으므로 블라인드는 유지된다.
+    """
+
+    def _mod(self):
+        import importlib.util
+        root = Path(__file__).resolve().parents[1]
+        spec = importlib.util.spec_from_file_location(
+            "score_verdicts", root / "scripts" / "score_verdicts.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_digest_alone_gives_the_bar(self):
+        out = self._mod().baselines_from_digest({"n": 139, "persist": 0.4029})
+        assert "59.7%" in out
+        assert "전부 소멸로 찍었을 때" in out
+
+    def test_names_persist_when_persist_is_the_majority(self):
+        out = self._mod().baselines_from_digest({"n": 61, "persist": 0.541})
+        assert "54.1%" in out
+        assert "전부 지속로 찍었을 때" in out
+
+    def test_random_is_marked_as_an_expectation(self):
+        """정답이 없으면 고정 시드 무작위의 실제 점수를 낼 수 없다."""
+        out = self._mod().baselines_from_digest({"n": 139, "persist": 0.4029})
+        assert "기댓값" in out
+
+
+class TestResultVerdictShapeIsRead:
+    """review.py 가 쓰는 result.verdict 를 채점기가 읽어야 한다.
+
+    화이트리스트에 이 경로가 빠져 있었다. 그래서 판정 출력 원본을 그대로
+    넘기면 "판정을 찾지 못했다" 가 났다.
+    """
+
+    def test_reads_nested_result(self):
+        import importlib.util
+        root = Path(__file__).resolve().parents[1]
+        spec = importlib.util.spec_from_file_location(
+            "score_verdicts", root / "scripts" / "score_verdicts.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        assert mod._verdict_from({"result": {"verdict": "WATCH"}}) == "WATCH"

@@ -75,6 +75,11 @@ class RiseEvent:
     # 기준 구간과 관측 구간의 일별 순위. 구간 평균만 주면 꾸준히 오른 것과
     # 하루만 튄 것이 같은 숫자가 된다. 둘은 이후 유지 여부가 다를 수 있는데,
     # 모델이 구분할 방법이 없으면 판단을 보류할 수밖에 없다.
+    #
+    # None 은 그날 TOP100 안에 없었다는 뜻이다. 수집이 없던 날이 아니다. 창은
+    # observed_days 로 고른 날만 쓰므로 수집이 없던 날은 애초에 창에 못 들어
+    # 온다. 이걸 "결측" 이라고 적어 보내는 바람에 모델이 자료 없음으로 읽고
+    # 판단을 보류했다. 기권 37건이 든 이유 가운데 광고 다음으로 많았다.
     rank_daily: Tuple[Optional[float], ...] = ()
     # 이 상품의 속성이 작년 같은 시기에도 올랐는지. 계절성 반증용이다. 모델이
     # 판정을 보류한 이유로 가장 많이 든 항목이 이것이었다. 커머스 수집은 37일뿐
@@ -111,12 +116,18 @@ class RiseEvent:
         if self.rank_daily:
             days = list(w.base) + list(w.detect)
             pairs = ", ".join(
-                f"{d[5:]} {'결측' if v is None else f'{v:.0f}위'}"
+                f"{d[5:]} {'TOP100 밖' if v is None else f'{v:.0f}위'}"
                 for d, v in zip(days, self.rank_daily))
-            out.append({
-                "id": "rank_daily", "channel": "commerce_rank",
-                "observation": f"일별 순위는 {pairs} 다. 구간 평균만으로는 "
-                               f"꾸준히 오른 것과 하루만 튄 것을 구분할 수 없다"})
+            note = (f"일별 순위는 {pairs} 다. 여기 적힌 날은 모두 수집이 있었던 "
+                    f"날이므로, 'TOP100 밖' 은 자료가 없다는 뜻이 아니라 그날 "
+                    f"상위 100 위 안에 없었다는 뜻이다. 구간 평균만으로는 꾸준히 "
+                    f"오른 것과 하루만 튄 것을 구분할 수 없다")
+            gaps = _calendar_gaps(days)
+            if gaps:
+                note += (f". 다만 {', '.join(gaps)} 은 수집 자체가 없어 "
+                         f"그날의 순위는 알 수 없다")
+            out.append({"id": "rank_daily", "channel": "commerce_rank",
+                        "observation": note})
         s = self.seasonality
         if s and s.get("yoy") is not None:
             out.append({
@@ -148,6 +159,24 @@ class RiseEvent:
             "sold_out": self.sold_out,
             "brand_simultaneous_risers": self.brand_risers,
         }
+
+
+def _calendar_gaps(days: Sequence[str]) -> List[str]:
+    """창에 적힌 날들 사이에 수집이 통째로 없던 날을 찾는다.
+
+    창은 수집이 있었던 날만 골라 이어 붙인 것이라, 10-16 다음이 10-18 일 수
+    있다. 그 사이 10-17 은 그 상품이 밖에 있던 것이 아니라 아무도 수집하지
+    않은 날이다. 둘을 한 단어로 적으면 모델이 구분하지 못한다.
+    """
+    from datetime import date, timedelta
+
+    out: List[str] = []
+    for a, b in zip(days, days[1:]):
+        d, end = date.fromisoformat(a) + timedelta(days=1), date.fromisoformat(b)
+        while d < end:
+            out.append(d.isoformat()[5:])
+            d += timedelta(days=1)
+    return out
 
 
 def load_series(

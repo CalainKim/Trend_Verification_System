@@ -385,3 +385,98 @@ class TestWindowYoy:
         item = {"2025-10-05": 0.0, "2026-10-04": 20.0}
         days = [f"2026-10-{d:02d}" for d in range(6, 13)]
         assert window_yoy(item, days) is None
+
+
+class TestMissingDayMeaning:
+    """창에 빈 날이 있으면 그게 무슨 뜻인지 밝혀야 한다.
+
+    창은 observed_days 로 고른 날만 쓴다. 그러니 창에 적힌 날은 전부 수집이
+    있었던 날이고, 그 상품이 없다는 것은 자료가 없다는 뜻이 아니라 그날
+    TOP100 밖으로 떨어졌다는 뜻이다. 기준 시점 직전에 밖에 있었다면 버티지
+    못했다는 강한 신호다.
+
+    그런데 이걸 "결측" 이라고 적어 보내고 있었다. 모델은 자료가 없는 것으로
+    읽고 판단을 보류했다. 4차 실행에서 기권 37건이 든 이유를 세어 보니 광고
+    여부 36회 다음으로 많은 것이 이 빈 날이었고 28회였다. 신호를 가지고
+    있으면서 잡음이라고 적어 보낸 셈이다.
+    """
+
+    def _event(self, ranks):
+        """상품 하나가 아홉 날 중 일부에만 있는 창을 만든다."""
+        d = days_from("2026-10-01", 9)
+        pts = [(day, r, 10) for day, r in zip(d, ranks) if r is not None]
+        # 혼자면 그날 수집이 있었는지 알 수 없다. 늘 있는 상품을 하나 둔다.
+        series = mkseries({"A": pts, "B": [(day, 50, 10) for day in d]})
+        w = ps.Window(base=d[:3], detect=d[3:6], hold=d[6:])
+        events = {e.item_key: e for e in ps.rise_events(series, w, min_rise=1.0)}
+        return events.get("A"), w
+
+    def test_absent_day_is_called_out_of_top100(self):
+        e, w = self._event([80, None, 78, 50, 52, 48, None, None, None])
+        assert e is not None
+        line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
+        assert "TOP100 밖" in line["observation"]
+        assert "결측" not in line["observation"]
+
+    def test_says_why_it_is_not_missing_data(self):
+        """단어만 바꾸면 모델이 또 자료 없음으로 읽는다. 이유를 적는다."""
+        e, w = self._event([80, None, 78, 50, 52, 48, None, None, None])
+        line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
+        assert "수집이 있었던" in line["observation"]
+
+    def test_does_not_look_at_the_hold_window(self):
+        """확인 구간은 근거에도 특징에도 들어가면 안 된다. 그게 정답이다."""
+        a, wa = self._event([80, 82, 78, 50, 52, 48, None, None, None])
+        b, wb = self._event([80, 82, 78, 50, 52, 48, 40, 41, 42])
+        assert a.features() == b.features()
+        assert a.evidence(wa) == b.evidence(wb)
+
+    def test_adds_no_summary_number(self):
+        """밖에 있던 날 수를 특징으로 넣지 않는다.
+
+        넣어 보고 정답과 맞춰 보니 전체 날수로는 신호가 없었고(0일 60%,
+        1~3일 50%, 4일 이상 54%, 기저율 54%), t_cut 직전 연속 날수로는
+        있었다(0일 63%, 1~2일 43%, 3일 이상 17%). 그런데 뒤의 것은 채점에
+        쓸 바로 그 61건의 정답을 보고 고른 것이라, 같은 문제지에서 올라간
+        점수는 부풀려진 값이다. 일별 순위를 그대로 주면 모델이 읽을 수
+        있으므로 요약 숫자는 넣지 않는다. 수집이 쌓여 새 문제지가 나오면
+        그때 확인한다.
+        """
+        e, _ = self._event([80, None, 78, 50, None, 48, None, None, None])
+        assert "days_out_of_top100" not in e.features()
+        assert set(e.features()) == {
+            "rank_base", "rank_at_cut", "rank_rise", "review_delta",
+            "heart_delta", "sale_percent_delta", "is_new", "sold_out",
+            "brand_simultaneous_risers"}
+
+
+class TestCalendarGaps:
+    """창에 적힌 날 사이에 수집이 통째로 없던 날은 따로 알려야 한다.
+
+    창은 수집이 있었던 날을 이어 붙인 것이라 10-16 다음이 10-18 일 수 있다.
+    그 사이 10-17 은 상품이 밖에 있던 것이 아니라 아무도 수집하지 않은
+    날이다. TOP100 밖 과 한 단어로 적으면 같은 혼동이 반대로 생긴다.
+    """
+
+    def test_finds_the_skipped_day(self):
+        assert ps._calendar_gaps(["2026-10-16", "2026-10-18"]) == ["10-17"]
+
+    def test_finds_several(self):
+        assert ps._calendar_gaps(["2026-10-16", "2026-10-20"]) == [
+            "10-17", "10-18", "10-19"]
+
+    def test_consecutive_days_have_none(self):
+        assert ps._calendar_gaps(["2026-10-16", "2026-10-17"]) == []
+
+    def test_mentioned_in_the_evidence(self):
+        d = ["2026-10-01", "2026-10-02", "2026-10-03",
+             "2026-10-04", "2026-10-06", "2026-10-07"]      # 10-05 수집 없음
+        hold = ["2026-10-08", "2026-10-09", "2026-10-10"]
+        series = mkseries({"A": [(x, r, 10) for x, r in zip(d + hold, [80, 82, 78, 50, 52, 48, 40, 41, 42])],
+                           "B": [(x, 50, 10) for x in d + hold]})
+        w = ps.Window(base=d[:3], detect=d[3:], hold=hold)
+        e = next(x for x in ps.rise_events(series, w, min_rise=1.0)
+                 if x.item_key == "A")
+        line = next(x for x in e.evidence(w) if x["id"] == "rank_daily")
+        assert "10-05" in line["observation"]
+        assert "수집 자체가 없어" in line["observation"]

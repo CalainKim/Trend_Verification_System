@@ -6,9 +6,14 @@
 읽는 키 여덟 개를 모두 갖고 있어 변환이 필요 없다. 이 스크립트는 둘을 잇기만
 한다.
 
-    ./scripts/review_cases.py --benchmark benchmark --n 30 --dry-run
-    ./scripts/review_cases.py --benchmark benchmark --n 30
-    ./scripts/score_verdicts.py --benchmark benchmark --verdicts runs/<이름>/verdicts.json
+    ./.venv/bin/python scripts/review_cases.py --benchmark benchmark --n 30 --dry-run
+    ./.venv/bin/python scripts/review_cases.py --benchmark benchmark --n 30
+    ./.venv/bin/python scripts/score_verdicts.py --verdicts runs/<이름>/verdicts.json
+
+    venv 의 python 으로 불러야 한다. ./scripts/review_cases.py 로 바로 부르면
+    shebang 이 시스템 python 을 잡고, 거기에는 Anthropic SDK 가 없어서 61건이
+    전부 0초 만에 실패한다. 규칙 판정(--dry-run)은 SDK 를 안 쓰므로 그대로
+    통과해서, 배선을 확인했다고 착각하기 쉽다.
 
 --dry-run 은 API 를 부르지 않고 배선만 확인한다. 실제 실행은 케이스마다 한 번씩
 모델을 부르므로 돈이 든다. 먼저 적은 수로 돌려 보고 늘린다.

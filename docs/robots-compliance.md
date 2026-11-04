@@ -7,7 +7,7 @@
 | 무신사 (musinsa.com) | `Disallow: /` | **불가** — 화이트리스트 방식 |
 | W컨셉 (wconcept.co.kr) | (명시 없음, 화이트리스트 전용) | **불가** |
 | 29CM (29cm.co.kr) | `Allow: /` (마이페이지, 주문, 인증 등만 차단) | 가능 |
-| 지그재그 (zigzag.kr) | `Allow: /` (GPTBot만 차단) | 가능 |
+| 지그재그 (zigzag.kr) | `Allow: /` (GPTBot만 차단) | 당시 가능 → **2026-11-05 재확인 결과 불가.** 아래를 본다 |
 | 에이블리 (ably.co.kr) | robots.txt 응답 없음 | 명시 규칙 없음 — 이용약관 별도 확인 필요 |
 
 ## 무신사 상세
@@ -110,3 +110,62 @@ scripts/install_local_schedule.sh 참고.
 
 robots.txt 는 여전히 허용 범위 안이다(29CM 는 `User-agent: * → Allow: /`).
 차단은 robots 규칙이 아니라 인프라 수준의 접근 제어로 판단된다.
+
+## 재확인 2026-11-05
+
+두 달 만에 다시 받아 봤다. **지그재그가 바뀌었다.** 9월에는 와일드카드가
+열려 있었는데 지금은 무신사와 같은 화이트리스트 구조다.
+
+```
+User-agent: Googlebot, bingbot, Yeti, NaverBot, Applebot,
+            OAI-SearchBot, Claude-SearchBot, PerplexityBot,
+            ChatGPT-User, Claude-User, facebookexternalhit, ...
+Allow: /
+Disallow: /auth, /checkout, /inbox, /*/__preview/
+
+User-agent: AhrefsBot, GPTBot, ClaudeBot, CCBot, Baiduspider,
+            Google-Extended, Applebot-Extended, GoogleOther, ...
+Disallow: /
+
+User-agent: *
+Disallow: /
+```
+
+본 프로젝트 수집기는 마지막 그룹에 걸린다. **지그재그 자체 크롤링은
+허용되지 않는다.** 11월 역할 분담에 적어 둔 "지그재그 수집" 은 그대로
+진행할 수 없고 대체 소스를 쓴다.
+
+robots.txt 는 바뀌는 파일이다. 한 번 확인하고 끝내면 안 되고 수집기를
+새로 붙일 때마다 다시 받아야 한다.
+
+### 대체 후보 8곳 (2026-11-05 확인)
+
+| 사이트 | `User-agent: *` 규칙 | 일반 수집기 |
+|---|---|---|
+| 지그재그 (zigzag.kr) | `Disallow: /` | 불가 |
+| SSF샵 (ssfshop.com) | `Disallow: /` | 불가 |
+| EQL (eqlstore.com) | `Disallow: /`, 루트만 허용 | 불가 |
+| LF몰 (lfmall.co.kr) | `Disallow: /` | 불가 |
+| 에이블리 (a-bly.com) | `Allow: /$`, `Allow: /app*`, `Disallow: /` | `/app*` 만. 실제로는 403 |
+| 브랜디 (brandi.co.kr) | `Disallow: /products/*` | 목록은 허용 |
+| 하이버 (hiver.co.kr) | `Disallow: /products/*`, `/store/*`, `/search`, `/api/` | 목록은 허용 |
+| 코오롱몰 (kolonmall.com) | **그룹 자체가 없다** | 제한 규칙 없음 |
+
+코오롱몰에는 `User-agent: *` 그룹이 아예 없다. RFC 9309 는 내 수집기에
+맞는 그룹이 하나도 없으면 제한 규칙이 없는 것으로 읽는다. 다만 이것은
+명시적 허락이 아니라 규칙의 부재다. 29CM 의 `Allow: /` 와는 성격이
+다르므로 보고서에 쓸 때 구분해서 적는다.
+
+### 자료가 실제로 받아지는지 (2026-11-05 확인)
+
+robots 가 열려 있어도 자료가 서버 응답에 없으면 못 쓴다. 목록 페이지를
+한 번씩 받아 봤다.
+
+    브랜디      모든 경로가 같은 181KB 껍데기다. 내부 API 없이는 불가
+    에이블리     /app/best 가 403 이다
+    하이버      /ranking 이 서버 렌더링이고 __NEXT_DATA__ 에 50건이 있다
+                흠: seller 가 판매 법인명이고 브랜드가 아니다
+                흠: root_category 가 매장 구분이고 의류 분류가 아니다
+    코오롱몰     /Best 가 서버 렌더링이고 100건이 있다
+                순위, 브랜드, 상품명, 정가, 판매가, 리뷰 수, 상품코드
+                카테고리별 목록이 productListNo 와 categoryCode 로 나뉘어 있다

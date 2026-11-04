@@ -3,9 +3,17 @@
 목표: 증권 터미널처럼 뜨는 속성을 보여주고, 누르면 근거와 관련 상품이 나오고,
 판정이 버텼는지까지 채점해 보여주는 B2B 웹 화면. 갱신은 하루 1~2회면 충분하다.
 
-    DESIGN_BRIEF.md   Claude Design 에 붙여넣는 브리프 (화면 3장, 데이터 규칙 6개)
-    mock-data.json    브리프의 숫자 원본. 2026-11-02 DB 기준 실제 값
+    DESIGN_BRIEF.md       트렌드 모니터 브리프 (화면 3장, 데이터 규칙 6개)
+    mock-data.json        그 숫자 원본. 2026-11-02 DB 기준 실제 값
+    RETROSPECT_BRIEF.md   회고 화면 브리프 (휴대폰 1순위, 데이터 규칙 6개)
+    retrospect-mock.json  그 숫자 원본. 시점 3개로 줄인 사본
+
     ../../scripts/build_design_mock.py   mock-data.json 을 다시 만든다
+    ../../scripts/build_retrospect.py    retrospect-mock.json 을 다시 만든다
+
+회고 화면은 과거 한 시점으로 돌아가 그때 오른 검색어를 보여 주고, 결과를
+가린 채 사용자가 먼저 찍게 한 뒤 펼친다. 트렌드 모니터와 자료가 다르고
+목적도 다르므로 브리프를 따로 둔다.
 
 ## 지금 상태 (2026-11-02)
 

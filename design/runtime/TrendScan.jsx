@@ -1,8 +1,9 @@
 // Scanning animation for 지금 유행 search: category columns with candidate chips swept by a scan line, pulled into a central collector.
 if (!document.getElementById('trend-scan-css')) {
   const st = document.createElement('style'); st.id = 'trend-scan-css';
-  st.textContent = `.tsc{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr)) ;gap:10px;padding:18px 20px 20px;overflow:hidden}
-.tsc__col{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0}
+  st.textContent = `.tsc{position:relative;flex:1;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:18px 20px 20px;overflow:hidden}
+.tsc[data-part='core']{display:flex;flex-direction:column;justify-content:flex-end}
+.tsc__col{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0;overflow:hidden}
 .tsc__cat{font-size:12px;font-weight:600;color:var(--color-body);display:flex;justify-content:space-between}
 .tsc__chip{position:relative;overflow:hidden;padding:6px 9px;border-radius:7px;font-size:12px;color:var(--color-body);background:var(--color-canvas);box-shadow:inset 0 0 0 1px var(--color-hairline-soft);white-space:nowrap;text-overflow:ellipsis;animation:tsc-lit 2.4s ease-in-out infinite;animation-delay:calc(var(--c) * 0.35s + var(--i) * 0.12s)}
 .tsc__chip::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(38,37,30,0.10),transparent);transform:translateX(-100%);animation:tsc-sheen 2.4s ease-in-out infinite;animation-delay:inherit}
@@ -33,14 +34,14 @@ if (!document.getElementById('trend-scan-css')) {
 @media (prefers-reduced-motion:reduce){.tsc__chip,.tsc__chip::after,.tsc__scan,.tsc__ring i,.tsc__ring b{animation:none}}`;
   document.head.appendChild(st);
 }
-function TrendScan({ cats = [], msg = '', step = 0, total = 5 }) {
+function TrendScan({ cats = [], msg = '', step = 0, total = 5, part = 'all' }) {
   const h = React.createElement;
-  return h('div', { className: 'tsc', style: { '--n': Math.max(1, cats.length) } },
-    h('span', { className: 'tsc__scan', 'aria-hidden': true }),
-    cats.map((c, ci) => h('div', { key: c.name, className: 'tsc__col' },
+  return h('div', { className: 'tsc', 'data-part': part, style: { '--n': Math.max(1, cats.length) } },
+    part !== 'core' ? h('span', { className: 'tsc__scan', 'aria-hidden': true }) : null,
+    part === 'core' ? null : cats.map((c, ci) => h('div', { key: c.name, className: 'tsc__col' },
       h('span', { className: 'tsc__cat' }, h('span', null, c.name), h('span', { style: { fontFamily: 'var(--font-mono)', fontWeight: 400, color: 'var(--color-muted)' } }, c.types.length)),
-      c.types.slice(0, 5).map((t, ti) => h('span', { key: t, className: 'tsc__chip', style: { '--c': ci, '--i': ti } }, t)))),
-    h('div', { className: 'tsc__core', role: 'status' },
+      c.types.map((t, ti) => h('span', { key: t, className: 'tsc__chip', style: { '--c': ci, '--i': ti } }, t)))),
+    part === 'cols' ? null : h('div', { className: 'tsc__core', role: 'status', style: part === 'core' ? { marginTop: 'auto' } : undefined },
       h('span', { className: 'tsc__ring', 'aria-hidden': true }, h('i'), h('b')),
       h('span', { className: 'tsc__msg' }, h('span', { key: msg }, msg)),
       h('span', { className: 'tsc__dots', 'aria-hidden': true }, Array.from({ length: total }, (_, i) => h('i', { key: i, 'data-on': i <= step ? '' : undefined })))));

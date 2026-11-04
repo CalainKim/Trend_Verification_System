@@ -424,6 +424,113 @@ def strip_middle_dot(html: str) -> tuple[str, int]:
     return html, n
 
 
+# ---- v9 에서 새로 필요해진 것 ------------------------------------------------
+#
+# v9 화면은 React 컴포넌트 일곱을 x-import 로 불러온다. v8 까지와 경로가 다르다.
+#
+#   v8 까지   component-from-global-scope="...Button"
+#             _ds_bundle.js 안에 이미 있는 것을 꺼낸다. 받아올 파일이 없다
+#   v9 부터   from="./PillNavV.jsx"
+#             런타임이 그 파일을 읽어서 Babel 로 바꾸고 실행한다
+#
+# 파일 하나로 떼어내면 읽을 자리가 없다. support.js 는 window.__resourceBlobs
+# 에 같은 이름의 Blob 이 있으면 fetch 하지 않고 그것을 쓴다. 거기에 심어 둔다.
+VENDOR = ("react.production.min.js", "react-dom.production.min.js",
+          "babel.min.js")
+
+
+def _script(body: str) -> str:
+    """글자로 들어 있는 </script> 에서 태그가 닫히는 것을 막는다."""
+    return "<script>\n" + body.replace("</script", "<\\/script") + "\n</script>\n"
+
+
+def inline_vendor(html: str, assets: Path) -> tuple[str, list[str]]:
+    """React, ReactDOM, Babel 을 head 맨 앞에 넣는다.
+
+    support.js 는 맨 끝에서 loadReactUmd().then(init) 를 부른다. React 를
+    unpkg 에서 받아온 뒤에야 화면을 그린다는 뜻이다. 번들에 React 가 없으면
+    인터넷이 없는 자리에서 빈 화면이 된다. 지금까지 보낸 파일이 그랬다.
+
+    셋 다 window 에 이미 있으면 받지 않고 넘어가도록 되어 있다
+    (loadReactUmd 의 if (w.React && w.ReactDOM), ensureBabel 의
+    if (window.Babel)). 그래서 support.js 보다 먼저 실행되게 head 맨 앞에
+    두면 그것으로 끝난다. 주소를 바꿔치기할 필요가 없다.
+
+    Babel 은 3MB 다. 미리 변환해 두면 그만큼 줄지만 node 와 변환 단계가
+    build 에 끼어들고, 화면이 Claude Design 안에서 도는 경로와 달라진다.
+    같은 경로로 두는 쪽을 택했다.
+    """
+    put, names = [], []
+    for name in VENDOR:
+        f = assets / "vendor" / name
+        if not f.exists():
+            print(f"  경고. vendor/{name} 가 없다. 인터넷이 있어야 화면이 뜬다")
+            continue
+        put.append(_script(f.read_text(encoding="utf-8")))
+        names.append(name)
+    if not put:
+        return html, names
+    head = ("\n<!-- React 와 Babel 을 넣는다. support.js 보다 먼저 실행돼야 "
+            "한다 -->\n" + "".join(put))
+    return html.replace("<head>", "<head>" + head, 1), names
+
+
+def inline_jsx(html: str, assets: Path) -> tuple[str, int, list[str]]:
+    """x-import 가 읽는 .jsx 를 Blob 으로 심는다.
+
+    키는 화면이 적어 둔 from 값 그대로여야 한다. support.js 의 bundledBlob
+    이 url.split("#")[0] 으로 찾기 때문에 ./PillNavV.jsx 와 PillNavV.jsx 는
+    다른 키다.
+    """
+    urls = sorted(set(re.findall(r'<x-import[^>]*\sfrom="([^"]+\.jsx)"', html)))
+    if not urls:
+        return html, 0, []
+    pairs, keys = [], []
+    for u in urls:
+        f = (assets / u.lstrip("./")).resolve()
+        if not f.exists():
+            print(f"  경고. {u} 가 없다. 그 자리에 빈 칸이 뜬다")
+            continue
+        src = json.dumps(f.read_text(encoding="utf-8"))
+        pairs.append(f"  {json.dumps(u)}: new Blob([{src}], "
+                     "{ type: 'text/javascript' }),")
+        keys.append(u)
+    if not pairs:
+        return html, 0, []
+    body = ("// x-import 가 읽을 파일을 미리 심어 둔다. support.js 의 "
+            "bundledBlob 이 꺼내 쓴다\n"
+            "window.__resourceBlobs = Object.assign(window.__resourceBlobs "
+            "|| {}, {\n" + "\n".join(pairs) + "\n});")
+    return (html.replace("<head>", "<head>\n" + _script(body), 1),
+            len(pairs), keys)
+
+
+def inline_local_images(html: str, assets: Path) -> tuple[str, int]:
+    """저장소에 같이 있는 그림을 data URI 로 바꾼다.
+
+    v9 에서 무신사 로고가 assets/ 아래 파일로 들어왔다. 주소로 남기면 파일을
+    옮긴 자리에서 깨진 그림 자리만 남는다.
+    """
+    n = 0
+
+    def one(m):
+        nonlocal n
+        src = m.group(1)
+        f = (assets / src).resolve()
+        if not f.exists():
+            return m.group(0)
+        mime = MIME.get(f.suffix.lower())
+        if not mime:
+            return m.group(0)
+        b64 = base64.b64encode(f.read_bytes()).decode()
+        n += 1
+        return f'src="data:{mime};base64,{b64}"'
+
+    html = re.sub(r'src="(?!data:|https?:|img:|\./support|\./image-slot)'
+                  r'([^":{}]+\.(?:png|jpg|jpeg|svg))"', one, html)
+    return html, n
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path, help="패치가 끝난 .html")
@@ -455,10 +562,18 @@ def main(argv=None) -> int:
     html, n_err = soften_llm(html)
     html, n_img = inline_remote_images(html)
     html, n_dot = strip_middle_dot(html)
+    # 아래 셋은 가운뎃점 치환 뒤에 와야 한다. Babel 은 3MB 짜리 압축 코드라
+    # 거기에 가운뎃점이 한 글자라도 있으면 치환이 코드를 망가뜨린다.
+    html, n_local = inline_local_images(html, args.assets)
+    html, n_jsx, jsx_keys = inline_jsx(html, args.assets)
+    html, vend = inline_vendor(html, args.assets)
 
     # {{ }} 는 화면이 그릴 때 채우는 자리표시자지 바깥 파일이 아니다.
-    left = [u for u in re.findall(r'(?:src|href)="(?!data:|http|#)([^"]+)"', html)
-            if "{{" not in u]
+    # from="./X.jsx" 는 지우면 안 된다. support.js 가 그 글자로
+    # window.__resourceBlobs 를 찾기 때문이다. Blob 을 심은 것은 빼고 센다.
+    left = [u for u in re.findall(
+        r'(?:src|href|from)="(?!data:|http|#)([^"]+)"', html)
+        if "{{" not in u and u not in jsx_keys]
     remote_img = re.findall(r'src="(https://img\.29cm\.co\.kr/[^"]+)"', html)
     if remote_img:
         print(f"  주의. 사진 {len(remote_img)}장은 주소로 남아 인터넷이 있어야 뜬다")
@@ -490,6 +605,9 @@ def main(argv=None) -> int:
     print("판정 패널을 넣었다 (문제지를 돌리고 verdicts.json 으로 내려받기)")
     print(f"상품 사진 {n_img}장을 파일 안에 넣었다")
     print(f"가운뎃점 {n_dot}곳을 쉼표로 바꿨다")
+    print(f"저장소에 있던 그림 {n_local}장을 파일 안에 넣었다")
+    print(f"x-import 가 읽는 .jsx {n_jsx}개를 Blob 으로 심었다")
+    print("React 와 Babel 을 넣었다: " + (", ".join(vend) if vend else "없다"))
     print(f"{before / 1024:.0f}KB -> {size / 1024 / 1024:.1f}MB")
     print(f"\n{args.out}")
     return 0

@@ -34,6 +34,7 @@ Claude Design 에서 받은 .dc.html 을 받아 고친 사본을 낸다. 원본�
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -404,6 +405,83 @@ def fix_model(src: str) -> tuple[str, int]:
     return src, n
 
 
+def fix_base_rate(src: str) -> tuple[str, str]:
+    """화면과 프롬프트에 글자로 박힌 기준 비율을 지금 값으로 바꾼다.
+
+    시안에는 "유지한 비율 54.1% (최근 확인분 25건 중 10건, 40.0%)" 가 네 군데
+    적혀 있다. 문제지가 61건이던 때의 값이다. 지금 benchmark 는 139건이고
+    지속 비율은 40.3% 다. 14%p 가 틀리면 모델이 넘어야 할 바가 통째로 달라진다.
+
+    넷 가운데 하나는 "최근 확인분이 기준 비율보다 낮습니다" 라고 단정한다.
+    숫자만 갈아 끼우면 41.2% 가 40.3% 보다 낮다는 거짓말이 된다. 비교까지
+    다시 한다.
+
+    바꿀 글이 하나라도 안 보이면 멈춘다. 조용히 지나가면 옛 숫자가 그대로
+    교수님과 무신사 앞에 뜬다.
+    """
+    js = DATA.read_text(encoding="utf-8")
+
+    def pick(name, open_c, close_c):
+        m = re.search(r"const %s = (\%s.*?\%s);" % (name, open_c, close_c),
+                      js, re.S)
+        if not m:
+            raise SystemExit(f"{DATA} 에서 {name} 을 못 찾았다")
+        return json.loads(m.group(1))
+
+    score, ledger = pick("SCORE", "{", "}"), pick("LEDGER", "[", "]")
+    if not score:
+        raise SystemExit("SCORE 가 비었다. export_frontend.py 를 --verdicts "
+                         "와 함께 돌려야 기준 비율을 고칠 수 있다")
+
+    # SCORE.base_rate 는 많은 쪽을 전부 찍었을 때의 비율이다. 화면이 말하는
+    # "유지 비율" 은 지속 쪽이므로, 많은 쪽이 소멸이면 뒤집어야 한다.
+    keep = 1 - score["base_rate"] if score["base_side"] == "fade" \
+        else score["base_rate"]
+    n_led = len(ledger)
+    kept = sum(1 for r in ledger if r[4])
+    recent = kept / n_led if n_led else 0.0
+    K, R = f"{keep * 100:.1f}", f"{recent * 100:.1f}"
+    cmp_word = ("높습니다" if recent > keep + 0.0005
+                else "낮습니다" if recent < keep - 0.0005 else "같습니다")
+
+    swaps = [
+        ("기준 비율(전부 유지한다고 했을 때 54.1%, 최근 40.0%)과 비교해 판단한다.",
+         f"기준 비율(전부 유지한다고 했을 때 {K}%, 최근 {R}%)과 비교해 판단한다."),
+        ("기준비율: '29CM에서 10계단 이상 오른 상품이 7일 뒤 상승분 절반 이상 "
+         "유지한 비율 54.1% (최근 확인분 25건 중 10건, 40.0%)'",
+         f"기준비율: '29CM에서 10계단 이상 오른 상품이 7일 뒤 상승분 절반 이상 "
+         f"유지한 비율 {K}% (최근 확인분 {n_led}건 중 {kept}건, {R}%)'"),
+        ("기준비율: '29CM에서 10계단 이상 오른 상품이 7일 뒤 상승분 절반 이상 "
+         "유지한 비율 54.1%'",
+         f"기준비율: '29CM에서 10계단 이상 오른 상품이 7일 뒤 상승분 절반 이상 "
+         f"유지한 비율 {K}%'"),
+        ("'최근 확인분 유지 비율은 40.0%로 기준 비율 54.1%보다 낮습니다.'",
+         f"'최근 확인분 유지 비율은 {R}%로 기준 비율 {K}%보다 {cmp_word}.'"),
+    ]
+    # 장부 머리말의 건수도 글자로 박혀 있다. 바로 아래 표는 LEDGER 를 그대로
+    # 그리므로, 머리말만 옛 수로 남으면 한 화면 안에서 25건과 34건이 같이
+    # 보인다. 보는 사람은 어느 쪽을 믿어야 할지 알 수 없다.
+    swaps.append((
+        ">25건 중 10건 남음 (40.0%)<",
+        f">{n_led}건 중 {kept}건 남음 ({R}%)<"))
+    # 이쪽은 LEDGER 가 눈앞에 있으니 계산식으로 바꾼다. 다음에 건수가 늘어도
+    # 저절로 맞는다.
+    swaps.append((
+        "ledgerStepCounts: ['25건', ",
+        "ledgerStepCounts: [LEDGER.length + '건', "))
+
+    for old, new in swaps:
+        if old not in src:
+            raise SystemExit("기준 비율을 적어 둔 자리를 못 찾았다. 시안에서 "
+                             f"문구가 바뀌었다:\n  {old[:60]}")
+        src = src.replace(old, new)
+
+    for stale in ("54.1%", "25건 중 10건"):
+        if stale in src:
+            raise SystemExit(f"{stale} 가 아직 남아 있다. 바꾸지 못한 자리가 있다")
+    return src, f"유지 비율 {K}%, 최근 {n_led}건 중 {kept}건 {R}%"
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path, help="Claude Design 에서 받은 .dc.html")
@@ -426,6 +504,8 @@ def main(argv=None) -> int:
     print("상품 사진 연결")
     src = wire_score(src)
     print("검증 기록 타일에 채점 결과 연결")
+    src, note = fix_base_rate(src)
+    print(f"글자로 박힌 기준 비율 네 곳을 지금 값으로 교체 ({note})")
     src, n = wire_week(src)
     print(f"신선도 문턱 {n}곳과 검증 기록 CSV 를 WEEK 로 교체")
     src, n = fix_pending_text(src)

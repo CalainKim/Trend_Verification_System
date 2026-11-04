@@ -10,11 +10,36 @@
 # 재료가 전부 저장소에 있으므로 clone 만 하면 어디서든 다시 만들 수 있다.
 # 화면 원본은 design/ 에 사본으로 두었고, 고치는 자리는 Claude Design 이다.
 # 거기서 새로 폴리싱했으면 design/ 의 사본을 바꾸고 이 스크립트를 다시 돌린다.
+#
+# 결과 이름에 시안 번호가 들어가므로 v8 로 만든 것과 v9 로 만든 것이 같이
+# 남는다. 새 시안이 미팅에서 말을 안 들으면 옛것을 그대로 열면 된다.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PY=./.venv/bin/python
-SRC="design/Trend Monitor v8.dc.html"
-WORK=build/.viewer
+
+# 어느 시안으로 만들지. Claude Design 에서 새로 뽑으면 design/ 에 넣고
+# 여기 기본값을 올린다. 옛 시안으로 다시 만들어야 하면 앞에 붙여서 부른다.
+#
+#   SRC="design/Trend Monitor v8.dc.html" ./scripts/build_viewer.sh
+#
+SRC="${SRC:-design/Trend Monitor v9.dc.html}"
+if [ ! -f "$SRC" ]; then
+    echo "시안 파일이 없다: $SRC" >&2
+    exit 1
+fi
+
+# 파일 이름에 시안 번호를 넣는다. 넣지 않으면 v8 과 v9 가 같은 날짜로
+# 만들어질 때 뒤에 만든 것이 앞엣것을 덮어쓴다. 미팅 직전에 쓰던 파일이
+# 소리 없이 사라지는 사고가 난다.
+VER="$(basename "$SRC" | sed -nE 's/.*(v[0-9]+)\.dc\.html$/\1/p')"
+if [ -z "$VER" ]; then
+    echo "시안 이름에서 번호를 못 찾았다: $SRC" >&2
+    echo "design/Trend Monitor v9.dc.html 처럼 v 와 숫자로 끝나야 한다" >&2
+    exit 1
+fi
+echo "시안 $VER ($SRC)"
+
+WORK="build/.viewer/$VER"
 mkdir -p "$WORK"
 
 WEEK="${1:-}"
@@ -40,7 +65,7 @@ fi
 # 데이터와 이름이 어긋난다.
 HOLD=$($PY -c "import json;print(json.load(open('build/frontend_data.json'))['weeks'][2])" 2>/dev/null \
        || grep -o '확인 [0-9-]*' build/frontend_data.js | head -1 | cut -d' ' -f2)
-OUT="build/트렌드 모니터 ($HOLD).html"
+OUT="build/트렌드 모니터 $VER ($HOLD).html"
 
 echo
 $PY scripts/patch_design.py "$SRC" -o "$WORK/patched.html"
@@ -51,7 +76,7 @@ $PY scripts/bundle_design.py "$WORK/patched.html" --assets design/runtime -o "$O
 # 로컬 을 넣는다. 번들러가 그 글자가 없으면 거부한다. ANTHROPIC_API_KEY 가
 # 없으면 이 단계는 건너뛴다.
 if [ -f .env ]; then set -a; . ./.env; set +a; fi
-LOCAL="build/트렌드 모니터 ($HOLD) 로컬.html"
+LOCAL="build/트렌드 모니터 $VER ($HOLD) 로컬.html"
 if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
     echo
     $PY scripts/bundle_design.py "$WORK/patched.html" --assets design/runtime \

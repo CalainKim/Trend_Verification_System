@@ -14,8 +14,25 @@ from typing import Any, Dict, Optional
 # 앞 10자리가 항상 날짜라서 문자열 비교만으로 T_cut 필터가 성립한다.
 _OBSERVED_AT_RE = re.compile(r"^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)?)?$")
 
+#: 채널은 "자료가 어디서 왔나" 다. 운영사가 같으면 한 채널로 묶는다.
+#: 29CM 는 무신사 계열이라 commerce_rank 하나에 들어 있다. 코오롱몰과
+#: 하이버는 운영사가 달라서 따로 센다.
+#:
+#: 채널을 쪼개 두는 데는 격리 목적도 있다. persistence 의 질의가 전부
+#: `channel = ?` 로 걸리므로, 새 수집 대상을 새 채널에 넣으면 이미 쌓인
+#: 자료로 돌아가는 분석이 구조적으로 안 바뀐다. 검증 파트가 commerce_rank
+#: 상의 범위로 모델을 학습하는 동안 그 범위를 건드리지 않는 방법이다.
 CHANNELS = frozenset(
-    {"musinsa_rank", "naver_datalab", "naver_shopping", "gtrends", "news", "commerce_rank"}
+    {
+        "musinsa_rank",
+        "naver_datalab",
+        "naver_shopping",
+        "gtrends",
+        "news",
+        "commerce_rank",   # 29CM. 무신사 계열이라 무신사와 같은 채널이다
+        "kolon_rank",      # 코오롱몰. 2026-11-05 부터
+        "hiver_rank",      # 하이버(브랜디 계열). 2026-11-05 부터
+    }
 )
 
 

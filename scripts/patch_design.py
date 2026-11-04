@@ -553,6 +553,11 @@ def unmix_examples(src: str) -> tuple[str, int]:
          "비교할 지난주가 아직 없어 판단에서 뺍니다\""),
         (">예시</span></sc-if>", ">수집 전</span></sc-if>"),
         ("(ex ? '. 예시 데이터' : '')", "(ex ? '. 수집 전이라 판단에서 뺐다' : '')"),
+        # 찾는 동안 도는 스캔 그림도 같은 목록을 쓴다. 거르지 않으면 하의와
+        # 신발을 훑고 있는 것처럼 보인다. 실제로는 그 자료가 없다.
+        ("scanCats: (() => { const m = {}; benchT.forEach(t => {",
+         "scanCats: (() => { const m = {}; benchT.filter(t => !t.isEx)"
+         ".forEach(t => {"),
         # 남은 자리들. 한 화면 안에서 어떤 줄은 예시, 어떤 줄은 수집 전이라고
         # 하면 둘이 다른 것인 줄 안다. 말을 하나로 맞춘다
         ("1차 후보 유형 <span style=\"font-weight:400\">(* 예시)</span>",

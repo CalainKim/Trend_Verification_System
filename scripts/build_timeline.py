@@ -53,21 +53,31 @@ def attr_timeline(conn) -> dict:
     return {"weeks": weeks, "series": out}
 
 
-def item_timeline(conn) -> dict:
+def item_timeline(conn, cats=None) -> dict:
     """상품 일별 순위. 목록 밖이면 null 이고 101 로 채우지 않는다.
 
     채우는 것은 평균을 낼 때 할 일이다. 자료에 101 을 박아 두면 화면이
     "101위였다" 로 그린다. 목록 밖은 순위를 모르는 것이지 101위가 아니다.
     """
+    # 기본은 분석 범위(상의)다. 2026-11-04 부터 하의, 아우터, 신발도 모으지만
+    # 여기서 같이 그리면 디자인에 건네는 사본이 조용히 달라진다. 넓히는 것은
+    # 눈에 보이는 선택이어야 한다.
+    codes = tuple(ps.ANALYSIS_CATEGORY_CODES if cats is None else cats)
+    where, args_ = "", []
+    if codes:
+        marks = ", ".join("?" for _ in codes)
+        where = (" AND instr(entity,'@') > 0"
+                 f" AND substr(entity, instr(entity,'@') + 1) IN ({marks})")
+        args_ = list(codes)
     rows = conn.execute("""
         SELECT substr(observed_at,1,10) d, entity, metric_value v,
                json_extract(metadata,'$.brand_kor') brand,
                json_extract(metadata,'$.category3') cat,
                keyword_raw name
         FROM signal_raw
-        WHERE channel='commerce_rank' AND metric_type='rank'
+        WHERE channel='commerce_rank' AND metric_type='rank'""" + where + """
         ORDER BY d
-    """).fetchall()
+    """, args_).fetchall()
     days = sorted({r["d"] for r in rows})
     idx = {d: i for i, d in enumerate(days)}
     items: Dict[str, dict] = {}

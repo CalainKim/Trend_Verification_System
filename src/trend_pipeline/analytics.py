@@ -10,7 +10,7 @@ import json
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import date, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Sequence
 
 from . import storage
 
@@ -99,12 +99,24 @@ def build_items(
     conn: sqlite3.Connection,
     channel: str = "commerce_rank",
     ranking_category_code: Optional[str] = None,
+    categories: Optional[Sequence[str]] = None,
 ) -> Tuple[List[str], Dict[str, Item]]:
     """관측일별로 스냅샷 하나씩만 골라 상품별 시계열을 만든다.
 
     한 날에 여러 스냅샷이 있어도 섞지 않는다. 섞으면 같은 날에 같은 순위가
     두 번 나타난다.
+
+    categories 를 주지 않으면 persistence.ANALYSIS_CATEGORY_CODES(상의)만
+    본다. 2026-11-04 부터 하의, 아우터, 신발도 모으는데, 여기 기본이 넓으면
+    공개 대시보드가 그날 밤부터 말없이 섞인 것을 보여 준다. 넓게 보려면
+    빈 튜플이나 코드 목록을 준다.
+
+    ranking_category_code 는 코드 하나만 받던 옛 인자다. 주면 그쪽이 이긴다.
     """
+    from . import persistence as _ps   # 순환 임포트를 피해 함수 안에서 읽는다
+
+    codes = tuple(_ps.ANALYSIS_CATEGORY_CODES if categories is None
+                  else categories)
     picks = storage.daily_snapshots(conn, channel, pick="last")
     days = [r["day"] for r in picks]
     if not days:
@@ -126,12 +138,13 @@ def build_items(
     day_of = {v: k for k, v in snapshot_at.items()}
     for row in rows:
         meta = json.loads(row["metadata"] or "{}")
-        if (
-            ranking_category_code
-            and row["metric_type"] == "rank"
-            and str(meta.get("ranking_category_code")) != str(ranking_category_code)
-        ):
-            continue
+        if row["metric_type"] == "rank":
+            code = str(meta.get("ranking_category_code") or "")
+            if ranking_category_code:
+                if code != str(ranking_category_code):
+                    continue
+            elif codes and code not in codes:
+                continue
         key = item_key(row["entity"])
         day = day_of[row["observed_at"]]
         item = items.get(key)

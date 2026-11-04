@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Iterator, List, Optional, Sequence
 
@@ -36,10 +37,36 @@ IMAGE_CDN = "https://img.29cm.co.kr"
 
 #: 1차 분석 범위(상의) 카테고리. 3차 분류(티셔츠/후드/맨투맨)는 응답의
 #: frontCategoryInfo.category3Name 으로 사후 필터링한다.
+#:
+#: **이 둘은 늘리지 않는다.** 봉인한 문제지 139건과 기저율 59.7% 가 이 범위로
+#: 만들어졌고 검증 파트가 이 자료로 모델을 학습하고 있다. 여기에 코드를 하나
+#: 더 넣으면 다음 빌드부터 기저율이 조용히 다른 숫자가 되고, 모델이 기준을
+#: 넘었다는 결론이 근거를 잃는다. 넓히려면 아래 EXTRA 쪽에 넣는다.
 TOPS_CATEGORY_CODES: Dict[str, str] = {
     "268103100": "여성의류>상의",
     "272103100": "남성의류>상의",
 }
+
+#: 2차 화면(카테고리를 넘는 유행)을 위해 더 모으는 범위. 2026-11-04 부터.
+#:
+#: 화면의 하의, 아우터, 신발은 지금까지 손으로 적은 예시였다. 예시로는
+#: "카테고리를 넘는 유행" 이라는 2차의 주장이 서지 않는다. 순위는 소급 조회가
+#: 안 되고 수집을 시작한 날부터만 쌓이므로 먼저 켠다. 속성 사전과 유형 규칙은
+#: 뒤에 채워도 과거 상품명에 다시 돌릴 수 있다.
+#:
+#: 분석 쪽은 이 범위를 기본으로 보지 않는다. 보려면 그 자리에서 명시해야 한다.
+EXTRA_CATEGORY_CODES: Dict[str, str] = {
+    "268106100": "여성의류>바지",
+    "272104100": "남성의류>하의",
+    "268102100": "여성의류>아우터",
+    "272102100": "남성의류>아우터",
+    "270106100": "여성슈즈>스니커즈",
+    "274101100": "남성슈즈>스니커즈",
+}
+
+#: 수집이 도는 전체 범위. 분석 범위와 다르다는 것이 요점이다.
+ALL_CATEGORY_CODES: Dict[str, str] = {**TOPS_CATEGORY_CODES,
+                                      **EXTRA_CATEGORY_CODES}
 
 #: NOW=실시간, ONE_DAY=일간, ONE_WEEK=주간, ONE_MONTH=월간
 PERIOD_SORTS = ("NOW", "ONE_DAY", "ONE_WEEK", "ONE_MONTH")
@@ -74,16 +101,38 @@ class Cm29RankCollector(Collector):
 
     # ------------------------------------------------------------------ HTTP
 
-    def _get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
-        self.sleep()
-        resp = self.session.get(
-            BASE_URL + path, params=params or {}, timeout=self.timeout_sec
-        )
-        resp.raise_for_status()
-        payload = resp.json()
-        if payload.get("result") != "SUCCESS":
-            raise RuntimeError(f"29CM API 실패: {payload.get('message')} ({path}, {params})")
-        return payload["data"]
+    def _get(self, path: str, params: Optional[Dict[str, Any]] = None,
+             tries: int = 3) -> Any:
+        """한 번 실패했다고 수집 전체를 버리지 않는다.
+
+        29CM 은 가끔 최상위에 객체가 아니라 배열을 돌려준다. 그대로 두면
+        payload.get 에서 AttributeError 가 나면서 그 회차가 통째로 죽는다.
+        순위는 소급 조회가 안 되므로 죽은 회차의 자료는 영영 못 되찾는다.
+        카테고리를 여덟로 늘리면 요청이 네 배라 이 자리를 더 자주 만난다.
+
+        잠깐 쉬었다 다시 묻고, 그래도 안 되면 무엇이 왔는지 적고 멈춘다.
+        조용히 빈 결과를 돌려주면 그날 순위가 없는 것과 구분이 안 된다.
+        """
+        last = ""
+        for attempt in range(tries):
+            self.sleep()
+            resp = self.session.get(
+                BASE_URL + path, params=params or {}, timeout=self.timeout_sec
+            )
+            resp.raise_for_status()
+            payload = resp.json()
+            if isinstance(payload, dict) and payload.get("result") == "SUCCESS":
+                return payload["data"]
+            if isinstance(payload, dict):
+                raise RuntimeError(
+                    f"29CM API 실패: {payload.get('message')} ({path}, {params})")
+            # 객체가 아니다. 대개 잠시 뒤 다시 물으면 정상으로 온다.
+            last = repr(payload)[:200]
+            if attempt < tries - 1:
+                time.sleep(2.0 * (attempt + 1))
+        raise RuntimeError(
+            f"29CM API 가 {tries}번 모두 객체가 아닌 것을 돌려줬다 "
+            f"({path}, {params}): {last}")
 
     def fetch_categories(self, parent_code: Optional[str] = None) -> List[Dict[str, Any]]:
         """parent_code 가 없으면 대분류, 있으면 그 아래 중분류 목록."""

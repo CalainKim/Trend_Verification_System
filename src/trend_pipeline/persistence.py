@@ -211,18 +211,69 @@ def _calendar_gaps(days: Sequence[str]) -> List[str]:
     return out
 
 
+#: 분석이 보는 커머스 범위. 29CM 카테고리 코드다.
+#:
+#: 수집은 이보다 넓다. 2026-11-04 부터 하의, 아우터, 신발도 모은다. 그런데
+#: 봉인한 문제지 139건과 기저율 59.7% 는 상의로 만들었고 검증 파트가 그
+#: 자료로 모델을 학습하고 있다. 읽는 쪽이 전부를 가져가면 다음 빌드부터
+#: 기저율이 조용히 달라지고 모델이 기준을 넘었다는 결론이 근거를 잃는다.
+#:
+#: 그래서 읽는 자리의 기본값은 좁은 쪽이다. 넓게 보려면 그 자리에서
+#: categories 를 명시해야 한다. 넓히는 것이 눈에 보이는 선택이어야 한다.
+#:
+#: cm29_rank.TOPS_CATEGORY_CODES 와 같은 값이어야 한다. 어긋나면
+#: tests/test_category_scope.py 가 잡는다.
+ANALYSIS_CATEGORY_CODES: Tuple[str, ...] = ("268103100", "272103100")
+
+
+def _item_scope_sql() -> str:
+    """순위가 분석 범위 안에서 찍힌 상품만 고르는 조건.
+
+    review_count 와 heart_count 행은 entity 에 카테고리 꼬리가 없다
+    (수집기가 순위 행에만 붙인다). 그래서 꼬리로 바로 거르면 그 둘이
+    통째로 빠진다. 상품 키로 범위를 정하고 그 상품의 모든 지표를 가져온다.
+    """
+    return """
+        substr(entity, 1, instr(entity || '@', '@') - 1) IN (
+            SELECT DISTINCT substr(entity, 1, instr(entity, '@') - 1)
+            FROM signal_raw
+            WHERE channel = ? AND metric_type = 'rank'
+              AND instr(entity, '@') > 0
+              AND substr(entity, instr(entity, '@') + 1) IN ({marks})
+        )
+    """
+
+
 def load_series(
-    conn: sqlite3.Connection, channel: str = "commerce_rank"
+    conn: sqlite3.Connection, channel: str = "commerce_rank",
+    categories: Optional[Sequence[str]] = None,
 ) -> Dict[str, Dict[str, dict]]:
-    """상품별 일자별 지표. 랭킹 entity 의 카테고리 접미사는 떼어 묶는다."""
+    """상품별 일자별 지표. 랭킹 entity 의 카테고리 접미사는 떼어 묶는다.
+
+    categories 를 주지 않으면 ANALYSIS_CATEGORY_CODES(상의)만 본다. 전부
+    보려면 빈 튜플을 준다. 기본을 좁게 둔 이유는 그 상수의 주석에 있다.
+    """
     out: Dict[str, Dict[str, dict]] = {}
-    rows = conn.execute(
-        """
+    codes = tuple(ANALYSIS_CATEGORY_CODES if categories is None else categories)
+    if codes:
+        marks = ", ".join("?" for _ in codes)
+        sql = ("""
+        SELECT observed_at, entity, keyword_raw, metric_type, metric_value, metadata
+        FROM signal_raw WHERE channel = ?
+          AND metric_type IN ('rank', 'review_count', 'heart_count')
+          AND """ + _item_scope_sql().format(marks=marks) + """
+        ORDER BY observed_at
+        """)
+        args: tuple = (channel, channel) + codes
+    else:
+        sql = """
         SELECT observed_at, entity, keyword_raw, metric_type, metric_value, metadata
         FROM signal_raw WHERE channel = ?
           AND metric_type IN ('rank', 'review_count', 'heart_count')
         ORDER BY observed_at
-        """, (channel,)).fetchall()
+        """
+        args = (channel,)
+    rows = conn.execute(sql, args).fetchall()
     for r in rows:
         key = r["entity"].split("@", 1)[0]
         day = r["observed_at"][:10]

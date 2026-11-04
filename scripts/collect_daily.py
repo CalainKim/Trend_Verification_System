@@ -21,6 +21,8 @@ from trend_pipeline import snapshots, storage  # noqa: E402
 from trend_pipeline.collectors.cm29_rank import (  # noqa: E402
     MAX_PAGE_SIZE,
     PERIOD_SORTS,
+    ALL_CATEGORY_CODES,
+    EXTRA_CATEGORY_CODES,
     TOPS_CATEGORY_CODES,
     Cm29RankCollector,
 )
@@ -43,7 +45,10 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="29CM 베스트 랭킹 일별 수집")
     p.add_argument("--period", default="ONE_DAY", choices=PERIOD_SORTS)
     p.add_argument("--limit", type=int, default=MAX_PAGE_SIZE, help="카테고리당 상위 N개")
-    p.add_argument("--categories", nargs="*", default=None, help="카테고리 코드 (기본: 상의)")
+    p.add_argument("--categories", nargs="*", default=None,
+                   help="카테고리 코드 (기본: 상의, 하의, 아우터, 신발 8개)")
+    p.add_argument("--tops-only", action="store_true",
+                   help="상의 둘만 모은다. 분석 범위와 같은 범위다")
     p.add_argument("--db", default=None, help="SQLite 경로 (기본: data/signals.sqlite)")
     p.add_argument("--interval", type=float, default=1.5, help="요청 간 최소 간격(초)")
     p.add_argument("--snapshot-dir", default=str(ROOT / "data" / "snapshots"),
@@ -58,7 +63,11 @@ def main(argv=None) -> int:
         print_status(conn)
         return 0
 
-    codes = args.categories or list(TOPS_CATEGORY_CODES)
+    # 기본은 넓게 모은다. 분석이 보는 범위는 이보다 좁고, 그쪽 기본값은
+    # persistence.ANALYSIS_CATEGORY_CODES 에 따로 있다. 모으는 범위와 보는
+    # 범위를 일부러 떼어 놓았다. 이유는 그 상수의 주석에 적었다.
+    codes = (args.categories or list(TOPS_CATEGORY_CODES if args.tops_only
+                                     else ALL_CATEGORY_CODES))
     collector = Cm29RankCollector(min_interval_sec=args.interval)
     run_id = storage.new_run_id()
 
@@ -75,6 +84,11 @@ def main(argv=None) -> int:
     )
 
     print(f"run_id={run_id}")
+    extra = [c for c in codes if c in EXTRA_CATEGORY_CODES]
+    if extra:
+        names = ", ".join(EXTRA_CATEGORY_CODES[c] for c in extra)
+        print(f"분석 범위 밖도 함께 모았다: {names}")
+        print("  분석과 벤치마크는 상의만 본다. 넓게 보려면 그 자리에서 지정한다")
     print(f"카테고리 {len(codes)}개 / 수집 {len(records)}행 / 신규 저장 {inserted}행 "
           f"(중복 {len(records) - inserted}행은 무시)")
     for path in written:

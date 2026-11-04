@@ -370,6 +370,23 @@ def wire_week(src: str) -> tuple[str, int]:
     src = src.replace("csv('검증기록_1101.csv', ['상품', '10/18', '10/25', '11/01', '결과']",
                       "csv(`검증기록_${WEEK.hold.replace('/', '')}.csv`, "
                       "['상품', WEEK.base, WEEK.detect, WEEK.hold, '결과']")
+
+    # 하단 바의 수집 시각. 화면이 들고 있는 자료는 WEEK.hold 주인데 여기만
+    # 11/01 로 박혀 있다. 미팅에서 화면을 띄우면 제일 아래 줄이 사흘 전
+    # 날짜를 말한다. 본문은 맞고 바닥만 틀리면 어느 쪽을 믿을지 알 수 없다.
+    js = DATA.read_text(encoding="utf-8")
+    m = re.search(r"const WEEK = (\{.*?\});", js, re.S)
+    if not m:
+        raise SystemExit(f"{DATA} 에서 WEEK 를 못 찾았다")
+    week = json.loads(m.group(1))
+    nxt = week["nextISO"][5:].replace("-", "/").lstrip("0").replace("/0", "/")
+    bar = [("29CM 11/01 22:00 수집", f"29CM {week['hold']} 22:00 수집"),
+           ("다음 수집 11/08 22:00", f"다음 수집 {nxt} 22:00")]
+    for old_t, new_t in bar:
+        if old_t not in src:
+            raise SystemExit(f"하단 바의 수집 시각 자리를 못 찾았다: {old_t}")
+        src = src.replace(old_t, new_t)
+        n += 1
     return src, n
 
 
@@ -482,6 +499,91 @@ def fix_base_rate(src: str) -> tuple[str, str]:
     return src, f"유지 비율 {K}%, 최근 {n_led}건 중 {kept}건 {R}%"
 
 
+def unmix_examples(src: str) -> tuple[str, int]:
+    """예시로 채운 카테고리를 결론에서 뺀다.
+
+    2차 화면은 하의, 아우터, 신발을 EX 라는 상수에 손으로 적어 두었다.
+    브랜드, 상품명, 가격, 순위, 검색어 8주가 전부 지어낸 값이다. 그런데
+    코드는 그것을 실제 유형과 똑같이 다룬다. 같은 목록에 섞여 모델에 가고,
+    카테고리를 넘는 공통점을 셀 때도 같이 세어진다.
+
+    문제는 결론 쪽에 표시가 없다는 것이다. 1차 후보 목록에만 예시라고
+    적혀 있고, 유행 이름 옆의 "강함" 배지와 공통점 칩에는 아무 표시가
+    없다. 위에서부터 읽다 그 표시를 지나친 사람은 결론만 가져간다.
+
+    특히 "강함" 이 문제다. 모델에게 준 규칙이 "두 카테고리 이상이 아니면
+    약함" 인데, 실제 수집은 상의뿐이라 어떤 유행도 강함이 될 수 없다.
+    지금 화면에 뜨는 강함은 전부 지어낸 카테고리가 받쳐 준 것이다.
+
+    그래서 줄은 그대로 두고 결론에서만 뺀다. 자리가 비어 있다는 것은
+    보이되, 없는 근거로 결론을 세우지는 않는다.
+    """
+    swaps = [
+        # 모델에게 지어낸 자료를 주지 않는다
+        ("run: () => this.runTrend(benchT, overlaps)",
+         "run: () => this.runTrend(benchT.filter(t => !t.isEx), overlaps)"),
+        # 카테고리를 넘는 공통점도 실제끼리만 센다. 지금까지 "브랜드 디키즈 2"
+        # 는 실제 상의 하나와 지어낸 하의 하나였다
+        ("const ovMap = {};\n    benchT.forEach(t => {",
+         "const ovMap = {};\n    benchT.filter(t => !t.isEx).forEach(t => {"),
+        # 실제로 모으는 카테고리가 둘 미만이면 어떤 유행도 강함일 수 없다
+        ("const ty = (m.types || []).map(x => ({ cat: x.cat || '', type: "
+         "x.type || '' })), cs = new Set(ty.map(x => x.cat)), open = "
+         "!!s.themeOpen[i], sb = SBG[m.strength] || SBG['보통'];",
+         "const ty = (m.types || []).map(x => ({ cat: x.cat || '', type: "
+         "x.type || '' })), cs = new Set(ty.map(x => x.cat)), open = "
+         "!!s.themeOpen[i], realCats = new Set(benchT.filter(t => !t.isEx)"
+         ".map(t => t.cat)), st0 = realCats.size >= 2 ? (m.strength || "
+         "'보통') : '약함', sb = SBG[st0] || SBG['보통'];"),
+        ("strength: m.strength || '보통', sbg: sb[0], sfg: sb[1],",
+         "strength: st0, sbg: sb[0], sfg: sb[1],"),
+        # 센 건수도 실제만 센다
+        ("nSub: tph === 'done' ? `후보 유형 ${benchT.length}개에서` : "
+         "`후보 유형 ${benchT.length}개`,",
+         "nSub: tph === 'done' ? `실제 후보 유형 ${benchT.filter(t => !t.isEx)"
+         ".length}개에서` : `실제 후보 유형 ${benchT.filter(t => !t.isEx)"
+         ".length}개`,"),
+        # 비는 이유를 바로 적는다. "겹치는 것이 없다" 와 "비교할 카테고리가
+        # 없다" 는 전혀 다른 말이다
+        ("아직 겹치는 속성이나 브랜드가 없습니다",
+         "상의만 수집하고 있어 비교할 카테고리가 없습니다"),
+        # 줄에 붙는 표시. 예시라는 말보다 왜 비었는지를 적는다
+        ("data-tip=\"연결 전 카테고리라 예시 데이터로 채웠습니다\"",
+         "data-tip=\"2026-11-04 부터 모으기 시작했습니다. "
+         "비교할 지난주가 아직 없어 판단에서 뺍니다\""),
+        (">예시</span></sc-if>", ">수집 전</span></sc-if>"),
+        ("(ex ? '. 예시 데이터' : '')", "(ex ? '. 수집 전이라 판단에서 뺐다' : '')"),
+        # 남은 자리들. 한 화면 안에서 어떤 줄은 예시, 어떤 줄은 수집 전이라고
+        # 하면 둘이 다른 것인 줄 안다. 말을 하나로 맞춘다
+        ("1차 후보 유형 <span style=\"font-weight:400\">(* 예시)</span>",
+         "1차 후보 유형 <span style=\"font-weight:400\">(수집 전 표시는 판단에서 뺐다)</span>"),
+        ("return { cat: t.cat + (t.isEx ? '*' : ''),",
+         "return { cat: t.cat,"),
+        ("브랜드 ${t.brands}곳${t.isEx ? '. 예시 데이터' : ''}`",
+         "브랜드 ${t.brands}곳${t.isEx ? '. 수집 전이라 판단에서 뺐다' : ''}`"),
+        ("length}개` + (on ? '' : ', 예시'), tip: on ? '29CM 상의 TOP100에서 1차 선별' "
+         ": '연결 전이라 예시 데이터입니다',",
+         "length}개` + (on ? '' : ', 수집 전'), tip: on ? '29CM 상의 TOP100에서 1차 선별' "
+         ": '2026-11-04 부터 모으기 시작했습니다. 비교할 지난주가 아직 없어 판단에서 뺍니다',"),
+        ("하의, 아우터, 신발의 1차 트렌드 후보를 모아, 카테고리를 넘어 지금 무엇이 "
+         "유행하는지 묶어 정리합니다. 하의, 아우터, 신발은 연결 전이라 예시 데이터입니다.",
+         "하의, 아우터, 신발의 1차 트렌드 후보를 모아, 카테고리를 넘어 지금 무엇이 "
+         "유행하는지 묶어 정리합니다. 하의, 아우터, 신발은 2026-11-04 부터 모으기 "
+         "시작했고 비교할 지난주가 아직 없어, 목록에만 두고 판단에서는 뺐습니다. "
+         "그래서 지금은 상의 하나로만 보고 있어 어떤 유행도 강함이 될 수 없습니다."),
+    ]
+    n = 0
+    for old, new in swaps:
+        if old not in src:
+            raise SystemExit("예시를 떼어 낼 자리를 못 찾았다. 시안이 바뀌었다:"
+                             f"\n  {old[:70]}")
+        src = src.replace(old, new)
+        n += 1
+    if "예시 데이터" in src or "(* 예시)" in src:
+        raise SystemExit("예시라는 말이 아직 화면에 남아 있다. 바꾸지 못한 자리가 있다")
+    return src, n
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path, help="Claude Design 에서 받은 .dc.html")
@@ -506,6 +608,9 @@ def main(argv=None) -> int:
     print("검증 기록 타일에 채점 결과 연결")
     src, note = fix_base_rate(src)
     print(f"글자로 박힌 기준 비율 네 곳을 지금 값으로 교체 ({note})")
+    src, n = unmix_examples(src)
+    print(f"예시로 채운 카테고리를 결론에서 분리 ({n}곳). "
+          "모델 입력, 공통점, 세기 배지에서 뺐다")
     src, n = wire_week(src)
     print(f"신선도 문턱 {n}곳과 검증 기록 CSV 를 WEEK 로 교체")
     src, n = fix_pending_text(src)

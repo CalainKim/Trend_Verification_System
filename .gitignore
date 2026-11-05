@@ -61,3 +61,10 @@ data/attribute_map.csv
 # 시간별 수집 로그
 data/gtrends*.log
 runs/
+
+# wrangler 가 만드는 것. 2026-11-05 에 wrangler 가 스스로 덧붙였고 그대로 둔다.
+# .dev.vars 는 로컬에서 중계 함수에 넣는 비밀값 파일이라 반드시 막아야 한다.
+# .wrangler 는 캐시다.
+.wrangler
+.dev.vars*
+!.dev.vars.example

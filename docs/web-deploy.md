@@ -105,11 +105,39 @@ messages      8개까지, role 과 content 모양을 직접 확인한다
 
 ```
 ./scripts/build_web.sh
-npx wrangler pages deploy build/web --project-name trend-monitor
+cd build/web && npx wrangler pages deploy .
 ```
 
 시안을 다시 받거나 모델을 바꾸면 같은 두 줄을 다시 돌린다.
 `build/` 는 저장소에 들어가지 않으므로 올리는 것은 항상 방금 만든 것이다.
+
+**반드시 `build/web` 안에서 돌린다.** wrangler 는 `functions/` 를 실행 위치
+기준으로 찾는다. 바깥에서 `wrangler pages deploy build/web` 로 돌리면
+`No Functions. Shimming...` 만 적고 중계 없이 올라간다. 화면은 올라가지만
+심층 검증 버튼이 조용히 죽는다. 2026-11-05 에 실제로 겪었다.
+
+## 6.1 wrangler 명령에 주의할 것
+
+`wrangler pages project create` 는 이름만 보면 프로젝트만 만들 것 같지만
+그렇지 않다. 2026-11-05 에 돌려 보니 이렇게 했다.
+
+```
+wrangler.jsonc 를 자동 생성한다   "assets": { "directory": "docs" }
+그 설정으로 즉시 배포한다          docs/ 전체 39개 파일을 올린다
+.gitignore 에 줄을 덧붙인다        .wrangler 와 .dev.vars
+```
+
+`docs` 는 wrangler 가 추측한 값이고 우리가 올릴 폴더가 아니다. `docs/` 에는
+저장소에서 제외한 로컬 전용 파일이 들어 있다.
+
+```
+docs/images/figures/      보고서 그림. .gitignore:43
+docs/report-figures.html  보고서 중간 산출물
+```
+
+그래서 저장소 루트에 `wrangler.jsonc` 를 두지 않는다. 설정은
+`build_web.sh` 가 `build/web` 안에 만든다. 루트에서 wrangler 를 돌려야 할
+일이 생기면 무엇을 올리는지 먼저 확인한다.
 
 ## 7. 모델
 

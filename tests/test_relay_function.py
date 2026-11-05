@@ -60,3 +60,36 @@ def test_중계판에는_키를_심을_수_없다():
     """--relay 와 --embed-key 를 같이 주면 멈춰야 한다."""
     src = (ROOT / "scripts" / "bundle_design.py").read_text(encoding="utf-8")
     assert "args.relay and args.embed_key" in src
+
+
+def test_배포_폴더에_검사_파일이_안_들어간다():
+    """functions/ 아래 파일은 전부 라우트가 된다.
+
+    폴더를 통째로 복사하면 complete.test.mjs 가 /api/complete.test 로 공개된다.
+    빌드 스크립트가 .js 만 집어 가는지 확인한다.
+    """
+    sh = (ROOT / "scripts" / "build_web.sh").read_text(encoding="utf-8")
+    assert "cp -R web/functions" not in sh, "functions 를 통째로 복사하면 검사 파일까지 올라간다"
+    assert "complete.js" in sh, "중계 함수를 집어 가지 않는다"
+
+
+def test_배포는_폴더_안에서_돌리게_되어_있다():
+    """wrangler 는 functions/ 를 실행 위치 기준으로 찾는다.
+
+    바깥에서 돌리면 "No Functions. Shimming..." 을 내고 중계 없이 올라가며,
+    화면은 뜨는데 심층 검증 버튼만 조용히 죽는다. 안내 문구가 사라지면
+    다음 사람이 같은 함정에 빠진다.
+    """
+    sh = (ROOT / "scripts" / "build_web.sh").read_text(encoding="utf-8")
+    assert "cd $OUT" in sh or "cd build/web" in sh, "폴더 안에서 돌리라는 안내가 없다"
+
+
+def test_저장소_루트에_wrangler_설정을_두지_않는다():
+    """루트 설정은 docs/ 를 올리는 사고로 이어졌다.
+
+    wrangler pages project create 가 자동 생성한 설정이 assets.directory 를
+    docs 로 잡았고, docs/ 에는 저장소에서 제외한 로컬 파일이 있다.
+    """
+    for name in ("wrangler.jsonc", "wrangler.json", "wrangler.toml"):
+        assert not (ROOT / name).exists(), (
+            f"{name} 이 루트에 있다. 무엇을 올리는지 확인하고 build/web 안으로 옮겨라")

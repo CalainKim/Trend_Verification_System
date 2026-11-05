@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "//": "functions/ 가 ESM 이라는 것만 알린다. 배포 폴더에는 복사하지 않는다. build_web.sh 가 functions 만 가져간다."
+}

@@ -288,8 +288,11 @@ trend_case            역추적 케이스의 정답. 산출물로 내보내지 �
     score_verdicts.py            판정 채점과 성적표
     build_case_dashboard.py  케이스 분석 화면 생성
     serve.sh             대시보드를 로컬에서 띄운다
+    bundle_design.py     시안을 파일 하나로 묶는다 (--relay 는 웹 배포판)
+    build_web.sh         웹 배포 폴더 생성 (Cloudflare Pages)
     collect_and_push.sh  로컬 일일 수집 (launchd 가 호출)
     install_local_schedule.sh  일일 수집 등록
+  web/functions/         Cloudflare Pages 중계 함수 (심층 검증)
   data/snapshots/        수집 원본 CSV (커밋 대상)
   data/attributes.yml    속성 키워드 사전 (사람이 검수한다)
   cases/                 역추적 케이스 산출물 (검증팀 전달용)

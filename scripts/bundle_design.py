@@ -109,6 +109,82 @@ BROWSER_SHIM = """
 </script>
 """
 
+#: 중계 배포판이 부르는 주소. 같은 출처라 CORS 가 필요 없고 키도 오지 않는다.
+RELAY_ENDPOINT = "/api/complete"
+
+#: 중계판에서 심층 검증이 실패했을 때의 설명. 파일 사본과 달리 키 문제가
+#: 아니므로 키를 언급하지 않는다. 승인된 사람만 들어오는 화면이라 "권한" 쪽을
+#: 먼저 의심하게 적는다.
+RELAY_NOTE = (
+    "심층 검증을 실행하지 못했습니다. 접근 권한이 끊겼거나 중계 서버가 "
+    "응답하지 않는 경우입니다. 잠시 뒤 다시 눌러 보시고, 계속 안 되면 "
+    "관리자에게 알려 주세요. 나머지 화면은 모두 실제 수집 자료입니다."
+)
+
+#: 브라우저가 우리 중계 서버를 부르게 하는 shim.
+#:
+#: 파일 사본용 BROWSER_SHIM 과 둘로 나눈 이유가 있다. 그쪽은 보는 사람의 키를
+#: 받아 api.anthropic.com 을 직접 부르고, 이쪽은 키를 아예 모른다. 키를 화면에
+#: 심는 선택지는 두지 않았다. 비밀번호로 사람을 걸러도 들어온 사람이 소스에서
+#: 키를 읽어 가면 그 뒤로는 게이트 밖에서 영구히 쓰이고, 호출 제한도 걸 수
+#: 없기 때문이다. 키는 서버에만 둔다.
+#:
+#: 응답 처리는 BROWSER_SHIM 과 같은 방식을 유지한다. stop_reason 과 생각 블록을
+#: 다루는 자리는 실제로 디버깅에 오래 걸렸던 지점이라 그대로 가져왔다.
+RELAY_SHIM = """
+<script>
+(function () {
+  if (window.claude && window.claude.complete) return;   // Claude Design 안이면 둔다
+  var ENDPOINT = %s;
+  window.claude = {
+    complete: async function (req) {
+      var res;
+      try {
+        res = await fetch(ENDPOINT, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          // 모델은 서버가 정한다. 여기서 보내는 값은 참고용이고, 서버가
+          // 허용 목록에 없는 이름을 받으면 무시한다. 화면을 고쳐서 비싼
+          // 모델을 부르게 하는 길을 막아 둔다.
+          body: JSON.stringify({
+            model: req.model, max_tokens: req.max_tokens,
+            output_config: req.output_config || { effort: 'low' },
+            system: req.system, messages: req.messages
+          })
+        });
+      } catch (e) {
+        throw new Error('중계 서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.');
+      }
+      if (res.status === 401 || res.status === 403) {
+        throw new Error('접근 권한이 없습니다. 로그인이 풀렸는지 확인해 주세요.');
+      }
+      if (res.status === 429) {
+        throw new Error('호출이 한도에 걸렸습니다. 잠시 뒤 다시 눌러 주세요.');
+      }
+      if (!res.ok) {
+        // 이유를 적지 않으면 화면이 "다시 실행해 주세요" 만 적고 끝난다.
+        var err = await res.json().catch(function () { return {}; });
+        var why = (err.error || {}).message || '';
+        throw new Error('심층 검증이 실패했습니다 (HTTP ' + res.status + '). ' + why);
+      }
+      var data = await res.json();
+      if (data.stop_reason === 'refusal') throw new Error('모델이 응답을 거절했습니다.');
+      // 한도에 걸리면 본문이 잘린 채로 온다. 그대로 넘기면 부르는 쪽에서
+      // JSON 파싱이 깨지고, 원인이 "JSON 이 이상하다" 로 보여서 못 찾는다.
+      if (data.stop_reason === 'max_tokens') {
+        throw new Error('응답이 max_tokens(' + req.max_tokens + ')에서 잘렸습니다.');
+      }
+      // 생각 블록은 본문이 비어 있다. 글자가 있는 블록만 모은다.
+      return (data.content || []).filter(function (b) { return b.type === 'text'; })
+        .map(function (b) { return b.text; })
+        .join(String.fromCharCode(10, 10));
+    }
+  };
+})();
+</script>
+""" % json.dumps(RELAY_ENDPOINT)
+
+
 # 화면은 추론이 실패하면 "다시 실행해 주세요" 라고 적는다. 사본에서는 몇 번을
 # 눌러도 되지 않으므로 이유를 적어 준다. 문구는 마크업에 두 번 들어 있다.
 GENERIC_ERRORS = ("추론 요청이 실패했습니다. 다시 실행해 주세요.",
@@ -276,7 +352,7 @@ REVIEW_PANEL = r"""
 """
 
 
-def inline_remote_images(html: str, timeout: float = 15.0) -> int:
+def inline_remote_images(html: str, timeout: float = 15.0) -> tuple[str, int]:
     """화면에 박힌 29CM 사진 주소를 base64 로 바꾼다.
 
     주소를 그대로 두면 파일이 인터넷 없이는 사진을 못 띄운다. 미팅에서 와이파이가
@@ -288,7 +364,9 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> int:
 
     urls = sorted(set(re.findall(r'"(https://img\.29cm\.co\.kr/[^"]+)"', html)))
     if not urls:
-        return 0
+        # 다른 경로는 모두 (html, 개수) 를 돌려준다. 여기서 0 만 돌려주면
+        # 부르는 쪽의 언패킹이 깨진다. 사진이 없는 시안에서 처음 드러났다.
+        return html, 0
     print(f"  사진 {len(urls)}장을 받는다")
     s = requests.Session()
     done = fail = 0
@@ -372,20 +450,25 @@ def bundle(html: str, assets: Path) -> tuple[str, dict]:
     return html, stats
 
 
-def soften_llm(html: str) -> tuple[str, int]:
-    """심층 검증이 조용히 실패하지 않고 이유를 말하게 한다."""
+def soften_llm(html: str, shim: str = BROWSER_SHIM,
+               note: str = OFFLINE_NOTE) -> tuple[str, int]:
+    """심층 검증이 조용히 실패하지 않고 이유를 말하게 한다.
+
+    shim 은 둘 중 하나다. BROWSER_SHIM 은 보는 사람의 키로 브라우저가
+    api.anthropic.com 을 직접 부르고, RELAY_SHIM 은 우리 중계 서버를 부른다.
+    """
     call = "const text = await window.claude.complete("
     if call not in html:
         raise SystemExit("심층 검증 호출 자리를 찾지 못했다")
     guard = ("const text = await (window.claude && window.claude.complete "
              "? window.claude.complete : () => { throw new Error("
-             + repr(OFFLINE_NOTE) + ") })(")
+             + repr(note) + ") })(")
     html = html.replace(call, guard)
-    # 브라우저가 API 를 직접 부를 수 있게 shim 을 넣는다. 화면 스크립트보다 먼저
+    # 브라우저가 API 를 부를 수 있게 shim 을 넣는다. 화면 스크립트보다 먼저
     # 실행돼야 하므로 head 가 닫히기 전에 둔다.
     if "</head>" not in html:
         raise SystemExit("head 닫는 태그를 찾지 못했다. shim 을 넣을 자리가 없다")
-    html = html.replace("</head>", BROWSER_SHIM + "</head>", 1)
+    html = html.replace("</head>", shim + "</head>", 1)
     # 판정 패널은 CASES 와 window.claude 가 준비된 뒤에 돌아야 하므로 body 끝에 둔다.
     if "</body>" not in html:
         raise SystemExit("body 닫는 태그를 찾지 못했다. 판정 패널을 넣을 자리가 없다")
@@ -395,8 +478,30 @@ def soften_llm(html: str) -> tuple[str, int]:
     if n == 0:
         raise SystemExit("추론 실패 문구를 찾지 못했다. 화면 구조가 바뀌었다")
     for e in GENERIC_ERRORS:
-        html = html.replace(e, OFFLINE_NOTE)
+        html = html.replace(e, note)
     return html, n
+
+
+#: 시안이 적어 둔 모델과 실제로 쓸 모델. 시안은 Claude Design 에서 다시
+#: 받아오는 파일이라 원본을 손으로 고치면 다음 수령 때 되살아난다. 가운뎃점을
+#: 빌드할 때마다 지우는 것과 같은 이유로 여기서 바꾼다.
+MODEL_FROM = "claude-sonnet-4-5"
+MODEL_TO = "claude-sonnet-5-5"
+
+
+def swap_model(html: str, to: str = MODEL_TO) -> tuple[str, int]:
+    """시안에 박힌 모델 이름을 바꾼다.
+
+    중계판에서는 서버가 모델을 다시 정하므로 이 값이 최종 결정은 아니다.
+    그래도 바꿔 두는 이유는 두 가지다. 파일 사본(--embed-key)은 서버를 거치지
+    않아 이 값이 그대로 쓰이고, 화면이 적는 오류 문구에도 이 이름이 나온다.
+    """
+    n = html.count(f"'{MODEL_FROM}'")
+    if n == 0:
+        # 이름이 사라지면 API 가 404 를 돌려주고, 그 원인을 찾기 어렵다.
+        # 조용히 넘기지 않고 멈춘다.
+        raise SystemExit(f"모델 이름 {MODEL_FROM} 을 찾지 못했다. 시안이 바뀌었다")
+    return html.replace(f"'{MODEL_FROM}'", f"'{to}'"), n
 
 
 def strip_middle_dot(html: str) -> tuple[str, int]:
@@ -537,11 +642,22 @@ def main(argv=None) -> int:
     ap.add_argument("--assets", type=Path, required=True,
                     help="support.js 와 _ds 가 있는 폴더")
     ap.add_argument("-o", "--out", type=Path, required=True)
+    ap.add_argument("--relay", action="store_true",
+                    help="중계 배포판을 만든다. 키를 넣지 않고 같은 출처의 "
+                         f"{RELAY_ENDPOINT} 를 부른다. Cloudflare Pages 배포용이다")
+    ap.add_argument("--model", default=MODEL_TO,
+                    help=f"시안에 박힌 모델을 이 이름으로 바꾼다 (기본 {MODEL_TO})")
     ap.add_argument("--embed-key", action="store_true",
                     help="환경변수 ANTHROPIC_API_KEY 를 파일에 넣는다. 내 컴퓨터에서 "
                          "바로 쓰려는 사본에만 쓴다. 이 파일은 절대 남에게 보내지 "
                          "않는다. 파일 이름에 로컬 이 들어가야 한다")
     args = ap.parse_args(argv)
+
+    if args.relay and args.embed_key:
+        # 중계판에 키를 심으면 중계를 두는 이유가 없어진다. 들어온 사람이
+        # 소스에서 키를 읽어 가면 게이트 밖에서 영구히 쓰인다.
+        raise SystemExit("--relay 와 --embed-key 는 같이 쓸 수 없다. "
+                         "중계판은 키를 서버에만 둔다")
 
     if args.embed_key:
         import os
@@ -559,7 +675,10 @@ def main(argv=None) -> int:
     html = args.source.read_text(encoding="utf-8")
     before = len(html.encode())
     html, stats = bundle(html, args.assets)
-    html, n_err = soften_llm(html)
+    html, n_model = swap_model(html, args.model)
+    shim = RELAY_SHIM if args.relay else BROWSER_SHIM
+    note = RELAY_NOTE if args.relay else OFFLINE_NOTE
+    html, n_err = soften_llm(html, shim, note)
     html, n_img = inline_remote_images(html)
     html, n_dot = strip_middle_dot(html)
     # 아래 셋은 가운뎃점 치환 뒤에 와야 한다. Babel 은 3MB 짜리 압축 코드라
@@ -601,7 +720,11 @@ def main(argv=None) -> int:
     size = len(html.encode())
     print(f"CSS {stats['css']}개, JS {stats['js']}개, 폰트 {stats['font']}개를 넣었다")
     print(f"심층 검증 오류 문구 {n_err}곳을 사본용 설명으로 교체")
-    print("브라우저에서 API 를 직접 부르는 shim 을 넣었다 (키는 보는 사람이 입력)")
+    print(f"모델을 {MODEL_FROM} -> {args.model} 로 {n_model}곳 바꿨다")
+    if args.relay:
+        print(f"중계 shim 을 넣었다 ({RELAY_ENDPOINT} 를 부른다. 키는 서버에만 있다)")
+    else:
+        print("브라우저에서 API 를 직접 부르는 shim 을 넣었다 (키는 보는 사람이 입력)")
     print("판정 패널을 넣었다 (문제지를 돌리고 verdicts.json 으로 내려받기)")
     print(f"상품 사진 {n_img}장을 파일 안에 넣었다")
     print(f"가운뎃점 {n_dot}곳을 쉼표로 바꿨다")

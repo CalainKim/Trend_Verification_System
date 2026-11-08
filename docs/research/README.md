@@ -2,6 +2,8 @@
 
 **논문 질문:** 시계열 근거를 결합하면 급상승한 상품의 지속성 판단이 개선되는가?
 
+[초안 PR #18](https://github.com/CalainKim/Trend_Verification_System/pull/18) · [노션 연구 페이지](https://app.notion.com/p/4127af36aa5f809caee6d16cb8f4b6d1)
+
 맨투맨 8상품의 C(원시 순위 + 계산 특징) 입력으로 Claude/A40 Qwen 총 16회 실행과 봉인 정답 채점을 완료했다. **마지막 순위 기준선 7 정답, Claude 6 정답·1 보류, Qwen 7 보류**로 이번에는 LLM의 추가 이점을 확인하지 못했다. 세 방법 모두 오답은 1건이다. 학습이나 사이트 변경은 하지 않았다. A/B/C 전체 효과 비교는 후속 범위다.
 
 | 문서 | 내용 |

@@ -79,3 +79,19 @@ API 사용량이 확인되지 않은 실패는 요청의 보수적 최대 비용
 ## 이번 결과의 해석
 
 C와 단순 기준선의 예비 수치만 해석한다. A/B/C 효과, 시간 일반화, 학습 효과는 아직 측정하지 않았다. 전체 정답·오답·보류·실패 비율과 답변율을 함께 읽고, 근거 ID가 맞는 것을 설명 내용 전체가 참이라는 뜻으로 해석하지 않는다. 논문 초안은 [PAPER_DRAFT.md](PAPER_DRAFT.md)에서 이어간다.
+
+## forecast-v2: 같은 Qwen 8건의 과제 수행 확인
+
+현재 결정한 예측·보류 규칙은 [FORECAST_V2.md](FORECAST_V2.md)에 있다. v1은 기본값으로 보존하며, 새 버전은 명시적으로 선택한다. 동일한 사용자 JSON에 시스템 지시만 바뀐다.
+
+```powershell
+python scripts/run_reasoning_smoke.py preview --prompt-version forecast-v2 --input-view structured --output-dir private/research-preview-v2
+python scripts/run_reasoning_smoke.py run --provider a40 --prompt-version forecast-v2 --input-view structured --config private/research-pilot/config-v2.json --store private/research-pilot/forecast-v2
+python scripts/run_reasoning_smoke.py freeze --store private/research-pilot/forecast-v2
+```
+
+이 실행에서는 `score`를 호출하지 않는다. 미래값 부재로 중단하는지, 문턱을 관측값처럼 쓰는지, 실제 과거 근거로 예측 또는 허용된 HOLD를 설명하는지만 점검한다. 평가 정답과 정확도 비교는 이번 목적에 포함하지 않는다.
+
+새 store를 쓰더라도 예산이 새로 생기는 것은 아니다. config-v2는 기존 Claude·GPU 사용 추정을 총 $5에서 차감한 잔여액을 사용하고, 추가 호출 8회·재시도 0회·이번 GPU 세션 1,800초로 제한했다. 기존 GPU 886초와 합쳐 7,200초 안이다. 시간은 서버 준비·다운로드·대기까지 포함한 재시작 전 시각으로 기록하고 Pod 자체를 기한 안에 중지해야 한다.
+
+재실행의 환경 차이(호스트 이전, 캐시 복구 등)와 실제 종료 시각은 별도 비용·환경 기록으로 남긴다. 원본 v1 결과나 프롬프트를 덮어쓰지 않으며, 버전이 다른 저장소 재개는 실행기가 거부한다.

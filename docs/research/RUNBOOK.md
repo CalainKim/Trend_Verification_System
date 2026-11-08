@@ -37,11 +37,15 @@ Claude만 먼저 실행할 수 있다. 처음 1건은 전체 8건에 포함하�
 .venv/Scripts/python scripts/run_reasoning_smoke.py run --provider claude --store private/research-pilot/live --config private/research-pilot/config.json
 ```
 
-A40에는 공식 Qwen3-8B 가중치와 vLLM을 사용한다. 모델 서버는 원격 `127.0.0.1`에 바인딩하고 SSH 터널로 연결한다. 학습·외부 공개 API는 만들지 않는다. 다음은 서버 실행 형태이며, 설치한 vLLM 버전과 모델 revision을 실행 기록에 남긴다.
+A40에는 공식 Qwen3-8B 가중치와 vLLM을 사용한다. 모델 서버는 원격 `127.0.0.1`에 바인딩하고 SSH 터널로 연결한다. 학습·외부 공개 API는 만들지 않는다. 이번 확인 환경은 `runpod/pytorch:1.5.0-cu1281-torch280-ubuntu2404`, Python 3.12.3, PyTorch 2.8.0이다.
 
 ```bash
-vllm serve Qwen/Qwen3-8B --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 16384 --max-num-seqs 1 --gpu-memory-utilization 0.85 --reasoning-parser qwen3
+uv venv --system-site-packages /tmp/trend-vllm-env
+uv pip install --python /tmp/trend-vllm-env/bin/python vllm==0.10.2 transformers==4.57.6 huggingface-hub==0.36.2
+HF_HOME=/workspace/trend-models/huggingface HF_HUB_DISABLE_IMPLICIT_TOKEN=1 VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1 OMP_NUM_THREADS=4 /tmp/trend-vllm-env/bin/vllm serve Qwen/Qwen3-8B --revision b968826d9c46dd6066d109eabc6255188de91218 --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 16384 --max-num-seqs 1 --gpu-memory-utilization 0.85 --reasoning-parser qwen3 --download-dir /workspace/trend-models/huggingface --disable-log-requests
 ```
+
+실제 요청은 thinking을 켜고 temperature 0.6을 전달했다. 모델 기본값 top_p 0.95·top_k 20과 서버 기본값 min_p 0·반복 페널티 1을 사용했다. 엔진 seed는 0이며 요청 seed는 별도로 지정하지 않았다. 패키지·컴파일 캐시는 컨테이너 초기화 시 사라지고 `/workspace`의 가중치만 보존된다. 같은 입력의 반복 호출이 완전히 결정적이라고 가정하지 않는다.
 
 Runpod Connect에 실제로 표시된 호스트·포트와 기존 SSH 키로 연결한다. 아래의 대괄호 자리는 현재 연결 정보로 바꾼다. 이전 화면의 IP를 재사용하지 않는다.
 

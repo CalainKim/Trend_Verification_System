@@ -1,0 +1,547 @@
+{
+  "scored_at": "2026-11-08T12:55:31.402158+00:00",
+  "prediction_sha256": "2235f1e082a397f5e046ab888d04bd7d7af13edd3f12f5a3349f4353fba8f04e",
+  "labels_sha256": "abb50ca0bcfb9ad8f8b9405c1b01e68c6d9c077f2128f9f0aa15b8a07143ead5",
+  "cards": [
+    {
+      "provider": "a40",
+      "input_view": "structured",
+      "n_cases": 8,
+      "n_answered": 1,
+      "n_complete": 8,
+      "n_hold": 7,
+      "n_failed": 0,
+      "n_missing": 0,
+      "n_recorded_failures": 0,
+      "correct": 0,
+      "wrong": 1,
+      "coverage": 0.125,
+      "completion_rate": 1.0,
+      "answered_accuracy": 0.0,
+      "answered_accuracy_ci95": [
+        0.0,
+        0.7934567085261071
+      ],
+      "ci_interpretation": "Descriptive binomial interval only; same-date/product dependence is not accounted for, so this is not evidence of temporal generalization.",
+      "correct_rate": 0.0,
+      "wrong_rate": 0.125,
+      "hold_rate": 0.875,
+      "failure_rate": 0.0,
+      "persist_precision": 0.0,
+      "persist_recall": 0.0,
+      "persist_f1": 0.0,
+      "actual_persist": 4,
+      "actual_fade": 4,
+      "confusion": {
+        "persist": {
+          "WATCH": 0,
+          "NOT_SUPPORTED": 0,
+          "HOLD": 4
+        },
+        "fade": {
+          "WATCH": 1,
+          "NOT_SUPPORTED": 0,
+          "HOLD": 3
+        }
+      },
+      "failures_by_truth": {
+        "persist": 0,
+        "fade": 0
+      },
+      "status_counts": {
+        "complete": 8,
+        "failed": 0,
+        "invalid": 0,
+        "budget_skipped": 0,
+        "interrupted": 0,
+        "missing": 0
+      },
+      "elapsed_seconds_total": 319.02527,
+      "elapsed_seconds_mean": 39.87815875,
+      "elapsed_seconds_median": 29.9749615,
+      "elapsed_record_count": 8,
+      "cost_total_usd": null,
+      "cost_mean_usd": null,
+      "cost_record_count": 0,
+      "actual_cost_total_usd": null,
+      "actual_cost_known_subtotal_usd": null,
+      "actual_cost_record_count": 0,
+      "actual_cost_missing_count": 8,
+      "actual_cost_complete": false,
+      "accounted_cost_total_usd": null,
+      "accounted_cost_known_subtotal_usd": null,
+      "accounted_cost_record_count": 0,
+      "accounted_cost_missing_count": 8,
+      "accounted_cost_complete": false,
+      "reserved_cost_record_count": 0,
+      "cost_interpretation": "Actual costs use reported billable usage. Accounted costs additionally include conservative reservations for unknown charges, not verified spend. Partial known subtotals are not cohort totals. GPU wall-clock/storage costs require the separate runtime record.",
+      "usage": {
+        "input_tokens": 16017,
+        "output_tokens": 9688,
+        "reasoning_tokens": null
+      },
+      "usage_record_counts": {
+        "input_tokens": 8,
+        "output_tokens": 8,
+        "reasoning_tokens": 0
+      },
+      "usage_complete_record_count": 8,
+      "usage_complete": true,
+      "usage_interpretation": "Token sums contain known usage only. A failed attempt without usage keeps usage_complete false even if a later retry succeeds.",
+      "numeric_review_flag_count": 3,
+      "invalid_evidence_id_count": 0,
+      "evidence_check_interpretation": "Valid IDs and literal numeric matches do not establish factual support. Numeric flags require human inspection."
+    },
+    {
+      "provider": "always_fade",
+      "input_view": "baseline",
+      "n_cases": 8,
+      "n_answered": 8,
+      "n_complete": 8,
+      "n_hold": 0,
+      "n_failed": 0,
+      "n_missing": 0,
+      "n_recorded_failures": 0,
+      "correct": 4,
+      "wrong": 4,
+      "coverage": 1.0,
+      "completion_rate": 1.0,
+      "answered_accuracy": 0.5,
+      "answered_accuracy_ci95": [
+        0.21521252682444186,
+        0.7847874731755582
+      ],
+      "ci_interpretation": "Descriptive binomial interval only; same-date/product dependence is not accounted for, so this is not evidence of temporal generalization.",
+      "correct_rate": 0.5,
+      "wrong_rate": 0.5,
+      "hold_rate": 0.0,
+      "failure_rate": 0.0,
+      "persist_precision": null,
+      "persist_recall": 0.0,
+      "persist_f1": null,
+      "actual_persist": 4,
+      "actual_fade": 4,
+      "confusion": {
+        "persist": {
+          "WATCH": 0,
+          "NOT_SUPPORTED": 4,
+          "HOLD": 0
+        },
+        "fade": {
+          "WATCH": 0,
+          "NOT_SUPPORTED": 4,
+          "HOLD": 0
+        }
+      },
+      "failures_by_truth": {
+        "persist": 0,
+        "fade": 0
+      },
+      "status_counts": {
+        "complete": 8,
+        "failed": 0,
+        "invalid": 0,
+        "budget_skipped": 0,
+        "interrupted": 0,
+        "missing": 0
+      },
+      "elapsed_seconds_total": 0.0,
+      "elapsed_seconds_mean": 0.0,
+      "elapsed_seconds_median": 0.0,
+      "elapsed_record_count": 8,
+      "cost_total_usd": 0.0,
+      "cost_mean_usd": 0.0,
+      "cost_record_count": 8,
+      "actual_cost_total_usd": 0.0,
+      "actual_cost_known_subtotal_usd": 0.0,
+      "actual_cost_record_count": 8,
+      "actual_cost_missing_count": 0,
+      "actual_cost_complete": true,
+      "accounted_cost_total_usd": 0.0,
+      "accounted_cost_known_subtotal_usd": 0.0,
+      "accounted_cost_record_count": 8,
+      "accounted_cost_missing_count": 0,
+      "accounted_cost_complete": true,
+      "reserved_cost_record_count": 0,
+      "cost_interpretation": "Actual costs use reported billable usage. Accounted costs additionally include conservative reservations for unknown charges, not verified spend. Partial known subtotals are not cohort totals. GPU wall-clock/storage costs require the separate runtime record.",
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null
+      },
+      "usage_record_counts": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "usage_complete_record_count": 0,
+      "usage_complete": false,
+      "usage_interpretation": "Token sums contain known usage only. A failed attempt without usage keeps usage_complete false even if a later retry succeeds.",
+      "numeric_review_flag_count": 0,
+      "invalid_evidence_id_count": 0,
+      "evidence_check_interpretation": "Valid IDs and literal numeric matches do not establish factual support. Numeric flags require human inspection."
+    },
+    {
+      "provider": "always_persist",
+      "input_view": "baseline",
+      "n_cases": 8,
+      "n_answered": 8,
+      "n_complete": 8,
+      "n_hold": 0,
+      "n_failed": 0,
+      "n_missing": 0,
+      "n_recorded_failures": 0,
+      "correct": 4,
+      "wrong": 4,
+      "coverage": 1.0,
+      "completion_rate": 1.0,
+      "answered_accuracy": 0.5,
+      "answered_accuracy_ci95": [
+        0.21521252682444186,
+        0.7847874731755582
+      ],
+      "ci_interpretation": "Descriptive binomial interval only; same-date/product dependence is not accounted for, so this is not evidence of temporal generalization.",
+      "correct_rate": 0.5,
+      "wrong_rate": 0.5,
+      "hold_rate": 0.0,
+      "failure_rate": 0.0,
+      "persist_precision": 0.5,
+      "persist_recall": 1.0,
+      "persist_f1": 0.6666666666666666,
+      "actual_persist": 4,
+      "actual_fade": 4,
+      "confusion": {
+        "persist": {
+          "WATCH": 4,
+          "NOT_SUPPORTED": 0,
+          "HOLD": 0
+        },
+        "fade": {
+          "WATCH": 4,
+          "NOT_SUPPORTED": 0,
+          "HOLD": 0
+        }
+      },
+      "failures_by_truth": {
+        "persist": 0,
+        "fade": 0
+      },
+      "status_counts": {
+        "complete": 8,
+        "failed": 0,
+        "invalid": 0,
+        "budget_skipped": 0,
+        "interrupted": 0,
+        "missing": 0
+      },
+      "elapsed_seconds_total": 0.0,
+      "elapsed_seconds_mean": 0.0,
+      "elapsed_seconds_median": 0.0,
+      "elapsed_record_count": 8,
+      "cost_total_usd": 0.0,
+      "cost_mean_usd": 0.0,
+      "cost_record_count": 8,
+      "actual_cost_total_usd": 0.0,
+      "actual_cost_known_subtotal_usd": 0.0,
+      "actual_cost_record_count": 8,
+      "actual_cost_missing_count": 0,
+      "actual_cost_complete": true,
+      "accounted_cost_total_usd": 0.0,
+      "accounted_cost_known_subtotal_usd": 0.0,
+      "accounted_cost_record_count": 8,
+      "accounted_cost_missing_count": 0,
+      "accounted_cost_complete": true,
+      "reserved_cost_record_count": 0,
+      "cost_interpretation": "Actual costs use reported billable usage. Accounted costs additionally include conservative reservations for unknown charges, not verified spend. Partial known subtotals are not cohort totals. GPU wall-clock/storage costs require the separate runtime record.",
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null
+      },
+      "usage_record_counts": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "usage_complete_record_count": 0,
+      "usage_complete": false,
+      "usage_interpretation": "Token sums contain known usage only. A failed attempt without usage keeps usage_complete false even if a later retry succeeds.",
+      "numeric_review_flag_count": 0,
+      "invalid_evidence_id_count": 0,
+      "evidence_check_interpretation": "Valid IDs and literal numeric matches do not establish factual support. Numeric flags require human inspection."
+    },
+    {
+      "provider": "claude",
+      "input_view": "structured",
+      "n_cases": 8,
+      "n_answered": 7,
+      "n_complete": 8,
+      "n_hold": 1,
+      "n_failed": 0,
+      "n_missing": 0,
+      "n_recorded_failures": 0,
+      "correct": 6,
+      "wrong": 1,
+      "coverage": 0.875,
+      "completion_rate": 1.0,
+      "answered_accuracy": 0.8571428571428571,
+      "answered_accuracy_ci95": [
+        0.48686549668097007,
+        0.9743210440510253
+      ],
+      "ci_interpretation": "Descriptive binomial interval only; same-date/product dependence is not accounted for, so this is not evidence of temporal generalization.",
+      "correct_rate": 0.75,
+      "wrong_rate": 0.125,
+      "hold_rate": 0.125,
+      "failure_rate": 0.0,
+      "persist_precision": 1.0,
+      "persist_recall": 0.5,
+      "persist_f1": 0.6666666666666666,
+      "actual_persist": 4,
+      "actual_fade": 4,
+      "confusion": {
+        "persist": {
+          "WATCH": 2,
+          "NOT_SUPPORTED": 1,
+          "HOLD": 1
+        },
+        "fade": {
+          "WATCH": 0,
+          "NOT_SUPPORTED": 4,
+          "HOLD": 0
+        }
+      },
+      "failures_by_truth": {
+        "persist": 0,
+        "fade": 0
+      },
+      "status_counts": {
+        "complete": 8,
+        "failed": 0,
+        "invalid": 0,
+        "budget_skipped": 0,
+        "interrupted": 0,
+        "missing": 0
+      },
+      "elapsed_seconds_total": 54.073478,
+      "elapsed_seconds_mean": 6.75918475,
+      "elapsed_seconds_median": 5.767417,
+      "elapsed_record_count": 8,
+      "cost_total_usd": 0.10114000000000001,
+      "cost_mean_usd": 0.012642500000000001,
+      "cost_record_count": 8,
+      "actual_cost_total_usd": 0.10114000000000001,
+      "actual_cost_known_subtotal_usd": 0.10114000000000001,
+      "actual_cost_record_count": 8,
+      "actual_cost_missing_count": 0,
+      "actual_cost_complete": true,
+      "accounted_cost_total_usd": 0.10114000000000001,
+      "accounted_cost_known_subtotal_usd": 0.10114000000000001,
+      "accounted_cost_record_count": 8,
+      "accounted_cost_missing_count": 0,
+      "accounted_cost_complete": true,
+      "reserved_cost_record_count": 0,
+      "cost_interpretation": "Actual costs use reported billable usage. Accounted costs additionally include conservative reservations for unknown charges, not verified spend. Partial known subtotals are not cohort totals. GPU wall-clock/storage costs require the separate runtime record.",
+      "usage": {
+        "input_tokens": 21535,
+        "output_tokens": 5807,
+        "reasoning_tokens": null
+      },
+      "usage_record_counts": {
+        "input_tokens": 8,
+        "output_tokens": 8,
+        "reasoning_tokens": 0
+      },
+      "usage_complete_record_count": 8,
+      "usage_complete": true,
+      "usage_interpretation": "Token sums contain known usage only. A failed attempt without usage keeps usage_complete false even if a later retry succeeds.",
+      "numeric_review_flag_count": 63,
+      "invalid_evidence_id_count": 0,
+      "evidence_check_interpretation": "Valid IDs and literal numeric matches do not establish factual support. Numeric flags require human inspection."
+    },
+    {
+      "provider": "last3_mean",
+      "input_view": "baseline",
+      "n_cases": 8,
+      "n_answered": 8,
+      "n_complete": 8,
+      "n_hold": 0,
+      "n_failed": 0,
+      "n_missing": 0,
+      "n_recorded_failures": 0,
+      "correct": 4,
+      "wrong": 4,
+      "coverage": 1.0,
+      "completion_rate": 1.0,
+      "answered_accuracy": 0.5,
+      "answered_accuracy_ci95": [
+        0.21521252682444186,
+        0.7847874731755582
+      ],
+      "ci_interpretation": "Descriptive binomial interval only; same-date/product dependence is not accounted for, so this is not evidence of temporal generalization.",
+      "correct_rate": 0.5,
+      "wrong_rate": 0.5,
+      "hold_rate": 0.0,
+      "failure_rate": 0.0,
+      "persist_precision": 0.5,
+      "persist_recall": 0.75,
+      "persist_f1": 0.6,
+      "actual_persist": 4,
+      "actual_fade": 4,
+      "confusion": {
+        "persist": {
+          "WATCH": 3,
+          "NOT_SUPPORTED": 1,
+          "HOLD": 0
+        },
+        "fade": {
+          "WATCH": 3,
+          "NOT_SUPPORTED": 1,
+          "HOLD": 0
+        }
+      },
+      "failures_by_truth": {
+        "persist": 0,
+        "fade": 0
+      },
+      "status_counts": {
+        "complete": 8,
+        "failed": 0,
+        "invalid": 0,
+        "budget_skipped": 0,
+        "interrupted": 0,
+        "missing": 0
+      },
+      "elapsed_seconds_total": 0.0,
+      "elapsed_seconds_mean": 0.0,
+      "elapsed_seconds_median": 0.0,
+      "elapsed_record_count": 8,
+      "cost_total_usd": 0.0,
+      "cost_mean_usd": 0.0,
+      "cost_record_count": 8,
+      "actual_cost_total_usd": 0.0,
+      "actual_cost_known_subtotal_usd": 0.0,
+      "actual_cost_record_count": 8,
+      "actual_cost_missing_count": 0,
+      "actual_cost_complete": true,
+      "accounted_cost_total_usd": 0.0,
+      "accounted_cost_known_subtotal_usd": 0.0,
+      "accounted_cost_record_count": 8,
+      "accounted_cost_missing_count": 0,
+      "accounted_cost_complete": true,
+      "reserved_cost_record_count": 0,
+      "cost_interpretation": "Actual costs use reported billable usage. Accounted costs additionally include conservative reservations for unknown charges, not verified spend. Partial known subtotals are not cohort totals. GPU wall-clock/storage costs require the separate runtime record.",
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null
+      },
+      "usage_record_counts": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "usage_complete_record_count": 0,
+      "usage_complete": false,
+      "usage_interpretation": "Token sums contain known usage only. A failed attempt without usage keeps usage_complete false even if a later retry succeeds.",
+      "numeric_review_flag_count": 0,
+      "invalid_evidence_id_count": 0,
+      "evidence_check_interpretation": "Valid IDs and literal numeric matches do not establish factual support. Numeric flags require human inspection."
+    },
+    {
+      "provider": "last_rank",
+      "input_view": "baseline",
+      "n_cases": 8,
+      "n_answered": 8,
+      "n_complete": 8,
+      "n_hold": 0,
+      "n_failed": 0,
+      "n_missing": 0,
+      "n_recorded_failures": 0,
+      "correct": 7,
+      "wrong": 1,
+      "coverage": 1.0,
+      "completion_rate": 1.0,
+      "answered_accuracy": 0.875,
+      "answered_accuracy_ci95": [
+        0.5291051942301386,
+        0.9775830911367038
+      ],
+      "ci_interpretation": "Descriptive binomial interval only; same-date/product dependence is not accounted for, so this is not evidence of temporal generalization.",
+      "correct_rate": 0.875,
+      "wrong_rate": 0.125,
+      "hold_rate": 0.0,
+      "failure_rate": 0.0,
+      "persist_precision": 1.0,
+      "persist_recall": 0.75,
+      "persist_f1": 0.8571428571428571,
+      "actual_persist": 4,
+      "actual_fade": 4,
+      "confusion": {
+        "persist": {
+          "WATCH": 3,
+          "NOT_SUPPORTED": 1,
+          "HOLD": 0
+        },
+        "fade": {
+          "WATCH": 0,
+          "NOT_SUPPORTED": 4,
+          "HOLD": 0
+        }
+      },
+      "failures_by_truth": {
+        "persist": 0,
+        "fade": 0
+      },
+      "status_counts": {
+        "complete": 8,
+        "failed": 0,
+        "invalid": 0,
+        "budget_skipped": 0,
+        "interrupted": 0,
+        "missing": 0
+      },
+      "elapsed_seconds_total": 0.0,
+      "elapsed_seconds_mean": 0.0,
+      "elapsed_seconds_median": 0.0,
+      "elapsed_record_count": 8,
+      "cost_total_usd": 0.0,
+      "cost_mean_usd": 0.0,
+      "cost_record_count": 8,
+      "actual_cost_total_usd": 0.0,
+      "actual_cost_known_subtotal_usd": 0.0,
+      "actual_cost_record_count": 8,
+      "actual_cost_missing_count": 0,
+      "actual_cost_complete": true,
+      "accounted_cost_total_usd": 0.0,
+      "accounted_cost_known_subtotal_usd": 0.0,
+      "accounted_cost_record_count": 8,
+      "accounted_cost_missing_count": 0,
+      "accounted_cost_complete": true,
+      "reserved_cost_record_count": 0,
+      "cost_interpretation": "Actual costs use reported billable usage. Accounted costs additionally include conservative reservations for unknown charges, not verified spend. Partial known subtotals are not cohort totals. GPU wall-clock/storage costs require the separate runtime record.",
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "reasoning_tokens": null
+      },
+      "usage_record_counts": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "usage_complete_record_count": 0,
+      "usage_complete": false,
+      "usage_interpretation": "Token sums contain known usage only. A failed attempt without usage keeps usage_complete false even if a later retry succeeds.",
+      "numeric_review_flag_count": 0,
+      "invalid_evidence_id_count": 0,
+      "evidence_check_interpretation": "Valid IDs and literal numeric matches do not establish factual support. Numeric flags require human inspection."
+    }
+  ],
+  "unattempted_providers": [],
+  "notes": [
+    "Development pilot, one historical cutoff; not an independent temporal test.",
+    "A/B/C effects require the unexecuted comparison views; agreement is not accuracy.",
+    "A40 rental cost is session-level, not a per-token API fee."
+  ]
+}

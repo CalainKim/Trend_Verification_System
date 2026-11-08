@@ -16,6 +16,7 @@
 // 환경변수
 //   ANTHROPIC_API_KEY   필수. Cloudflare 대시보드에서 암호로 넣는다
 //   CLAUDE_MODEL        선택. 기본값은 아래 DEFAULT_MODEL
+//   RELAY_OPEN_UNTIL    선택. 이 시각까지만 연다(ISO). 없으면 닫힘. scripts/relay.sh
 
 const DEFAULT_MODEL = 'claude-sonnet-5-5';
 
@@ -39,7 +40,19 @@ const json = (obj, status) => new Response(JSON.stringify(obj), {
 
 const fail = (status, message) => json({ error: { message } }, status);
 
+// 스위치. 평소에는 닫아 두고 교수님 미팅 같은 시연 때만 정한 시각까지 연다.
+// 값이 없거나 시각이 지났거나 읽을 수 없으면 닫힌 것으로 본다. 닫는 것을
+// 잊어도 마감 시각이 지나면 저절로 닫힌다. 여닫기는 scripts/relay.sh 로 한다.
+export function relayOpen(env, now = Date.now()) {
+  const until = Date.parse((env && env.RELAY_OPEN_UNTIL) || '');
+  return Number.isFinite(until) && until > now;
+}
+
 export async function onRequestPost({ request, env }) {
+  // 키를 보기 전에 막는다. 닫혀 있으면 Anthropic 에 요청이 한 번도 나가지 않는다
+  if (!relayOpen(env)) {
+    return fail(503, '심층 검증은 지금 닫혀 있습니다. 시연할 때만 열어 둡니다.');
+  }
   if (!env.ANTHROPIC_API_KEY) {
     return fail(500, '서버에 ANTHROPIC_API_KEY 가 설정되지 않았습니다.');
   }

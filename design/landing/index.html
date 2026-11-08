@@ -2,9 +2,20 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MUSINSA TrendCheck</title>
 <meta name="description" content="흩어진 패션 신호를 모으고, 과거의 데이터만으로 진짜 트렌드였는지 판정하는 검증 시스템입니다.">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TrendCheck">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>
+// 홈 화면 앱(PWA). 배포 주소에서만 등록되고, 미리보기에서 실패해도 화면에는 영향이 없다
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+</script>
 <link rel="icon" href="assets/musinsa-logo.png">
 <style>
 /* 글꼴: V9 디자인 시스템의 Pretendard 를 먼저 쓰고, 없으면 CDN 으로 받는다 */

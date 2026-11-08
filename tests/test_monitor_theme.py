@@ -37,3 +37,11 @@ def test_두_번_돌려도_한_번만_들어간다():
 def test_빌드_스크립트가_테마를_입힌다():
     sh = (ROOT / "scripts" / "build_web.sh").read_text(encoding="utf-8")
     assert "apply_monitor_theme.py" in sh
+
+
+def test_폰_배치와_앱_설치_정보를_넣는다():
+    out, _ = theme.apply(SAMPLE.replace('<head>', '<head><meta name="viewport" content="width=device-width, initial-scale=1">'))
+    assert 'id="tc-musinsa-mobile"' in out
+    assert 'nav[aria-label="작업 공간"]' in out, "아이콘 줄을 고르는 기준점이 빠졌다"
+    assert 'rel="manifest"' in out and "serviceWorker" in out
+    assert "viewport-fit=cover" in out

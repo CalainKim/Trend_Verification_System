@@ -35,6 +35,17 @@ mkdir -p "$OUT/assets/fonts"
 cp "$LANDING/assets/musinsa-logo.png" "$OUT/assets/"
 cp -R "$LANDING/assets/brands" "$OUT/assets/brands"
 cp -R "$LANDING/assets/stack" "$OUT/assets/stack"
+# 홈 화면 앱(PWA). 서비스 워커는 범위가 사이트 전체가 되도록 맨 위에 둔다
+cp "$LANDING/manifest.webmanifest" "$LANDING/sw.js" "$LANDING/offline.html" "$OUT/"
+cp -R "$LANDING/assets/pwa" "$OUT/assets/pwa"
+# 서비스 워커를 브라우저가 오래 기억하면 고친 것이 늦게 퍼진다. 매번 새로 묻게 한다
+cat > "$OUT/_headers" <<'HD'
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: no-cache
+HD
 # 글꼴은 V9 디자인 시스템 것을 그대로 쓴다. 랜딩은 이 경로를 두 번째로 찾는다
 cp design/runtime/_ds/trendcheck-design-system-*/assets/fonts/PretendardVariable.woff2 "$OUT/assets/fonts/"
 # 첫 화면 3D 영상. 없으면 랜딩이 캔버스 장면으로 대신 돌기 때문에 멈추지 않고 알리기만 한다

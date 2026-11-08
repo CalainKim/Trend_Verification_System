@@ -1,0 +1,18 @@
+{
+  "name": "MUSINSA TrendCheck",
+  "short_name": "TrendCheck",
+  "description": "흩어진 패션 신호를 모으고, 과거의 데이터만으로 진짜 트렌드였는지 판정합니다.",
+  "lang": "ko",
+  "id": "/app/",
+  "start_url": "/app/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f5f5",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "/assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/pwa/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

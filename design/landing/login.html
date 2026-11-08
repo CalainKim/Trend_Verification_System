@@ -4,8 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0b0b0b">
 <title>로그인 | MUSINSA TrendCheck</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0b0b0b">
+<link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TrendCheck">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>
+// 홈 화면 앱(PWA). 배포 주소에서만 등록되고, 미리보기에서 실패해도 화면에는 영향이 없다
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+</script>
 <link rel="icon" href="assets/musinsa-logo.png">
 <style>
 @font-face{font-family:"Pretendard Variable";src:url("../runtime/_ds/trendcheck-design-system-f78377aa-b6bb-412f-bf41-b7913ec99fcb/assets/fonts/PretendardVariable.woff2") format("woff2-variations"),url("assets/fonts/PretendardVariable.woff2") format("woff2-variations"),url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");font-weight:45 920;font-display:swap}

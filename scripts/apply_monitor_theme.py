@@ -94,6 +94,68 @@ RGB_MAP = {
 }
 
 
+# 폰 배치. 원본은 넓은 화면용 세 칸 구성이라 폰에서는 왼쪽 아이콘 줄이 72px 을
+# 차지하고, 아래 상태 줄과 열린 패널이 본문을 찌그러뜨린다. 원본이 인라인 스타일로
+# 그리므로 고정된 기준점(nav 의 aria-label, PillNavV 의 클래스)으로 고른다.
+#   아이콘 줄      화면 아래 탭 막대로. 그룹 이름과 로고, 명령 창 버튼은 숨긴다
+#   아래 상태 줄   숨긴다
+#   탐색 패널      본문을 밀지 않고 위에 겹쳐 뜨는 판으로
+NAV = 'nav[aria-label="작업 공간"]'
+MOBILE_CSS = """
+<style id="tc-musinsa-mobile">
+@media (max-width:760px){
+  div:has(> div > @NAV){grid-template-rows:minmax(0,1fr)!important}
+  div:has(> div > @NAV) > div:nth-child(2){display:none!important}
+
+  @NAV{
+    position:fixed!important;left:0;right:0;bottom:0;z-index:30;
+    width:auto!important;height:calc(64px + env(safe-area-inset-bottom))!important;
+    padding:0 6px env(safe-area-inset-bottom)!important;
+    flex-direction:row!important;align-items:center!important;justify-content:center!important;
+    border-right:0!important;border-top:1px solid var(--color-hairline)!important;
+    background:rgba(250,250,250,.84)!important;
+    -webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);
+  }
+  @NAV > img, @NAV > span, @NAV > button{display:none!important}
+  @NAV .pnv{flex-direction:row;width:100%}
+  @NAV .pnv__bar{width:100%;padding:0;background:transparent;box-shadow:none}
+  @NAV .pnv__list{flex-direction:row;justify-content:space-around;align-items:center;gap:0}
+  @NAV .pnv__grp, @NAV .pnv__sep, @NAV .pnv__glide{display:none!important}
+  @NAV .pnv__item{width:44px;height:44px;overflow:hidden}
+  @NAV .pnv__item[aria-current="page"]{background:var(--color-ink);color:#fff}
+  @NAV + div, @NAV ~ div{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+
+  div:has(> @NAV) > aside{
+    position:fixed!important;left:0;top:0;bottom:calc(64px + env(safe-area-inset-bottom));z-index:28;
+    width:min(86vw,340px)!important;max-width:none!important;
+    background:rgba(250,250,250,.9)!important;
+    -webkit-backdrop-filter:blur(26px) saturate(160%);backdrop-filter:blur(26px) saturate(160%);
+    box-shadow:0 24px 70px rgba(0,0,0,.28);
+  }
+  /* 본문 뒤에 오는 패널(오른쪽 속성)은 오른쪽에서 뜬다 */
+  div:has(> @NAV) > div ~ aside{left:auto!important;right:0}
+}
+</style>
+""".replace("@NAV", NAV)
+
+# 홈 화면 앱(PWA) 설치 정보. 랜딩과 로그인에도 같은 것이 들어 있다
+PWA_HEAD = """
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#f5f5f5">
+<link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TrendCheck">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+</script>
+"""
+
+VIEWPORT_OLD = '<meta name="viewport" content="width=device-width, initial-scale=1">'
+VIEWPORT_NEW = '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+
+
 def apply(html: str) -> tuple[str, dict]:
     stats = {"hex": 0, "rgba": 0, "css": 0}
     if MARK in html:
@@ -110,7 +172,9 @@ def apply(html: str) -> tuple[str, dict]:
     i = html.lower().rfind("</head>")
     if i == -1:
         raise SystemExit("</head> 를 찾지 못했다. 테마를 넣을 자리가 없다")
-    html = html[:i] + THEME_CSS + html[i:]
+    html = html[:i] + THEME_CSS + MOBILE_CSS + PWA_HEAD + html[i:]
+    # 아이폰 아래쪽 홈 막대 영역까지 쓰려면 viewport-fit=cover 가 있어야 한다
+    html = html.replace(VIEWPORT_OLD, VIEWPORT_NEW, 1)
     stats["css"] = 1
     return html, stats
 

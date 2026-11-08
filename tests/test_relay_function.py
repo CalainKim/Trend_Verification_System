@@ -93,3 +93,19 @@ def test_저장소_루트에_wrangler_설정을_두지_않는다():
     for name in ("wrangler.jsonc", "wrangler.json", "wrangler.toml"):
         assert not (ROOT / name).exists(), (
             f"{name} 이 루트에 있다. 무엇을 올리는지 확인하고 build/web 안으로 옮겨라")
+
+
+def test_중계는_평소에_닫혀_있다():
+    """심층 검증은 시연 때만 연다. 스위치 검사가 키 검사보다 먼저여야 한다.
+
+    닫혀 있을 때 Anthropic 에 요청이 나가면 막은 의미가 없다.
+    """
+    src = (ROOT / "web" / "functions" / "api" / "complete.js").read_text(encoding="utf-8")
+    assert "RELAY_OPEN_UNTIL" in src
+    assert src.index("relayOpen(env)") < src.index("if (!env.ANTHROPIC_API_KEY)")
+
+
+def test_여닫는_스크립트가_있다():
+    sh = (ROOT / "scripts" / "relay.sh").read_text(encoding="utf-8")
+    assert "RELAY_OPEN_UNTIL" in sh and "open" in sh and "close" in sh
+    assert "12시간" in sh, "오래 열어 두는 것을 막는 상한이 빠졌다"

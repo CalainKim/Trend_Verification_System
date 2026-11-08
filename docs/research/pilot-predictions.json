@@ -1,0 +1,1691 @@
+{
+  "schema_version": 1,
+  "private_prediction_sha256": "2235f1e082a397f5e046ab888d04bd7d7af13edd3f12f5a3349f4353fba8f04e",
+  "public_payload_sha256": "4c6498803e2112de9e1909c5b9334abdcf31e9a447d4b6164ce766725591335f",
+  "public_payload": {
+    "source_commit": "6fc299003000e1eb34afab6514140c84a63cde97",
+    "case_ids": [
+      "rise_2026-10-12_29cm_2816996",
+      "rise_2026-10-12_29cm_2824007",
+      "rise_2026-10-12_29cm_3450561",
+      "rise_2026-10-12_29cm_4125187",
+      "rise_2026-10-12_29cm_4130049",
+      "rise_2026-10-12_29cm_4205647",
+      "rise_2026-10-12_29cm_4205649",
+      "rise_2026-10-12_29cm_4216006"
+    ],
+    "frozen_at": "2026-11-08T12:53:20.366210+00:00",
+    "records": [
+      {
+        "case_id": "rise_2026-10-12_29cm_2816996",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH",
+          "summary": "감지 구간에서 평균 순위가 56위에서 41.29위로 14.71계단 올랐고, 최근 관측(6위, 28위, 19위)이 계속 목록에 있다. 다만 변동이 매우 커서 확신은 낮고, 이후 7개 관측일 평균이 48.64위 이하가 될 것으로 예측해 WATCH로 판단한다.",
+          "support": [
+            {
+              "text": "기준 평균 56위에서 감지 평균 41.29위로 14.71계단 개선됐다. 최소 개선폭 10을 넘고, 지속 기준은 이후 평균 48.64위 이하다.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            },
+            {
+              "text": "목록 내 비율이 기준 구간 0.5714에서 감지 구간 0.7143으로 올랐다. 감지 구간 마지막 날인 2026-10-12에는 6위로, 평균 문턱보다 훨씬 높은 순위다.",
+              "evidence_ids": [
+                "rank_features",
+                "current_rank"
+              ]
+            },
+            {
+              "text": "감지 구간 7일 중 5일이 목록에 있고 순위는 5위, 6위, 19위, 28위, 29위, 33위였다. 마지막 두 번의 관측 중 2026-10-12는 6위였다.",
+              "evidence_ids": [
+                "rank_history"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "감지 구간에도 2026-10-08, 2026-10-10에는 목록에 없었다(계산용 경계값 101). 순위가 5위에서 29위, 101위 등으로 크게 오르내려 평균 문턱 48.64위를 넘길 위험이 있다.",
+              "evidence_ids": [
+                "rank_history"
+              ]
+            },
+            {
+              "text": "기준 구간에도 15위, 24위, 17위 같은 높은 순위가 있었으므로, 이번 상승이 구조적 변화인지 일시적 변동인지 단정하기 어렵다.",
+              "evidence_ids": [
+                "rank_history"
+              ]
+            }
+          ],
+          "unknowns": [
+            "이후 7개 관측일의 실제 순위",
+            "순위 변동 원인(광고, 할인, 리뷰, 검색 변화)",
+            "계절성과 고객군 영향",
+            "목록 부재일에 실제로 몇 위였는지"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 9.830929,
+        "usage": {
+          "input_tokens": 2638,
+          "output_tokens": 769
+        },
+        "usage_complete": true,
+        "cost_usd": 0.012966,
+        "input_hash": "bed63435ad7ca77d627388a50387d67159a2bbb05df904801d313e8cdfe06b83",
+        "prompt_hash": "2e1d84d82439ad99420cabc4ecf05ebabe67d0cab8865a6e5f299b1535e9efce",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "support[0]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "0.7143",
+            "evidence_ids": [
+              "rank_features",
+              "current_rank"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[2]",
+            "number": "2026",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[2]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[2]",
+            "number": "12",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "2026",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "48.64",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2824007",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED",
+          "summary": "감지 구간의 상승은 10/07(64위)과 10/11(68위) 두 번의 단발 진입에서 나온 것으로, 이후 7개 관측일 평균이 96.0위 이하로 유지될 가능성은 낮다고 예측한다. 10/12에는 다시 목록에서 빠졌다.",
+          "support": [
+            {
+              "text": "감지 구간 평균 91위로 기준 평균 101위보다 10계단 개선되어 최소 상승 요건(10)은 겨우 충족한다. 10/07 64위, 10/11 68위로 목록에 든 날의 순위는 상대적으로 높다.",
+              "evidence_ids": [
+                "rank_features",
+                "rank_history"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "감지 구간 7일 중 5일은 목록에 없었고 목록 내 비율은 0.2857이다. 상승이 연속적인 흐름이 아니라 이틀의 산발적 진입에 기댄다.",
+              "evidence_ids": [
+                "rank_features",
+                "rank_history"
+              ]
+            },
+            {
+              "text": "가장 최근 관측인 10/12에 TOP100에서 빠졌다. 현재 상태는 경계값 101로 계산되는 목록 부재이며, 상승분의 절반 유지에 필요한 96.0위 이하 평균과 거리가 있다.",
+              "evidence_ids": [
+                "current_rank",
+                "rank_features"
+              ]
+            },
+            {
+              "text": "이후 7일 평균이 96.0 이하가 되려면 목록 진입이 반복되어야 하는데, 기준 구간 8일(9/29~10/06)에는 진입이 전혀 없었고 최근 4일 중 3일도 목록 밖이었다.",
+              "evidence_ids": [
+                "rank_history",
+                "rank_features"
+              ]
+            }
+          ],
+          "unknowns": [
+            "이후 7개 관측일의 실제 순위",
+            "목록 밖 날의 실제 순위(101위는 계산용 경계값일 뿐임)",
+            "10/07과 10/11 진입의 원인(재입고, 가격·리뷰·검색 변화 등)"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 7.27017,
+        "usage": {
+          "input_tokens": 2807,
+          "output_tokens": 704
+        },
+        "usage_complete": true,
+        "cost_usd": 0.012654,
+        "input_hash": "17225ee4366878027eabad6b69515c33d13788a8df5f9c7ab252c9596a87cc50",
+        "prompt_hash": "d333e6b96793c598eb28a68083f17117b7608ed3b2197253d32b215be779b81c",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "summary",
+            "number": "11",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "11",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "5",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "0.2857",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[2]",
+            "number": "8",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[2]",
+            "number": "9",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[2]",
+            "number": "29",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[2]",
+            "number": "06",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[2]",
+            "number": "4",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[2]",
+            "number": "3",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_3450561",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "감지 평균 45.29위로 기준 평균 58위보다 12.71계단 올랐고 최근 두 날은 13위, 12위다. 그러나 감지 구간 안에서 순위가 11~87위로 크게 흔들려서, 이후 7개 관측일 평균이 51.64위 이하일지 어느 쪽으로도 판단하기 어렵다.",
+          "support": [
+            {
+              "text": "최근 관측일인 2026-10-11과 2026-10-12에 각각 13위, 12위로 감지 평균 45.29위보다 높은 위치에 있다. 이 수준이 이어지면 문턱 51.64위를 충분히 만족한다.",
+              "evidence_ids": [
+                "current_rank",
+                "rank_history"
+              ]
+            },
+            {
+              "text": "감지 구간에서는 7개 수집일 모두 목록에 있어 목록 내 비율이 1.0이다. 기준 구간의 0.5714보다 목록 노출이 안정적이다.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "감지 구간의 순위가 11위, 19위, 20위와 81위, 85위, 87위로 오가며 변동이 크다. 평균 상승분이 일관된 상위권 유지보다는 극단값 혼합의 영향을 받았을 수 있다.",
+              "evidence_ids": [
+                "rank_history"
+              ]
+            },
+            {
+              "text": "상승폭은 12.71계단으로 최소 후보 기준 10을 조금 넘는 수준이다. 유지 문턱은 평균 51.64위 이하로 기준 평균 58위와 큰 차이가 없어, 몇 번의 낮은 순위만으로도 기준 미달이 될 수 있다.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "unknowns": [
+            "확인 구간 7개 수집일의 실제 순위",
+            "최근 12~13위 수준이 이어질지, 80위대로 되돌아갈지 판단할 추가 근거",
+            "순위 변동이 큰 원인(광고, 할인, 리뷰, 검색 변화, 계절성 등)"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 5.769022,
+        "usage": {
+          "input_tokens": 2583,
+          "output_tokens": 717
+        },
+        "usage_complete": true,
+        "cost_usd": 0.012336,
+        "input_hash": "e22a13f84081416550194f0d5b96e8f21bda3d4cc7fc1448bf077c9d17a46922",
+        "prompt_hash": "938dfa7f44c032b92a9c2727a826f5226f650c5e55b934a46b9e7e5405713cd2",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "support[0]",
+            "number": "45.29",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "51.64",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "1.0",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[1]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4125187",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED",
+          "summary": "감지 구간의 상승은 10-10(50위), 10-11(73위) 두 번의 진입에서만 나왔고, 기준일(10-12)에 다시 목록에서 빠졌다. 이후 7개 관측일 평균이 95.36위 이하여야 하는데, 최근 흐름으로 보면 이 기준을 채울 가능성이 낮다고 예측한다.",
+          "support": [
+            {
+              "text": "감지 구간 평균은 89.71위로 기준 평균 101위보다 11.29계단 올랐고, 최소 개선폭 10계단을 넘는다. 10-10에 50위, 10-11에 73위로 두 번 TOP100에 들었다.",
+              "evidence_ids": [
+                "rank_features",
+                "rank_history"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "감지 구간 7일 중 5일은 목록에 없었고 목록 내 비율은 0.2857이다. 상승 전체가 마지막 이틀 진입에 의존한다.",
+              "evidence_ids": [
+                "rank_features",
+                "rank_history"
+              ]
+            },
+            {
+              "text": "cutoff 당일인 2026-10-12에는 다시 TOP100에서 빠졌다(경계값 101). 가장 최근 관측이 상승 유지에 불리하다.",
+              "evidence_ids": [
+                "current_rank",
+                "rank_history"
+              ]
+            },
+            {
+              "text": "지속 기준은 이후 7개 관측일 평균 95.36위 이하다. 목록 밖이면 101로 계산되므로, 7일 중 상당수가 목록에 들고 순위도 양호해야 한다. 현재 자료로는 그런 유지 근거가 약하다.",
+              "evidence_ids": [
+                "rank_features",
+                "rank_history"
+              ]
+            }
+          ],
+          "unknowns": [
+            "이후 7개 관측일의 실제 순위",
+            "10-10, 10-11의 일시 진입 원인(리뷰·할인·검색 변화 등)",
+            "수집 목록이 100개 미만이었던 날이 있는지 여부"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 5.20841,
+        "usage": {
+          "input_tokens": 2800,
+          "output_tokens": 678
+        },
+        "usage_complete": true,
+        "cost_usd": 0.01238,
+        "input_hash": "414bf094f163ceeb8c8cdde47732c7b62149f88e70ea8137a133d220fe95fc55",
+        "prompt_hash": "e4177ad0972a6dd8ec3ba2cdeb092243e6ca2cbd0b4037c855771d1716fb32ca",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "summary",
+            "number": "11",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "11",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "5",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "0.2857",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4130049",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED",
+          "summary": "기준 평균 52위에서 감지 평균 29.29위로 22.71계단 올랐지만, 최근 순위가 31위, 56위로 빠르게 하락했다. 이후 7개 관측일 평균이 40.64위 이하여야 지속 기준을 만족하는데, 현재 흐름상 이를 넘길 가능성이 더 높아 기준 미달로 예측한다.",
+          "support": [
+            {
+              "text": "감지 구간 평균 29.29위는 기준 평균 52위보다 22.71계단 높고, 최소 개선폭 10계단을 넘는다. 두 구간 모두 목록 내 비율은 1.0이다.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            },
+            {
+              "text": "감지 구간 중 10-06~10-10에는 13, 24, 41, 20, 20위로 상위권이 이어졌다.",
+              "evidence_ids": [
+                "rank_history"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "감지 구간 후반에 순위가 20위(10-10), 31위(10-11), 56위(10-12)로 연속 하락했다. 최신 56위는 기준 평균 52위보다 낮은 순위이고 문턱 40.64위에도 한참 못 미친다.",
+              "evidence_ids": [
+                "current_rank",
+                "rank_history"
+              ]
+            },
+            {
+              "text": "순위 변동폭이 커서(13위~74위) 감지 평균 29.29위가 안정적 수준이라고 보기 어렵다. 최신 값이 유지되면 이후 평균이 문턱 40.64위를 넘는다.",
+              "evidence_ids": [
+                "rank_history",
+                "rank_features"
+              ]
+            }
+          ],
+          "unknowns": [
+            "확인 구간 7개 관측일의 실제 순위",
+            "순위 변동의 원인(광고, 할인, 리뷰, 검색 변화 등)",
+            "계절성과 고객군 영향"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 4.892954,
+        "usage": {
+          "input_tokens": 2518,
+          "output_tokens": 641
+        },
+        "usage_complete": true,
+        "cost_usd": 0.011446,
+        "input_hash": "4e07b0dc9f469cd0883bc3731a5ea16eadeafad1f9ab517ab8c5e97d2c97f905",
+        "prompt_hash": "23ad01eb874e3257df8d1614f38878530b0faf4e806eb85fc3fd37a1e5fd5136",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "support[0]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "06",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "11",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "52",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "40.64",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205647",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED",
+          "summary": "감지 구간의 상승은 10/06~10/08 사흘간의 목록 진입(85위, 32위, 77위)에서 나왔다. 그 뒤 10/09~10/12 네 수집일은 모두 목록에서 빠졌다. 지속 기준(이후 7개 관측일 평균 93.21위 이하)을 맞추려면 상승분의 절반 이상이 유지되어야 한다. 그런데 최근 흐름은 경계값 101로 돌아가 있어 기준 미달로 예측한다.",
+          "support": [
+            {
+              "text": "감지 구간에서 7개 수집일 중 3일(10/06 85위, 10/07 32위, 10/08 77위)이 TOP100에 들었다. 기준 구간의 목록 내 비율은 0.0이었고 감지 구간은 0.4286이다. 평균은 101위에서 85.43위로 올라 상승폭은 15.57계단이다.",
+              "evidence_ids": [
+                "rank_history",
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "10/09부터 10/12까지 4개 수집일 연속으로 목록에 없다(계산용 경계값 101). 상승이 10/08 이후 이어지지 못하고 기준 수준으로 되돌아갔다. 2026-10-12 현재도 TOP100에 없다.",
+              "evidence_ids": [
+                "current_rank",
+                "rank_history"
+              ]
+            },
+            {
+              "text": "지속 기준을 만족하려면 이후 7개 관측일 평균이 93.21위 이하여야 한다. 최근 4일이 모두 101인 점을 고려하면, 남은 관측일에 재진입이 많이 필요하다. 상승분 자체도 3일간의 단발성 진입에 의존한다.",
+              "evidence_ids": [
+                "rank_features",
+                "rank_history"
+              ]
+            }
+          ],
+          "unknowns": [
+            "확인 구간 7개 수집일의 실제 순위",
+            "목록 이탈의 원인(재고, 가격·할인, 검색 변화 등)",
+            "10/09 이후 목록 밖에서의 실제 순위 수준"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 5.611315,
+        "usage": {
+          "input_tokens": 2802,
+          "output_tokens": 717
+        },
+        "usage_complete": true,
+        "cost_usd": 0.012774,
+        "input_hash": "0e254ba5297f24bf561f28f4bfe26274a334b465e24902ac73b795d98ec09698",
+        "prompt_hash": "1f8c60c76f388e143ace5fa05a32fdaf8feb2379311ef3aeffc0925fa5467355",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "summary",
+            "number": "06",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "summary",
+            "number": "08",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "summary",
+            "number": "09",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "3",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "06",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "08",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "0.4286",
+            "evidence_ids": [
+              "rank_history",
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "09",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "4",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "08",
+            "evidence_ids": [
+              "current_rank",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[1]",
+            "number": "4",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[1]",
+            "number": "3",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205649",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH",
+          "summary": "감지 구간 후반으로 갈수록 순위가 뚜렷하게 좋아지고 있고 현재 23위다. 이 추세가 이어지면 이후 7개 관측일 평균이 지속 기준(66.57위 이하)을 충족할 가능성이 더 높다고 예측한다. 다만 목록 이탈이 반복돼 불확실성이 크다.",
+          "support": [
+            {
+              "text": "감지 구간 평균 59.57위로 기준 평균 73.57위보다 14.0계단 좋아졌다. 최소 후보 상승폭 10을 넘는다.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            },
+            {
+              "text": "최근 3개 관측일이 41위, 35위, 23위로 연속 개선됐고 2026-10-12 현재 23위다. 이후 평균이 문턱 66.57위보다 낮을 여지가 크다.",
+              "evidence_ids": [
+                "rank_history",
+                "current_rank"
+              ]
+            },
+            {
+              "text": "목록 내 비율이 기준 구간 0.5714에서 감지 구간 0.7143으로 늘었고, 지속 기준은 이후 평균 66.57위 이하로 비교적 완만하다.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "감지 구간에도 2026-10-07, 2026-10-09에 목록 부재(경계값 101)가 있었고, 순위가 29위에서 77위로 크게 출렁였다. 변동성이 커서 평균이 쉽게 악화될 수 있다.",
+              "evidence_ids": [
+                "rank_history"
+              ]
+            },
+            {
+              "text": "감지 평균 59.57위는 101 경계값을 포함한 계산이어서, 상승폭이 일부 목록 이탈 빈도 변화에 좌우될 수 있다.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "unknowns": [
+            "확인 구간 7개 관측일의 실제 순위",
+            "순위 상승을 만든 원인(광고, 할인, 리뷰, 검색 변화 등)",
+            "수집 목록이 100개 미만인 날이 있었는지 여부"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 5.765812,
+        "usage": {
+          "input_tokens": 2648,
+          "output_tokens": 725
+        },
+        "usage_complete": true,
+        "cost_usd": 0.012546,
+        "input_hash": "d5108a64b5fa1dea67b676190be8d64506f83927698784301d4d7e4cce4aa848",
+        "prompt_hash": "9b00f6f92cd98da56b56d085b17b5af4190d1597ba43f2f1c41b7c26ca14f839",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "support[0]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "3",
+            "evidence_ids": [
+              "rank_history",
+              "current_rank"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "66.57",
+            "evidence_ids": [
+              "rank_history",
+              "current_rank"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[2]",
+            "number": "0.7143",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "2026",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[0]",
+            "number": "09",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[1]",
+            "number": "101",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4216006",
+        "provider": "claude",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED",
+          "summary": "감지 구간 평균 59.86위는 기준 평균 101위에서 41.14계단 오른 값이지만, 상승이 불안정하고 최근에 약해지고 있어 이후 7개 관측일 평균이 80.43위 이하로 유지될 가능성은 낮다고 예측한다.",
+          "support": [
+            {
+              "text": "기준 구간은 7일 모두 목록 밖(경계값 101)이었고, 감지 구간은 7일 중 5일이 TOP100에 있어(비율 0.7143) 상승 자체는 확인된다. 평균 상승폭은 41.14계단이다.",
+              "evidence_ids": [
+                "rank_features",
+                "rank_history"
+              ]
+            },
+            {
+              "text": "2026-10-06과 2026-10-08에 8위를 기록했고 2026-10-11에도 68위로 목록에 있었다. 일부 관측일에는 문턱(80.43위)보다 높은 순위가 나왔다.",
+              "evidence_ids": [
+                "rank_history"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "순위가 8, 38, 8, 95, 101(목록 밖), 68, 101(목록 밖)로 크게 흔들린다. 지속 기준을 만족하려면 이후 7개 관측일 평균이 80.43위 이하여야 하는데, 이 변동성에서는 목록 밖 날이 몇 번만 나와도 기준을 넘기 쉽다.",
+              "evidence_ids": [
+                "rank_history",
+                "rank_features"
+              ]
+            },
+            {
+              "text": "감지 구간의 후반부로 갈수록 약해진다. 최고 순위(8위)는 구간 초반에 몰려 있고, 2026-10-09 이후 4일 중 3일이 95위 또는 목록 밖이다. 마지막 관측일인 2026-10-12에도 목록에 없었다.",
+              "evidence_ids": [
+                "rank_history",
+                "current_rank"
+              ]
+            },
+            {
+              "text": "감지 평균 59.86위는 초반의 매우 높은 순위가 끌어올린 값이다. 최근 흐름은 문턱 80.43위보다 낮은 순위(큰 숫자) 쪽이다.",
+              "evidence_ids": [
+                "rank_history",
+                "rank_features"
+              ]
+            }
+          ],
+          "unknowns": [
+            "확인 구간 7개 관측일의 실제 순위",
+            "2026-10-12 이후 순위 추세를 설명할 추가 자료(리뷰·할인·검색 변화 등)",
+            "목록 밖 날의 실제 순위(101위 이하 어디인지)"
+          ]
+        },
+        "actual_model": "claude-sonnet-5-5",
+        "elapsed_seconds": 9.724866,
+        "usage": {
+          "input_tokens": 2739,
+          "output_tokens": 856
+        },
+        "usage_complete": true,
+        "cost_usd": 0.014038,
+        "input_hash": "811e3659b48ea139a8c59d4e18531eeb57c4bb8e46d974d8a2d7638be44ac8f4",
+        "prompt_hash": "ae9e5c9562c2556cf1b60fe8ec96758ee37c63057058436ec62988d46285d4db",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "support[0]",
+            "number": "5",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "0.7143",
+            "evidence_ids": [
+              "rank_features",
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "2026",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "10",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "06",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "11",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[1]",
+            "number": "80.43",
+            "evidence_ids": [
+              "rank_history"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[1]",
+            "number": "4",
+            "evidence_ids": [
+              "rank_history",
+              "current_rank"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "against[1]",
+            "number": "3",
+            "evidence_ids": [
+              "rank_history",
+              "current_rank"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2816996",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "확인 기간 데이터 부재로 판단 불가",
+          "support": [],
+          "against": [],
+          "unknowns": [
+            "확인 기간(2026-10-13~2026-10-19)의 순위 데이터 누락",
+            "상승분 절반 유지 여부 판단을 위한 평균 순위 정보 부재"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 86.506559,
+        "usage": {
+          "input_tokens": 1959,
+          "output_tokens": 2370
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "bed63435ad7ca77d627388a50387d67159a2bbb05df904801d313e8cdfe06b83",
+        "prompt_hash": "2e1d84d82439ad99420cabc4ecf05ebabe67d0cab8865a6e5f299b1535e9efce",
+        "validation_errors": [],
+        "numeric_flags": []
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2824007",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "상승분의 절반 유지 여부 판단에 필요한 확인 기간 데이터 부재",
+          "support": [
+            {
+              "text": "기준 구간 평균 101위, 감지 구간 평균 91위로 상승폭 10계단 확인",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [],
+          "unknowns": [
+            "확인 기간 평균 순위(96.0위 이하 여부) 데이터 부재",
+            "확인 기간 내 상품 순위 관측 부재"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 60.942438,
+        "usage": {
+          "input_tokens": 2091,
+          "output_tokens": 1922
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "17225ee4366878027eabad6b69515c33d13788a8df5f9c7ab252c9596a87cc50",
+        "prompt_hash": "d333e6b96793c598eb28a68083f17117b7608ed3b2197253d32b215be779b81c",
+        "validation_errors": [],
+        "numeric_flags": []
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_3450561",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "확인 기간 데이터 부재로 지속성 판단 불가",
+          "support": [
+            {
+              "text": "기준 평균 58위, 감지 평균 45.29위, 상승폭 12.71계단 계산됨",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [],
+          "unknowns": [
+            "확인 기간(2026-10-13~2026-10-19)의 순위 데이터 누락"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 28.154234,
+        "usage": {
+          "input_tokens": 1921,
+          "output_tokens": 879
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "e22a13f84081416550194f0d5b96e8f21bda3d4cc7fc1448bf077c9d17a46922",
+        "prompt_hash": "938dfa7f44c032b92a9c2727a826f5226f650c5e55b934a46b9e7e5405713cd2",
+        "validation_errors": [],
+        "numeric_flags": []
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4125187",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH",
+          "summary": "상승분 절반 이상 유지 예측",
+          "support": [
+            {
+              "text": "기준 구간 평균 101위, 감지 구간 평균 89.71위로 상승폭 11.29계단. 이후 7개 관측일 평균 95.36위로, 101 - 95.36 = 5.64계단이 기준 상승분 절반(11.29/2=5.645)과 근접하여 지속 기준을 만족.",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [],
+          "unknowns": [
+            "확정적 계산 전 값의 소수점 세 자리 수치가 제공되지 않아 정확한 비교 여부 확인 불가"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 24.511369,
+        "usage": {
+          "input_tokens": 2094,
+          "output_tokens": 772
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "414bf094f163ceeb8c8cdde47732c7b62149f88e70ea8137a133d220fe95fc55",
+        "prompt_hash": "e4177ad0972a6dd8ec3ba2cdeb092243e6ca2cbd0b4037c855771d1716fb32ca",
+        "validation_errors": [],
+        "numeric_flags": [
+          {
+            "field": "support[0]",
+            "number": "5.64",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "2",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          },
+          {
+            "field": "support[0]",
+            "number": "5.645",
+            "evidence_ids": [
+              "rank_features"
+            ],
+            "kind": "number_not_literal_in_cited_evidence"
+          }
+        ]
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4130049",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "확인 기간 데이터 부재로 지속성 판단 불가",
+          "support": [],
+          "against": [],
+          "unknowns": [
+            "확인 기간 평균 순위 데이터 누락"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 17.453624,
+        "usage": {
+          "input_tokens": 1853,
+          "output_tokens": 543
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "4e07b0dc9f469cd0883bc3731a5ea16eadeafad1f9ab517ab8c5e97d2c97f905",
+        "prompt_hash": "23ad01eb874e3257df8d1614f38878530b0faf4e806eb85fc3fd37a1e5fd5136",
+        "validation_errors": [],
+        "numeric_flags": []
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205647",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "상승분의 절반 이상 유지 여부 판단을 위한 후속 데이터 부족",
+          "support": [
+            {
+              "text": "기준 구간 평균 순위(101)에서 감지 구간 평균 순위(85.43)로 15.57계단 상승",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [
+            {
+              "text": "이후 7개 관측일 평균 순위(93.21위 이하)가 제공되지 않아 지속성 검증 불가",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "unknowns": [
+            "이후 7개 관측일의 실제 순위 데이터"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 30.036516,
+        "usage": {
+          "input_tokens": 2092,
+          "output_tokens": 947
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "0e254ba5297f24bf561f28f4bfe26274a334b465e24902ac73b795d98ec09698",
+        "prompt_hash": "1f8c60c76f388e143ace5fa05a32fdaf8feb2379311ef3aeffc0925fa5467355",
+        "validation_errors": [],
+        "numeric_flags": []
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205649",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "확인 기간 데이터 부재로 지속성 판단 불가",
+          "support": [
+            {
+              "text": "기준 구간 평균 73.57위, 감지 구간 평균 59.57위로 상승폭 14.0계단 확인",
+              "evidence_ids": [
+                "rank_features"
+              ]
+            }
+          ],
+          "against": [],
+          "unknowns": [
+            "확인 구간(2026-10-13~2026-10-19)의 순위 데이터가 제공되지 않아 지속성 검증 불가"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 41.507123,
+        "usage": {
+          "input_tokens": 1972,
+          "output_tokens": 1309
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "d5108a64b5fa1dea67b676190be8d64506f83927698784301d4d7e4cce4aa848",
+        "prompt_hash": "9b00f6f92cd98da56b56d085b17b5af4190d1597ba43f2f1c41b7c26ca14f839",
+        "validation_errors": [],
+        "numeric_flags": []
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4216006",
+        "provider": "a40",
+        "input_view": "structured",
+        "status": "complete",
+        "result": {
+          "verdict": "HOLD",
+          "summary": "상승분의 절반 이상 유지 여부를 판단할 수 있는 데이터가 부족하다.",
+          "support": [],
+          "against": [],
+          "unknowns": [
+            "2026-10-12 이후 7개 관측일의 실제 순위 데이터가 제공되지 않아 평균 순위 계산이 불가능하다"
+          ]
+        },
+        "actual_model": "Qwen/Qwen3-8B",
+        "elapsed_seconds": 29.913407,
+        "usage": {
+          "input_tokens": 2035,
+          "output_tokens": 946
+        },
+        "usage_complete": true,
+        "cost_usd": null,
+        "input_hash": "811e3659b48ea139a8c59d4e18531eeb57c4bb8e46d974d8a2d7638be44ac8f4",
+        "prompt_hash": "ae9e5c9562c2556cf1b60fe8ec96758ee37c63057058436ec62988d46285d4db",
+        "validation_errors": [],
+        "numeric_flags": []
+      }
+    ],
+    "baselines": [
+      {
+        "case_id": "rise_2026-10-12_29cm_2816996",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2816996",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2816996",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2816996",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2824007",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2824007",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2824007",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_2824007",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_3450561",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_3450561",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_3450561",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_3450561",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4125187",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4125187",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4125187",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4125187",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4130049",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4130049",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4130049",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4130049",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205647",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205647",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205647",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205647",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205649",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205649",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205649",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4205649",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4216006",
+        "provider": "always_persist",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "WATCH"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4216006",
+        "provider": "always_fade",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4216006",
+        "provider": "last_rank",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      },
+      {
+        "case_id": "rise_2026-10-12_29cm_4216006",
+        "provider": "last3_mean",
+        "input_view": "baseline",
+        "status": "complete",
+        "result": {
+          "verdict": "NOT_SUPPORTED"
+        },
+        "elapsed_seconds": 0.0,
+        "cost_usd": 0.0
+      }
+    ],
+    "note": "Final outputs and accounting only. Source labels remain private. Predictions committed before label reconstruction."
+  }
+}

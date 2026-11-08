@@ -68,6 +68,66 @@ def test_selected_provider_only_and_readiness_resumes_without_recall(tmp_path):
     assert all(x["status"] == "complete" for x in full["records"].values())
 
 
+def test_forecast_version_runs_separately_and_does_not_mutate_an_existing_v1_store(tmp_path):
+    cfg, calls = config(tmp_path, initial_calls=8, retry_calls=0), []
+    old_store, new_store = tmp_path / "v1", tmp_path / "v2"
+    r.run(old_store, config_path=cfg, provider="a40", limit=1, client_factory=factory(calls))
+    before = (old_store / "state.json").read_bytes()
+    with pytest.raises(ValueError, match="prompt version changed"):
+        r.run(old_store, config_path=cfg, provider="a40", prompt_version="forecast-v2",
+              client_factory=factory(calls))
+    assert len(calls) == 1
+    assert (old_store / "state.json").read_bytes() == before
+    new = r.run(new_store, config_path=cfg, provider="a40", prompt_version="forecast-v2",
+                client_factory=factory(calls))
+    assert len(calls) == 9
+    assert new["prompt_version"] == "forecast-v2"
+    assert len(new["attempts"]) == 8
+    assert all(x["prompt_version"] == "forecast-v2" for x in new["records"].values())
+    assert new["runtime_sessions"][0]["prompt_version"] == "forecast-v2"
+    assert calls[0][2] == calls[1][2]  # First case observation JSON is unchanged.
+    assert calls[0][1] != calls[1][1]  # Only its system instruction changes.
+    r.run(new_store, config_path=cfg, provider="a40", prompt_version="forecast-v2",
+          client_factory=factory(calls))
+    assert len(calls) == 9
+    assert (old_store / "state.json").read_bytes() == before
+    frozen = r.freeze(new_store)
+    assert frozen["predictions"]["prompt_version"] == "forecast-v2"
+    assert r.verified_freeze(new_store)["prediction_sha256"] == frozen["prediction_sha256"]
+
+
+def test_legacy_store_without_version_still_resumes_as_v1(tmp_path):
+    cfg, store, calls = config(tmp_path), tmp_path / "legacy", []
+    state = r.run(store, config_path=cfg, provider="a40", limit=1, client_factory=factory(calls))
+    state.pop("prompt_version")
+    for row in state["records"].values():
+        row.pop("prompt_version")
+    for row in state["runtime_sessions"]:
+        row.pop("prompt_version")
+    r.atomic_json(store / "state.json", state)
+    r.run(store, config_path=cfg, provider="a40", limit=1, client_factory=factory(calls))
+    assert len(calls) == 1
+
+
+def test_zero_retry_budget_never_recalls_a_failed_case(tmp_path):
+    cfg, store, calls = config(tmp_path, initial_calls=8, retry_calls=0), tmp_path / "no-retry", []
+    r.run(store, config_path=cfg, provider="a40", prompt_version="forecast-v2", limit=1,
+          client_factory=factory(calls, fail=True))
+    state = r.run(store, config_path=cfg, provider="a40", prompt_version="forecast-v2", limit=1,
+                  retry=True, client_factory=factory(calls))
+    assert len(calls) == len(state["attempts"]) == 1
+    assert next(iter(state["records"].values()))["status"] == "failed"
+
+
+@pytest.mark.parametrize("provider", ["claude", "both"])
+def test_forecast_followup_rejects_other_live_providers(tmp_path, provider):
+    calls = []
+    with pytest.raises(ValueError, match="Qwen/a40 only"):
+        r.run(tmp_path / "no-call", provider=provider, prompt_version="forecast-v2",
+              client_factory=factory(calls))
+    assert calls == []
+
+
 def test_both_models_receive_identical_prompts(tmp_path):
     calls = []
     state = r.run(tmp_path / "run", config_path=config(tmp_path), limit=1, client_factory=factory(calls))

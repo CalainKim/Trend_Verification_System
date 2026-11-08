@@ -17,7 +17,7 @@ from pathlib import Path
 import time
 import uuid
 
-from .inputs import baseline_predictions, build_prompt, load_cases, load_manifest, prepare_case
+from .inputs import PROMPT_VERSIONS, baseline_predictions, build_prompt, load_cases, load_manifest, prepare_case
 from .evaluation import evaluate, validate_result
 from .providers import ModelConfig, ProviderError, create_client
 
@@ -120,7 +120,8 @@ def settings(path, selected):
               "a40_seconds": MAX_A40_SECONDS}
     for key, ceiling in limits.items():
         value = budget.get(key, ceiling)
-        if type(value) not in (int, float) or not math.isfinite(value) or value <= 0 or value > ceiling:
+        if (type(value) not in (int, float) or not math.isfinite(value) or value < 0
+                or (value == 0 and key != "retry_calls") or value > ceiling):
             raise ValueError("Budget must remain within the approved pilot ceiling")
         if key.endswith("calls") and type(value) is not int:
             raise ValueError("Call limits must be integers")
@@ -137,12 +138,14 @@ def _sealed_digest(repo_root):
     return value
 
 
-def _state(folder, manifest, bundles, limits, repo_root, demo):
+def _state(folder, manifest, bundles, limits, repo_root, demo, prompt_version):
     path = folder / "state.json"
     if path.exists():
         state = _load(path)
         if state["manifest_hash"] != digest(manifest) or state["demo"] != demo or state["limits"] != limits:
             raise ValueError("Store identity, manifest, or budget changed; do not mix experiments")
+        if state.get("prompt_version", "pilot-v1") != prompt_version:
+            raise ValueError("Store prompt version changed; use a separate store for the new prompt")
         return state
     baselines = []
     for bundle in bundles:
@@ -151,7 +154,7 @@ def _state(folder, manifest, bundles, limits, repo_root, demo):
             baselines.append({"case_id": case_id, "provider": method, "input_view": "baseline",
                               "status": "complete", "result": {"verdict": verdict},
                               "elapsed_seconds": 0.0, "cost_usd": 0.0})
-    state = {"schema_version": 1, "created_at": now(), "demo": demo,
+    state = {"schema_version": 1, "created_at": now(), "demo": demo, "prompt_version": prompt_version,
              "manifest": manifest, "manifest_hash": digest(manifest),
              "expected_case_ids": [prepare_case(x, "static")["case_id"] for x in bundles],
              "expected_label_digest": _sealed_digest(repo_root), "limits": limits,
@@ -212,9 +215,13 @@ def _demo_response(prepared, config):
 
 def run(store, *, repo_root=ROOT, manifest_path=None, config_path=DEFAULT_CONFIG,
         provider="both", input_view="structured", credentials_root=None, limit=None,
-        retry=False, demo=False, client_factory=create_client):
+        retry=False, demo=False, prompt_version="pilot-v1", client_factory=create_client):
     if input_view not in VIEWS:
         raise ValueError("Unknown input view")
+    if prompt_version not in PROMPT_VERSIONS:
+        raise ValueError("Unknown prompt version")
+    if not demo and prompt_version == "forecast-v2" and provider != "a40":
+        raise ValueError("The forecast-v2 follow-up authorizes Qwen/a40 only")
     if not demo and input_view != "structured":
         raise ValueError("This $5 pilot authorizes live structured view only; preview A/B without paid calls")
     if limit is not None and (type(limit) is not int or limit < 1):
@@ -227,7 +234,7 @@ def run(store, *, repo_root=ROOT, manifest_path=None, config_path=DEFAULT_CONFIG
     with store_lock(folder):
         if (folder / "frozen.json").exists():
             raise ValueError("Predictions are frozen; this store cannot generate more predictions")
-        state = _state(folder, manifest, bundles, limits, repo_root, demo)
+        state = _state(folder, manifest, bundles, limits, repo_root, demo, prompt_version)
         if not demo and "a40" in selected:
             gpu_bound = _gpu_bound(runtime, limits)
             prior_start = state.get("a40_started_at")
@@ -239,7 +246,7 @@ def run(store, *, repo_root=ROOT, manifest_path=None, config_path=DEFAULT_CONFIG
         if type(storage_reserve) not in (int, float) or not math.isfinite(storage_reserve) or storage_reserve < 0:
             raise ValueError("Invalid storage cost reserve")
         state["storage_reserved_usd"] = max(state.get("storage_reserved_usd", 0.0), storage_reserve)
-        session = {"started_at": now(), "providers": selected, "input_view": input_view,
+        session = {"started_at": now(), "providers": selected, "input_view": input_view, "prompt_version": prompt_version,
                    "runtime": runtime, "models": {k: v.public_dict() for k, v in configs.items()}}
         state["runtime_sessions"].append(session)
         atomic_json(folder / "state.json", state)
@@ -247,7 +254,7 @@ def run(store, *, repo_root=ROOT, manifest_path=None, config_path=DEFAULT_CONFIG
         try:
             for bundle in bundles[:limit]:
                 prepared = prepare_case(bundle, input_view)
-                system, user = build_prompt(prepared)
+                system, user = build_prompt(prepared, prompt_version)
                 for name in selected:
                     config = configs[name]
                     key = prepared["case_id"] + "|" + name + "|" + input_view
@@ -288,6 +295,7 @@ def run(store, *, repo_root=ROOT, manifest_path=None, config_path=DEFAULT_CONFIG
                                "actual_claude_usd": None}
                     state["attempts"].append(attempt)
                     record = {"case_id": prepared["case_id"], "provider": name, "input_view": input_view,
+                              "prompt_version": prompt_version,
                               "status": "interrupted", "result": None, "cache_hash": cache_hash,
                               "input_hash": digest(prepared), "prompt_hash": digest([system, user]),
                               "prepared_input": prepared, "prompt": {"system": system, "user": user},
@@ -352,7 +360,7 @@ def run(store, *, repo_root=ROOT, manifest_path=None, config_path=DEFAULT_CONFIG
 
 
 def _prediction_payload(state):
-    return {key: state[key] for key in ("schema_version", "demo", "manifest", "manifest_hash", "expected_case_ids",
+    return {key: state[key] for key in ("schema_version", "demo", "prompt_version", "manifest", "manifest_hash", "expected_case_ids",
                                       "expected_label_digest", "limits", "records", "attempts", "baseline_records",
                                       "runtime_sessions", "storage_reserved_usd", "a40_started_at", "a40_reserved_usd")
             if key in state}

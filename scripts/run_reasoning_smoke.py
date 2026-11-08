@@ -10,7 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from trend_research.inputs import build_prompt, load_cases, load_manifest, prepare_case
+from trend_research.inputs import PROMPT_VERSIONS, build_prompt, load_cases, load_manifest, prepare_case
 from trend_research.runner import DEFAULT_CONFIG, atomic_json, export_run, freeze, run, score_run
 from trend_research.providers import ProviderError
 
@@ -20,6 +20,8 @@ def main(argv=None):
     parser.add_argument("command", choices=["preview", "run", "export", "freeze", "score"])
     parser.add_argument("--provider", choices=["claude", "a40", "both"], default="both")
     parser.add_argument("--input-view", choices=["static", "history", "structured"], default="structured")
+    parser.add_argument("--prompt-version", choices=PROMPT_VERSIONS, default="pilot-v1",
+                        help="기존 pilot-v1 또는 예측/HOLD 구분을 명시한 forecast-v2; 버전별 store 분리")
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--store", type=Path)
@@ -36,8 +38,9 @@ def main(argv=None):
             manifest = load_manifest(args.manifest, repo_root=ROOT)
             cases = load_cases(manifest, ROOT)
             prepared = [prepare_case(x, args.input_view) for x in cases[:args.limit]]
-            data = {"model_calls": 0, "input_view": args.input_view, "cases": prepared,
-                    "prompts": [{"case_id": p["case_id"], "system": build_prompt(p)[0], "user": build_prompt(p)[1]} for p in prepared]}
+            data = {"model_calls": 0, "input_view": args.input_view, "prompt_version": args.prompt_version, "cases": prepared,
+                    "prompts": [{"case_id": p["case_id"], "system": build_prompt(p, args.prompt_version)[0],
+                                 "user": build_prompt(p, args.prompt_version)[1]} for p in prepared]}
             if args.output_dir:
                 atomic_json(args.output_dir / f"preview-{args.input_view}.json", data)
                 result = {"model_calls": 0, "cases": len(prepared), "output_dir": str(args.output_dir.resolve())}
@@ -46,7 +49,7 @@ def main(argv=None):
         elif args.command == "run":
             state = run(store, repo_root=ROOT, manifest_path=args.manifest, config_path=args.config,
                         provider=args.provider, input_view=args.input_view, credentials_root=args.credentials_root,
-                        limit=args.limit, retry=args.retry, demo=args.demo)
+                        limit=args.limit, retry=args.retry, demo=args.demo, prompt_version=args.prompt_version)
             result = {"store": str(store.resolve()), "demo": state["demo"], "attempts": len(state["attempts"]),
                       "claude_accounted_usd": sum(a["accounted_claude_usd"] for a in state["attempts"]),
                       "records": [{k: r.get(k) for k in ("case_id", "provider", "input_view", "status", "error", "validation_errors")}

@@ -11,12 +11,36 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from trend_research.inputs import (
-    PILOT_IDS, baseline_predictions, build_prompt, load_cases, load_manifest,
+    PILOT_IDS, FORECAST_SYSTEM_PROMPT, baseline_predictions, build_prompt, load_cases, load_manifest,
     parse_rank_history, prepare_case,
 )
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_prompt_versions_preserve_frozen_v1_and_identical_eight_observation_inputs():
+    reference = json.loads((ROOT / "docs/research/pilot-prompt-v1.json").read_text(encoding="utf-8"))
+    manifest = load_manifest(repo_root=ROOT)
+    cases = load_cases(manifest, ROOT)
+    for case in cases:
+        prepared = prepare_case(case, "structured")
+        original = deepcopy(prepared)
+        old_system, old_user = build_prompt(prepared)
+        explicit_old = build_prompt(prepared, "pilot-v1")
+        new_system, new_user = build_prompt(prepared, "forecast-v2")
+        assert (old_system, old_user) == explicit_old
+        assert old_system == reference["system"]
+        assert new_system == FORECAST_SYSTEM_PROMPT != old_system
+        assert old_user == new_user
+        assert json.loads(new_user) == original == prepared
+        if case["case_id"] == reference["case_id"]:
+            assert old_user == reference["user"]
+
+
+def test_unknown_prompt_version_is_rejected():
+    with pytest.raises(ValueError, match="prompt version"):
+        build_prompt(prepare_case(source_case(), "structured"), "forecast-typo")
 
 
 def source_case(ranks=None, start=date(2026, 9, 29)):

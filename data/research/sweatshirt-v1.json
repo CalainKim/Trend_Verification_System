@@ -1,0 +1,65 @@
+{
+  "schema_version": "sweatshirt-pilot-v1",
+  "source_commit": "6fc299003000e1eb34afab6514140c84a63cde97",
+  "source_repository": "https://github.com/CalainKim/Trend_Verification_System",
+  "hash_normalization": "SHA256 of UTF-8 source bytes with CRLF normalized to LF; no other normalization",
+  "selection": "Explicit sweatshirt product IDs, selected without labels or model outputs",
+  "case_role": "development_pilot_not_independent_test",
+  "cutoff": "2026-10-12",
+  "target": "half-rise-retention-over-next-seven-observed-dates",
+  "independence_notes": [
+    "Eight products from one cutoff and seven brands",
+    "4205647 and 4205649 are color variants of the same product family",
+    "historical_available_at is null; retrospective cutoff simulation only"
+  ],
+  "cases": [
+    {
+      "case_id": "rise_2026-10-12_29cm_2816996",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_2816996.json",
+      "sha256": "db0e75fc00466fd1ddbec493311bcfbd628c355de43efd16d29890be5b68e1fd",
+      "product_group_id": "29cm:2816996"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_2824007",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_2824007.json",
+      "sha256": "f89710373acc862e9b6cf88c534d95b72c1c0a4a6201b08f5544053f37af0ed0",
+      "product_group_id": "29cm:2824007"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_3450561",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_3450561.json",
+      "sha256": "45e277bb3a6e2514feccb14374b80f0043aa70e272e7a873b11ab485197e9539",
+      "product_group_id": "29cm:3450561"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4125187",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_4125187.json",
+      "sha256": "cfc7935241f892b41bd1adeaeb792ce3363ad236c4565dcd0b7302c9943e98af",
+      "product_group_id": "29cm:4125187"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4130049",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_4130049.json",
+      "sha256": "2e5e487c86c3d36139662218703d54595c81a689ce17ac48c3119be67bdeae6f",
+      "product_group_id": "29cm:4130049"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4205647",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_4205647.json",
+      "sha256": "3f635dcc1578da8046b6681318576807209ec0965fec94f1f11c6f82b43e6217",
+      "product_group_id": "29cm:outstanding-japanese-urake-jersey-tubular-sweat"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4205649",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_4205649.json",
+      "sha256": "c8b3c3020b1fbbbcf033acab027c02c940c0723014864bf7966d6b36bfd831f0",
+      "product_group_id": "29cm:outstanding-japanese-urake-jersey-tubular-sweat"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4216006",
+      "path": "benchmark/cases/rise_2026-10-12_29cm_4216006.json",
+      "sha256": "67e1753f8255dd1f6e6ae16b344128f3567b9318c7adc550d8112ca4be4a5220",
+      "product_group_id": "29cm:4216006"
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0b0b">
+<title>로그인 | MUSINSA TrendCheck</title>
+<link rel="icon" href="assets/musinsa-logo.png">
+<style>
+@font-face{font-family:"Pretendard Variable";src:url("../runtime/_ds/trendcheck-design-system-f78377aa-b6bb-412f-bf41-b7913ec99fcb/assets/fonts/PretendardVariable.woff2") format("woff2-variations"),url("assets/fonts/PretendardVariable.woff2") format("woff2-variations"),url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");font-weight:45 920;font-display:swap}
+
+/* 무신사 흑백에 강조색 하나. 순수한 검정과 흰색 대신 아주 살짝 뺀 값을 쓴다 */
+:root{
+  --ink:#0b0b0b;
+  --paper:#f7f7f7;
+  --dim:#b9b9b9;
+  --mute:#8c8c8c;
+  --blue:#245eff;
+  --err:#ff6b6a;
+  --out:cubic-bezier(.16,1,.3,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  /* 모서리 규칙: 카드 24, 입력과 버튼 14 */
+  --r-card:24px;
+  --r-ctl:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{
+  min-height:100dvh;font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;font-weight:500;
+  background:var(--ink);color:var(--paper);-webkit-font-smoothing:antialiased;word-break:keep-all;
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.ico{display:block;width:20px;height:20px}
+
+/* 배경: 첫 화면과 같은 3D 영상. 유리가 실제로 비칠 화면이 된다 */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--ink)}
+.bg video,.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease}
+.bg .ready{opacity:1}
+/* 왼쪽 글자가 읽히도록 왼쪽과 아래를 어둡게 */
+.bg::after{content:"";position:absolute;inset:0;background:
+  linear-gradient(90deg,rgba(11,11,11,.92) 0%,rgba(11,11,11,.72) 38%,rgba(11,11,11,.2) 70%,rgba(11,11,11,.35) 100%),
+  linear-gradient(0deg,rgba(11,11,11,.85) 0%,rgba(11,11,11,0) 40%)}
+
+.top{position:fixed;inset:0 0 auto 0;z-index:3;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 30px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{width:34px;height:34px;border-radius:50%;display:block;box-shadow:0 0 0 1px rgba(255,255,255,.2)}
+.logo small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.12em;opacity:.6}
+.logo b{font-size:17px;font-weight:700}
+.back{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--dim);transition:color .2s}
+.back .ico{width:16px;height:16px;transition:transform .3s var(--out)}
+.back:hover{color:var(--paper)}
+.back:hover .ico{transform:translateX(-3px)}
+
+/* 분할 화면: 왼쪽 제목, 오른쪽 입력 카드 */
+.page{position:relative;z-index:2;min-height:100dvh;max-width:1360px;margin:0 auto;padding:96px 30px 48px;
+  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:64px;align-items:center}
+.lead h1{font-size:clamp(40px,5.2vw,76px);font-weight:800;letter-spacing:-.045em;line-height:1.02}
+.lead p{margin-top:22px;max-width:30ch;font-size:clamp(16px,1.3vw,19px);line-height:1.6;color:var(--dim)}
+.lead,.card{animation:rise 1s var(--out) both}
+.card{animation-delay:.12s}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}}
+
+/* 진한 유리 카드. 겹친 테두리와 윗면 반사, 커서를 따라가는 빛 */
+.card{
+  position:relative;isolation:isolate;justify-self:end;width:min(440px,100%);
+  padding:36px 34px 30px;border-radius:var(--r-card);
+  background:
+    radial-gradient(420px circle at var(--mx,30%) var(--my,0%),rgba(255,255,255,.16),transparent 55%),
+    linear-gradient(150deg,rgba(255,255,255,.2),rgba(255,255,255,.05) 45%,rgba(255,255,255,.08)),
+    rgba(20,20,20,.28);
+  -webkit-backdrop-filter:blur(40px) saturate(190%) contrast(1.05);backdrop-filter:blur(40px) saturate(190%) contrast(1.05);
+  border:1px solid rgba(255,255,255,.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -1px 0 rgba(255,255,255,.1),
+    inset 0 0 40px rgba(255,255,255,.04),
+    0 40px 100px -40px rgba(0,0,0,.85);
+}
+/* 안쪽 한 겹 더: 유리 두께 */
+.card::after{content:"";position:absolute;inset:6px;border-radius:calc(var(--r-card) - 6px);border:1px solid rgba(255,255,255,.08);pointer-events:none}
+/* 윗면 반사 */
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:46%;border-radius:var(--r-card) var(--r-card) 0 0;background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.09),rgba(255,255,255,0) 70%);pointer-events:none;z-index:-1}
+
+.card h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.card .sub{margin-top:8px;font-size:14px;line-height:1.6;color:var(--dim)}
+
+form{margin-top:28px;display:grid;gap:8px}
+label{font-size:13px;font-weight:600;color:#d6d6d6}
+.field{position:relative}
+.field input{
+  width:100%;height:56px;padding:0 56px 0 18px;border:0;outline:0;border-radius:var(--r-ctl);
+  font:inherit;font-size:16px;font-weight:600;letter-spacing:.04em;color:var(--paper);
+  background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.16));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),inset 0 2px 6px rgba(0,0,0,.35);
+  transition:box-shadow .25s ease,background .25s ease;
+}
+.field input:focus{box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),inset 0 2px 6px rgba(0,0,0,.35),0 0 0 4px rgba(36,94,255,.28)}
+.field input[aria-invalid="true"]{box-shadow:inset 0 0 0 1px rgba(255,107,106,.7),inset 0 2px 6px rgba(0,0,0,.35)}
+.eye{position:absolute;right:8px;top:8px;width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--dim);cursor:pointer;display:grid;place-items:center;transition:background .2s,color .2s}
+.eye:hover{background:rgba(255,255,255,.1);color:var(--paper)}
+.eye .off{display:none}
+.eye[aria-pressed="true"] .on{display:none}
+.eye[aria-pressed="true"] .off{display:block}
+.err{min-height:20px;font-size:13px;font-weight:600;color:var(--err)}
+.err:empty{min-height:0}
+.err.shake{animation:shake .45s var(--out)}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+
+/* 흰 유리 버튼 */
+.go{
+  position:relative;isolation:isolate;margin-top:10px;height:56px;border:0;border-radius:var(--r-ctl);cursor:pointer;
+  font:inherit;font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:10px;
+  background:
+    radial-gradient(160px circle at var(--mx,50%) var(--my,-30%),rgba(255,255,255,.95),transparent 62%),
+    linear-gradient(180deg,rgba(255,255,255,.96),rgba(236,236,236,.84));
+  box-shadow:inset 0 1px 0 #fff,inset 0 -1px 1px rgba(0,0,0,.08),0 16px 34px -16px rgba(0,0,0,.7);
+  transition:transform .35s var(--spring),opacity .2s;
+}
+.go .ico{width:18px;height:18px;transition:transform .4s var(--spring)}
+.go:hover .ico{transform:translateX(3px)}
+.go:active{transform:scale(.98)}
+.go[aria-busy="true"]{opacity:.75;cursor:progress}
+.go[aria-busy="true"] .ico{animation:nudge .9s var(--out) infinite}
+@keyframes nudge{50%{transform:translateX(4px)}}
+.help{margin-top:18px;font-size:13px;line-height:1.6;color:var(--mute)}
+
+@media (max-width:860px){
+  .top{height:62px;padding:0 16px}
+  .logo b{font-size:15px}
+  .back span{display:none}
+  .page{grid-template-columns:1fr;gap:28px;padding:92px 16px 32px;align-items:end}
+  .lead h1{font-size:clamp(34px,10vw,44px)}
+  .lead p{margin-top:14px}
+  .card{justify-self:stretch;width:100%;padding:28px 22px 24px;border-radius:20px}
+  .card::after{border-radius:14px}
+  .bg::after{background:linear-gradient(0deg,rgba(11,11,11,.94) 0%,rgba(11,11,11,.6) 50%,rgba(11,11,11,.82) 100%)}
+}
+@media (prefers-reduced-motion:reduce){
+  .lead,.card,.err.shake,.go[aria-busy="true"] .ico{animation:none}
+}
+/* 투명도를 줄여 달라는 설정이면 유리 대신 단색으로 */
+@media (prefers-reduced-transparency:reduce){
+  .card{background:#1b1b1b;-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <img id="poster" alt="">
+  <video id="bgv" muted playsinline loop preload="auto"></video>
+</div>
+
+<header class="top">
+  <a class="logo" href="/" aria-label="MUSINSA TrendCheck 소개 페이지로">
+    <img src="assets/musinsa-logo.png" alt="">
+    <span><small>MUSINSA</small><b>TrendCheck</b></span>
+  </a>
+  <a class="back" href="/"><svg class="ico" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"/></svg><span>소개 페이지</span></a>
+</header>
+
+<main class="page">
+  <section class="lead">
+    <h1>트렌드<br>모니터</h1>
+    <p>이번 주 신호와 판정 근거를 한 화면에서 봅니다.</p>
+  </section>
+
+  <section class="card" aria-labelledby="t">
+    <h2 id="t">로그인</h2>
+    <p class="sub">전달받은 비밀번호를 입력해 주세요. 7일 동안 로그인이 유지됩니다.</p>
+
+    <form method="post" action="/auth/login" id="f" novalidate>
+      <input type="hidden" name="next" id="next" value="/app/">
+      <label for="pw">비밀번호</label>
+      <div class="field">
+        <input id="pw" name="password" type="password" autocomplete="current-password" required autofocus aria-describedby="err">
+        <button class="eye" type="button" id="eye" aria-label="비밀번호 보기" aria-pressed="false">
+          <span class="on"><svg class="ico" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"/></svg></span><span class="off"><svg class="ico" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M53.92,34.62A8,8,0,1,0,42.08,45.38L61.32,66.55C25,88.84,9.38,123.2,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208a127.11,127.11,0,0,0,52.07-10.83l22,24.21a8,8,0,1,0,11.84-10.76Zm47.33,75.84,41.67,45.85a32,32,0,0,1-41.67-45.85ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.16,133.16,0,0,1,25,128c4.69-8.79,19.66-33.39,47.35-49.38l18,19.75a48,48,0,0,0,63.66,70l14.73,16.2A112,112,0,0,1,128,192Zm6-95.43a8,8,0,0,1,3-15.72,48.16,48.16,0,0,1,38.77,42.64,8,8,0,0,1-7.22,8.71,6.39,6.39,0,0,1-.75,0,8,8,0,0,1-8-7.26A32.09,32.09,0,0,0,134,96.57Zm113.28,34.69c-.42.94-10.55,23.37-33.36,43.8a8,8,0,1,1-10.67-11.92A132.77,132.77,0,0,0,231.05,128a133.15,133.15,0,0,0-23.12-30.77C185.67,75.19,158.78,64,128,64a118.37,118.37,0,0,0-19.36,1.57A8,8,0,1,1,106,49.79,134,134,0,0,1,128,48c34.88,0,66.57,13.26,91.66,38.35,18.83,18.83,27.3,37.62,27.65,38.41A8,8,0,0,1,247.31,131.26Z"/></svg></span>
+        </button>
+      </div>
+      <p class="err" id="err" role="alert"></p>
+      <button class="go" type="submit" id="go"><span id="goLabel">들어가기</span><svg class="ico" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></button>
+    </form>
+    <p class="help">비밀번호가 필요하시면 프로젝트 담당자에게 문의해 주세요.</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tall = matchMedia('(max-aspect-ratio: 4/5)').matches;
+  const dir = tall ? 'assets/hero/m/' : 'assets/hero/';
+
+  // 배경 영상. 움직임을 줄이는 설정이면 정지 화면만
+  const poster = document.getElementById('poster'), v = document.getElementById('bgv');
+  poster.onload = () => poster.classList.add('ready');
+  poster.src = dir + 's4_verdict.jpg';
+  if (!reduce) {
+    v.addEventListener('canplay', () => { v.classList.add('ready'); v.play().catch(() => {}); }, { once: true });
+    v.src = dir + 's1_collect.mp4';
+  }
+
+  const q = new URLSearchParams(location.search);
+  // 돌아갈 곳은 같은 사이트 안의 경로만. 서버에서도 한 번 더 거른다
+  const n = q.get('next');
+  if (n && n.startsWith('/') && !n.startsWith('//') && !n.includes('\\')) document.getElementById('next').value = n;
+
+  const pw = document.getElementById('pw'), err = document.getElementById('err');
+  const showErr = (msg) => { err.textContent = msg; pw.setAttribute('aria-invalid', 'true'); err.classList.remove('shake'); void err.offsetWidth; err.classList.add('shake'); };
+  if (q.get('e')) showErr('비밀번호가 맞지 않습니다. 다시 입력해 주세요.');
+  pw.addEventListener('input', () => { if (err.textContent) { err.textContent = ''; pw.removeAttribute('aria-invalid'); } });
+
+  const eye = document.getElementById('eye');
+  eye.addEventListener('click', () => {
+    const show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    eye.setAttribute('aria-pressed', String(show));
+    eye.setAttribute('aria-label', show ? '비밀번호 숨기기' : '비밀번호 보기');
+    pw.focus();
+  });
+
+  const go = document.getElementById('go');
+  document.getElementById('f').addEventListener('submit', (e) => {
+    if (!pw.value) { e.preventDefault(); showErr('비밀번호를 입력해 주세요.'); pw.focus(); return; }
+    go.setAttribute('aria-busy', 'true'); document.getElementById('goLabel').textContent = '확인 중';
+  });
+  // 뒤로 가기로 돌아왔을 때 버튼이 확인 중에 멈춰 있지 않게
+  addEventListener('pageshow', () => { go.removeAttribute('aria-busy'); document.getElementById('goLabel').textContent = '들어가기'; });
+
+  // 유리 반사광이 커서를 따라간다
+  document.querySelectorAll('.card,.go').forEach((el) => el.addEventListener('pointermove', (e) => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }));
+})();
+</script>
+</body>
+</html>

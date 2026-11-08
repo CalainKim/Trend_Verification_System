@@ -444,7 +444,7 @@ def bundle(html: str, assets: Path) -> tuple[str, dict]:
         stats["js"] += 1
         # </script> 가 글자로 들어 있으면 거기서 태그가 닫힌다.
         body = f.read_text(encoding="utf-8").replace("</script>", "<\\/script>")
-        return f"<script>\n{body}\n</script>"
+        return f"<script>\n{hide_dc_markers(body)}\n</script>"
 
     html = re.sub(r'<script src="([^"]+)"></script>', js_tag, html)
     return html, stats
@@ -544,9 +544,24 @@ VENDOR = ("react.production.min.js", "react-dom.production.min.js",
           "babel.min.js")
 
 
+def hide_dc_markers(js: str) -> str:
+    """심는 스크립트 안의 <x-dc 글자를 같은 뜻의 \\x3cx-dc 로 바꾼다.
+
+    런타임(support.js)은 페이지 원문에서 처음 나오는 <x-dc> 를 화면의
+    시작으로 읽는다 (parseDcText 의 정규식). 런타임을 파일 하나로 심으면
+    그 코드 속 오류 문구 "has no <x-dc> block" 이 진짜 <x-dc> 보다 앞에
+    놓인다. 런타임이 자기 코드를 화면 내용으로 읽어 글자로 찍었다.
+    2026-11-08 /app/ 에서 확인했고 11-04 묶음도 같은 증상이었다.
+
+    \\x3c 는 자바스크립트 문자열과 정규식 안에서 < 와 같으므로 실행
+    결과는 바뀌지 않고 원문에서만 그 글자가 사라진다.
+    """
+    return js.replace("<x-dc", "\\x3cx-dc").replace("</x-dc", "\\x3c/x-dc")
+
+
 def _script(body: str) -> str:
     """글자로 들어 있는 </script> 에서 태그가 닫히는 것을 막는다."""
-    return "<script>\n" + body.replace("</script", "<\\/script") + "\n</script>\n"
+    return "<script>\n" + hide_dc_markers(body.replace("</script", "<\\/script")) + "\n</script>\n"
 
 
 def inline_vendor(html: str, assets: Path) -> tuple[str, list[str]]:

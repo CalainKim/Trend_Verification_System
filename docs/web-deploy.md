@@ -13,12 +13,26 @@ v9 화면을 승인된 사람만 들어오는 웹 주소로 올린다. 2026-11-0
 ## 1. 무엇을 배포하나
 
 ```
-build/web/index.html                 시안 한 파일. 6.4MB
+build/web/index.html                 랜딩. 누구나 본다
+build/web/assets/                    랜딩의 로고, 글꼴, 첫 화면 3D 영상
+build/web/login.html                 비밀번호 입력 창
+build/web/app/index.html             모니터 시안 한 파일. 6.4MB
+build/web/functions/_middleware.js   비밀번호 게이트
+build/web/functions/auth/            로그인, 로그아웃
 build/web/functions/api/complete.js  심층 검증 중계
 ```
 
-둘 다 `./scripts/build_web.sh` 가 만든다. 원본은 `design/Trend Monitor
-v9.dc.html` 과 `design/runtime/` 이고 전부 저장소에 있다.
+전부 `./scripts/build_web.sh` 가 만든다. 모니터 원본은 `design/Trend Monitor
+v9.dc.html` 과 `design/runtime/`, 랜딩 원본은 `design/landing/` 이다.
+
+2026-11-08 에 랜딩을 첫 화면으로 올리고 모니터를 `/app/` 으로 옮겼다.
+프로젝트 소개용이라 랜딩은 공개해도 된다고 정했다. 모니터와 중계는 키를
+쓰므로 계속 승인된 사람만 들어온다. 중계 주소는 `/api/complete` 절대경로라
+모니터 위치가 바뀌어도 그대로 닿는다.
+
+첫 화면 3D 영상은 Blender 로 렌더한다. 넓은 화면용은 `assets/hero/`, 세로
+화면용은 `assets/hero/m/` 에 두고, 랜딩이 화면 비율을 보고 고른다. 영상이
+없으면 캔버스로 그린 장면이 대신 돈다.
 
 ## 2. 왜 Cloudflare 인가
 
@@ -93,13 +107,55 @@ messages      8개까지, role 과 content 모양을 직접 확인한다
    ANTHROPIC_API_KEY   암호(Secret) 로 넣는다. 일반 변수로 넣으면 안 된다
    CLAUDE_MODEL        비워 두면 claude-sonnet-5-5 를 쓴다
 
-4  Zero Trust > Access > Applications 에서 이 주소를 감싼다
-   정책은 Emails 로 허용 목록을 만든다
-   들어올 사람의 메일 주소를 적는다. 50명까지 무료다
+4  비밀번호 게이트의 비밀값 둘을 같은 곳에 암호(Secret) 로 넣는다
+   SITE_PASSWORD    들어올 사람에게 알려 줄 비밀번호. 짧은 단어보다 길게
+   SESSION_SECRET   쿠키 서명용 임의 문자열. openssl rand -base64 32 로 만든다
+
+5  예전에 Zero Trust > Access 로 주소를 감쌌다면 풀거나 /app 과 /api 로 좁힌다
+   주소 전체를 감싸 두면 랜딩과 비밀번호 입력 창까지 막힌다
 ```
 
-4번을 나중으로 미루면 그 사이 주소를 아는 사람이 `/api/complete` 를 부를 수
-있다. 무료라 미룰 이유가 없으므로 처음부터 같이 켠다.
+4번의 두 값이 없으면 게이트가 /app 과 /api 를 열지 않고 500 을 낸다. 빠뜨린
+채 올려도 열린 채로 배포되지는 않는다.
+
+## 5.1 비밀번호 게이트
+
+2026-11-08 에 Cloudflare Access(메일 인증) 대신 비밀번호 입력 방식으로 바꿨다.
+들어올 사람에게 메일 주소를 받지 않고 비밀번호 하나만 알려 주면 되기 때문이다.
+
+```
+/            랜딩. 누구나
+/login       비밀번호 입력 창. 누구나
+/app/        모니터. 로그인한 사람만. 아니면 /login 으로 보낸다
+/api/        중계. 로그인한 사람만. 아니면 401
+/auth/login  입력 창이 비밀번호를 보내는 곳
+/auth/logout 쿠키를 지우고 랜딩으로
+```
+
+막는 자리는 화면이 아니라 서버(`functions/_middleware.js`)다. 화면에서 막으면
+주소를 직접 치거나 소스를 보고 넘어갈 수 있다.
+
+```
+쿠키          "만료시각.서명". SESSION_SECRET 으로 서명해 밖에서 만들 수 없다
+유지 기간     7일. HttpOnly, Secure, SameSite=Lax
+비밀번호 변경  서명에 비밀번호 해시를 섞어 두어 이전 쿠키가 모두 무효가 된다
+틀렸을 때     0.6초 늦게 답한다. 무료 등급에서 횟수 제한을 걸기 어려워서다
+돌아갈 곳     같은 사이트 안의 경로만. //다른사이트 로 내보내지 않는다
+```
+
+`web/functions/auth.test.mjs` 가 27가지로 검사하고 `pytest
+tests/test_auth_gate.py` 로 같이 돈다.
+
+로컬에서 끝까지 확인하려면 비밀값을 파일이 아니라 옵션으로 넣는다.
+
+```
+cd build/web
+npx wrangler pages dev . --binding SITE_PASSWORD="시험용" --binding SESSION_SECRET="시험용"
+```
+
+`build/web` 안에 `.dev.vars` 를 두면 `/.dev.vars` 주소로 그대로 내려받아진다.
+2026-11-08 에 실제로 확인했다. 그래서 빌드 스크립트가 배포 폴더에서 이런
+파일을 찾으면 멈춘다.
 
 ## 6. 올리고 갱신하기
 
@@ -129,6 +185,20 @@ wrangler.jsonc 를 자동 생성한다   "assets": { "directory": "docs" }
 
 `docs` 는 wrangler 가 추측한 값이고 우리가 올릴 폴더가 아니다. `docs/` 에는
 저장소에서 제외한 로컬 전용 파일이 들어 있다.
+
+2026-11-08 에 다시 만들 때는 계정에 프로젝트가 없었다. wrangler 4.158 은
+`pages project create` 를 새 Workers 방식으로 넘기려다 빈 폴더라 실패한다.
+우리는 `functions/` 를 쓰는 기존 Pages 방식이라 `--force` 를 붙여 만들었다.
+설정 파일이 없는 빈 폴더에서 돌려 아무것도 올라가지 않게 했다.
+
+```
+mkdir 빈폴더 && cd 빈폴더
+npx wrangler pages project create trend-monitor --production-branch main --force
+```
+
+`--force` 는 만들 때 한 번만 쓴다. 그 뒤의 `pages deploy` 와 `pages secret`
+은 붙이지 않아도 기존 Pages 로 간다.
+
 
 ```
 docs/images/figures/      보고서 그림. .gitignore:43

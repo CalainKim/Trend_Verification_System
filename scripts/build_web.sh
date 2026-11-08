@@ -16,17 +16,53 @@ OUT="build/web"
 rm -rf "$OUT"
 mkdir -p "$OUT"
 
-echo "### 1. 시안을 중계판으로 묶는다"
+echo "### 1. 시안을 중계판으로 묶는다 (/app/)"
+# 첫 화면(/)은 랜딩이고 모니터는 /app/ 에 둔다. 중계 주소는 /api/complete
+# 절대경로라 모니터 위치가 바뀌어도 그대로 닿는다.
+mkdir -p "$OUT/app"
 ./.venv/bin/python scripts/bundle_design.py "$SRC" \
-    --assets design/runtime --relay -o "$OUT/index.html"
+    --assets design/runtime --relay -o "$OUT/app/index.html"
+# 랜딩과 같은 무신사 색감. 원본은 다시 받아오는 파일이라 여기서 덧씌운다
+./.venv/bin/python scripts/apply_monitor_theme.py "$OUT/app/index.html"
 
 echo
-echo "### 2. 중계 함수를 복사한다"
+echo "### 1-1. 랜딩을 붙인다 (/)"
+LANDING="design/landing"
+cp "$LANDING/index.html" "$OUT/index.html"
+# 비밀번호 입력 창. Pages 가 /login 으로 내준다
+cp "$LANDING/login.html" "$OUT/login.html"
+mkdir -p "$OUT/assets/fonts"
+cp "$LANDING/assets/musinsa-logo.png" "$OUT/assets/"
+cp -R "$LANDING/assets/brands" "$OUT/assets/brands"
+cp -R "$LANDING/assets/stack" "$OUT/assets/stack"
+# 글꼴은 V9 디자인 시스템 것을 그대로 쓴다. 랜딩은 이 경로를 두 번째로 찾는다
+cp design/runtime/_ds/trendcheck-design-system-*/assets/fonts/PretendardVariable.woff2 "$OUT/assets/fonts/"
+# 첫 화면 3D 영상. 없으면 랜딩이 캔버스 장면으로 대신 돌기 때문에 멈추지 않고 알리기만 한다
+if ls "$LANDING"/assets/hero/*.mp4 >/dev/null 2>&1; then
+    cp -R "$LANDING/assets/hero" "$OUT/assets/hero"
+    find "$OUT/assets/hero" -name '*.mp4' | sed "s|^|  |"
+else
+    echo "  첫 화면 영상이 없다. 캔버스 장면으로 대신 보인다"
+fi
+
+echo
+echo "### 2. 중계 함수와 비밀번호 게이트를 복사한다"
 # 검사 파일(*.test.mjs)은 빼야 한다. functions/ 아래의 파일은 전부 라우트가
-# 되므로 그냥 복사하면 /api/complete.test 가 공개된다.
-mkdir -p "$OUT/functions/api"
+# 되므로 그냥 복사하면 /api/complete.test 가 공개된다. 그래서 하나씩 집는다.
+#
+# 게이트(_middleware.js)를 빠뜨리면 /app 과 /api 가 열린 채 올라간다.
+# 아래에서 다시 확인한다.
+mkdir -p "$OUT/functions/api" "$OUT/functions/auth" "$OUT/functions/_shared"
 cp web/functions/api/complete.js "$OUT/functions/api/complete.js"
+cp web/functions/_middleware.js "$OUT/functions/_middleware.js"
+cp web/functions/_shared/session.js "$OUT/functions/_shared/session.js"
+cp web/functions/auth/login.js "$OUT/functions/auth/login.js"
+cp web/functions/auth/logout.js "$OUT/functions/auth/logout.js"
 find "$OUT/functions" -type f | sed "s|^|  |"
+if [ ! -f "$OUT/functions/_middleware.js" ]; then
+    echo "  멈춘다. 비밀번호 게이트가 빠졌다"
+    exit 1
+fi
 
 # wrangler 는 functions/ 를 실행 위치 기준으로 찾는다. 배포 폴더 안에 있어도
 # 바깥에서 돌리면 "No Functions. Shimming..." 을 내고 중계 없이 올라간다.
@@ -52,6 +88,14 @@ if grep -rlE "$KEYPAT" "$OUT" 2>/dev/null | grep -q .; then
     exit 1
 fi
 echo "  키 없음"
+# 로컬 시험용 비밀값 파일이 배포 폴더에 있으면 /.dev.vars 로 그대로 내려받아진다.
+# 2026-11-08 wrangler pages dev 로 확인했다. 로컬 시험은 --binding 으로 넣는다.
+if find "$OUT" -name '.dev.vars*' -o -name '.env*' | grep -q .; then
+    echo "  멈춘다. 배포 폴더에 비밀값 파일이 있다"
+    find "$OUT" -name '.dev.vars*' -o -name '.env*'
+    exit 1
+fi
+echo "  비밀값 파일 없음"
 
 echo
 du -sh "$OUT"

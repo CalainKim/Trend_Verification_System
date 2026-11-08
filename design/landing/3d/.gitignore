@@ -1,0 +1,4 @@
+out/
+video/
+*.log
+log_*.txt

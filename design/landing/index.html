@@ -58,19 +58,38 @@ a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}
 
-/* ---------- 헤더 ---------- */
-.hd{position:fixed;inset:0 0 auto 0;z-index:50;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;color:var(--color-canvas);transition:transform .45s var(--ease),background .3s,color .3s}
-.hd.hide{transform:translateY(-100%)}
-.hd.solid{background:rgba(255,255,255,.9);backdrop-filter:blur(10px);color:var(--color-ink);box-shadow:0 1px 0 var(--color-hairline)}
+/* 로고 기본 모양. 푸터가 쓴다. 헤더 알약 안에서는 아래 .hd .logo 가 작게 덮어쓴다 */
 .logo{display:flex;align-items:center;gap:10px}
 .logo img{width:34px;height:34px;border-radius:999px;display:block}
 .logo b{font-weight:600;font-size:17px;letter-spacing:-.01em}
 .logo small{display:block;font-size:10.5px;font-weight:600;letter-spacing:.12em;opacity:.6;margin-bottom:1px}
-.nav{display:flex;gap:40px;font-size:15px;font-weight:500}
-.nav a{opacity:.8;transition:opacity .2s}
-.nav a:hover{opacity:1}
-.hd-cta{height:40px;padding:0 18px;border-radius:9999px;display:flex;align-items:center;gap:8px;background:var(--color-primary);color:#fff;font-size:14px;font-weight:500;transition:background .2s}
-.hd-cta:hover{background:var(--color-primary-active)}
+
+/* ---------- 헤더: 포트폴리오 상단 메뉴 ----------
+   화면 위 16px 에 떠 있는 높이 48px 유리 알약. 밑에 깔린 칸이 밝으면 밝은 유리로 바뀐다 */
+.hd{position:fixed;left:0;right:0;top:16px;z-index:50;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
+.hd-pill{pointer-events:auto;position:relative;isolation:isolate;height:48px;display:flex;align-items:center;gap:4px;padding:0 6px 0 18px;border-radius:9999px;color:#f5f5f5;
+  background:linear-gradient(140deg,rgba(255,255,255,.11),rgba(255,255,255,.025) 55%,rgba(255,255,255,.06)),rgba(10,10,10,.35);
+  -webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04),0 24px 60px -20px rgba(0,0,0,.7);
+  transition:background .35s ease,color .35s ease,border-color .35s ease}
+.hd .logo{display:flex;align-items:center;gap:8px;margin-right:10px;white-space:nowrap}
+.hd .logo img{width:24px;height:24px;border-radius:999px;display:block}
+.hd .logo b{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.hd .nav{display:flex;align-items:center;gap:2px}
+.hd .nav a{white-space:nowrap;padding:6px 12px;border-radius:9999px;font-size:14px;font-weight:500;color:rgba(245,245,245,.62);transition:color .2s,background .2s}
+.hd .nav a:hover,.hd .nav a.cur{color:#f5f5f5;background:rgba(255,255,255,.08)}
+.hd-cta{margin-left:6px;height:36px;padding:0 14px;border-radius:9999px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  background:rgba(255,255,255,.08);color:inherit;font-size:14px;font-weight:600;transition:background .2s,transform .2s}
+.hd-cta:hover{background:rgba(255,255,255,.14)}
+.hd-cta:active{transform:scale(.95)}
+/* 밝은 칸(결과, 원칙, 소식) 위 */
+.hd.light .hd-pill{color:#000;background:linear-gradient(140deg,rgba(255,255,255,.85),rgba(255,255,255,.6));border-color:rgba(0,0,0,.08);
+  box-shadow:inset 0 1px 0 #fff,0 18px 40px -20px rgba(0,0,0,.25)}
+.hd.light .nav a{color:rgba(0,0,0,.55)}
+.hd.light .nav a:hover,.hd.light .nav a.cur{color:#000;background:rgba(0,0,0,.05)}
+.hd.light .hd-cta{background:rgba(0,0,0,.06)}
+.hd.light .hd-cta:hover{background:rgba(0,0,0,.1)}
 
 /* ---------- 첫 화면 ---------- */
 .hero{position:relative;height:100vh;min-height:560px;overflow:hidden;background:var(--night);color:var(--color-canvas)}
@@ -414,14 +433,10 @@ section{position:relative}
 .glass.pri::after{background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,0))}
 .atb-t.glass.pri svg path{stroke:#000}
 /* 밝은 바탕 위(헤더가 흰 띠가 될 때)는 검정 유리 */
-.hd.solid .glass.pri{color:#fff;background:radial-gradient(140px circle at var(--mx,50%) var(--my,-40%),rgba(255,255,255,.22),transparent 62%),linear-gradient(180deg,rgba(40,40,40,.92),rgba(0,0,0,.86));box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 0 0 1px rgba(255,255,255,.08),0 8px 20px -10px rgba(0,0,0,.5)}
-.hd.solid .glass.pri::after{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0))}
 .glass.static:hover,.glass.static:active{transform:none}
 /* Chrome 계열은 뒤 화면을 물결처럼 굴절시킨다. 다른 브라우저는 간유리로 남는다 */
 .lg .glass{-webkit-backdrop-filter:url(#liquid) blur(10px) saturate(175%);backdrop-filter:url(#liquid) blur(10px) saturate(175%)}
 
-.hd-cta{background:none;height:42px;padding:0 20px}
-.hd-cta:hover{background:none}
 .pager{padding:8px 16px;gap:16px}
 .cue{background:none}
 .atb{gap:6px}
@@ -529,69 +544,150 @@ body{font-weight:500}
 .ft-top h5,.ft-meta{color:#9a9a9a}
 .wm{font-weight:800}
 
-/* ---------- 04 기술: 궤도와 로고 띠 ---------- */
+/* ---------- 포트폴리오에서 옮긴 것 (~/portfolio_site) ----------
+   움직임과 배치는 포트폴리오를 그대로 따르고, 색은 이 랜딩의 V9 토큰을 쓴다.
+   포트폴리오의 하늘색(#9fd0ff)을 그대로 쓰면 무신사 색감 위에서 혼자 튄다. */
+
+/* 유리 카드: 포트폴리오 .glass 를 카드용으로. 랜딩의 .glass 는 알약 버튼이라 따로 둔다 */
+.gcard{position:relative;isolation:isolate;
+  background:linear-gradient(140deg,rgba(255,255,255,.11),rgba(255,255,255,.025) 55%,rgba(255,255,255,.06));
+  -webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04),0 24px 60px -20px rgba(0,0,0,.7)}
+.gcard::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,-20%),rgba(255,255,255,.13),transparent 45%);opacity:0;transition:opacity .35s ease}
+.gcard:hover::before{opacity:1}
+.gcard::after{content:"";position:absolute;inset:1px;border-radius:inherit;border:1px solid rgba(255,255,255,.05);pointer-events:none}
+
+/* 제목: 단어 단위로 흐림이 걷히며 떠오른다 (포트폴리오 Words) */
+.words .wd{display:inline-block;opacity:0;transform:translateY(26px);filter:blur(10px);
+  transition:opacity .7s var(--out),transform .7s var(--out),filter .7s var(--out);transition-delay:calc(var(--k) * 70ms)}
+.words.on .wd{opacity:1;transform:none;filter:blur(0)}
+
+/* ---------- 01 기술: 로고 벽과 분류별 목록 (포트폴리오 TechWall) ---------- */
 .tech{background:var(--night);color:#fff;padding:160px 0 120px;overflow:hidden}
 .tech>.wrap{position:relative;z-index:1}
 .ico{display:inline-block;width:22px;height:22px;flex:none;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
-.tech-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:64px;align-items:center}
 
-/* 궤도 (Magic UI Orbiting Circles 를 참고해 다시 썼다) */
-.orbit{--size:480px;--r1:126px;--r2:220px;position:relative;width:var(--size);height:var(--size);margin:0 auto}
-.orbit .ring{position:absolute;left:50%;top:50%;border-radius:50%;border:1px solid rgba(255,255,255,.09);transform:translate(-50%,-50%)}
-.orbit .ring.a{width:calc(var(--r1)*2);height:calc(var(--r1)*2)}
-.orbit .ring.b{width:calc(var(--r2)*2);height:calc(var(--r2)*2);border-style:dashed;border-color:rgba(255,255,255,.08)}
-.orbit .spin{position:absolute;inset:0;animation:spin var(--dur) linear infinite}
-.orbit .spin.rev{animation-direction:reverse}
-@keyframes spin{to{transform:rotate(360deg)}}
-.orbit .it{position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate(calc(360deg / var(--n) * var(--k))) translateX(var(--r)) rotate(calc(-360deg / var(--n) * var(--k)))}
-.orbit .it>span{position:absolute;left:-26px;top:-26px;width:52px;height:52px;display:grid;place-items:center;border-radius:50%;animation:spin var(--dur) linear infinite reverse}
-.orbit .spin.rev .it>span{animation-direction:normal}
-.orbit .it .glass{width:52px;height:52px;border-radius:50%;color:#fff}
-.orbit .it .glass:hover{transform:scale(1.12)}
-.orbit .it em{position:absolute;top:58px;left:50%;transform:translateX(-50%);white-space:nowrap;font-style:normal;font-size:11px;font-weight:600;color:#a8a8a8;opacity:0;transition:opacity .25s}
-.orbit:hover .it em{opacity:1}
-.orbit:hover .spin,.orbit:hover .it>span{animation-play-state:paused}
-.orbit .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:132px;height:132px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.14),rgba(255,255,255,.03));-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.12),0 0 80px rgba(36,94,255,.25)}
-.orbit .core img{width:40px;height:40px;border-radius:50%}
-.orbit .core b{font-size:13px;font-weight:700}
+/* 7기둥(1, 2, 3, 2, 3, 2, 1칸)이 엇갈려 선다. 좁은 화면은 기둥을 풀어 격자로 */
+.lw{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;justify-items:center;gap:16px;padding-bottom:40px}
+.lw-col{display:contents}
+.lw-t{display:flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:12px;background:var(--night-2);border:1px solid rgba(255,255,255,.06)}
+.lw-f{position:relative;isolation:isolate;width:40px;height:40px;margin:0}
+.lw-f>span{position:absolute;inset:0;display:block}
+.lw-f .ico{width:100%;height:100%}
+@media (min-width:768px){.lw{grid-template-columns:repeat(5,auto)}.lw-f{width:48px;height:48px}}
+@media (min-width:1024px){
+  .lw{display:flex;flex-wrap:wrap;align-items:center;justify-content:center}
+  .lw-col{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .lw-col:nth-child(even){transform:translateY(40px)}
+  .lw-t{width:88px;height:88px}
+}
 
-/* 묶음별 목록 */
-.stack-list{display:grid;gap:12px}
-.sg{padding:18px 20px;border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.02)),rgba(17,17,17,.55);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
-.sg h4{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.88px;color:#a8a8a8;margin-bottom:12px}
-.sg div{display:flex;flex-wrap:wrap;gap:8px}
-.chipx{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 13px;border-radius:9999px;font-size:13px;font-weight:600;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:background .25s,transform .3s var(--spring)}
-.chipx .ico{width:15px;height:15px}
-.chipx:hover{background:rgba(255,255,255,.14);transform:translateY(-2px)}
+.sk{margin:40px 0 0;display:grid;gap:28px 40px;border-top:1px solid rgba(255,255,255,.1);padding-top:40px}
+@media (min-width:640px){.sk{grid-template-columns:1fr 1fr}}
+@media (min-width:1024px){.sk{grid-template-columns:repeat(3,1fr);margin-top:56px}}
+.sk-g{opacity:0;transform:translateY(18px);transition:opacity .6s var(--out),transform .6s var(--out);transition-delay:var(--dl,0s)}
+.sk-g.on{opacity:1;transform:none}
+.sk-g h4{font-size:13px;font-weight:600;color:#8a8a8a}
+.sk-g>div{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+.sk-p{display:inline-flex;align-items:center;gap:8px;border-radius:9999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);padding:6px 14px 6px 10px;font-size:13.5px;font-weight:500;color:rgba(245,245,245,.9)}
+.sk-p .ico{width:15px;height:15px}
 
-/* 로고 띠 (React Bits Logo Loop 를 참고해 다시 썼다) */
-.loops{margin-top:100px;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
-/* 띠 안의 긴 로고 줄이 칸을 넓혀 페이지 폭을 밀어내지 않게 한다. 폰에서 화면이 축소돼 보이던 원인 */
-.loops>div{min-width:0}
-.loop{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.loop-cap{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.88px;color:#8a8a8a;text-align:center;margin-bottom:10px}
-.track{display:flex;width:max-content;animation:loop var(--dur,40s) linear infinite}
-.track.rev{animation-direction:reverse}
-.loop:hover .track{animation-play-state:paused}
-@keyframes loop{to{transform:translateX(-50%)}}
-.track>div{display:flex;align-items:center;gap:64px;padding-right:64px}
-.lg-it{display:inline-flex;align-items:center;gap:10px;height:44px;color:#d0d0d0;font-size:16px;font-weight:700;white-space:nowrap;opacity:.8;transition:opacity .25s,transform .35s var(--spring)}
-.lg-it:hover{opacity:1;transform:scale(1.1);color:#fff}
-.lg-it img{display:block}
-.lg-it .ico{width:24px;height:24px}
-.lg-it small{font-size:12px;font-weight:600;color:#8a8a8a}
-@media (prefers-reduced-motion:reduce){.orbit .spin,.orbit .it>span,.track{animation:none}}
-/* 계속 도는 아이콘에는 굴절 필터를 빼서 가볍게 한다 */
-.lg .orbit .glass{-webkit-backdrop-filter:blur(10px) saturate(160%);backdrop-filter:blur(10px) saturate(160%)}
+/* ---------- 02 하는 일: 카드 네 장 (포트폴리오 HoverExpand) ---------- */
+.hx{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.hx-c{position:relative;overflow:hidden;border-radius:28px;padding:28px;outline:none;color:#fff}
+.hx-c:focus-visible{box-shadow:0 0 0 2px var(--color-primary),inset 0 1px 0 rgba(255,255,255,.22)}
+.hx-fig .win{margin-top:0}
+.hx-l{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;white-space:nowrap;font-size:14px;font-weight:700;color:#7da2ff}
+.hx-l i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.hx-l span{white-space:normal;color:rgba(255,255,255,.45);font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.88px}
+.hx-txt h3{margin-top:10px;font-size:clamp(20px,1.7vw,24px);font-weight:700;letter-spacing:-.03em;line-height:1.3}
+.hx-s{margin-top:10px;font-size:15px;line-height:1.65;color:rgba(255,255,255,.75);font-weight:500}
+.hx-n{position:absolute;right:28px;bottom:24px;z-index:3;font-size:clamp(36px,3.4vw,48px);font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+/* 폰과 태블릿: 펼친 모양 그대로 위에서 아래로 쌓는다 (포트폴리오도 좁은 화면에서는 늘 펼쳐 둔다) */
+@media (max-width:1023px){
+  .hx-c{display:flex;flex-direction:column;gap:22px;padding:24px}
+  .hx-txt{order:1;padding-right:64px}
+  .hx-fig{order:2}
+  .hx-shade{display:none}
+  .hx-n{top:22px;bottom:auto;right:24px;font-size:32px;color:rgba(255,255,255,.3)}
+}
+/* 넓은 화면: 올린 카드만 1.9배로 펼쳐지고 예시 화면이 떠오른다 */
+@media (min-width:1024px){
+  .hx{display:flex;align-items:stretch;gap:20px;--h:660px}
+  .hx-c{height:var(--h);min-width:0;flex:1 1 0%;transition:flex .7s ease-out}
+  .hx-c.act{flex:1.9 1 0%}
+  /* 폭을 펼친 크기로 고정해 두고 카드가 잘라 보인다. 펼치는 동안 표가 다시 줄바꿈되며 흔들리지 않게 */
+  .hx-fig{position:absolute;left:28px;top:28px;width:calc(var(--fw,420px) - 56px);opacity:0;transition:opacity .7s ease-out}
+  .hx-shade{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(to top,#000 0%,rgba(0,0,0,.85) 30%,transparent 55%);opacity:0;transition:opacity .7s ease-out}
+  .hx-txt{position:absolute;left:28px;right:28px;top:28px;z-index:3;max-width:19rem;transition:transform .7s ease-out}
+  .hx-l{color:#8a8a8a;transition:color .7s ease-out}
+  .hx-s{opacity:0;transition:opacity .7s ease-out}
+  .hx-n{color:rgba(255,255,255,.25);transition:color .7s ease-out}
+  .hx-c.act .hx-fig,.hx-c.act .hx-shade,.hx-c.act .hx-s{opacity:1}
+  .hx-c.act .hx-txt{transform:translateY(calc(var(--h) - 100% - 7.5rem))}
+  .hx-c.act .hx-l{color:#7da2ff}
+  .hx-c.act .hx-n{color:#fff}
+}
+@media (prefers-reduced-motion:reduce){
+  .words .wd{transition:none;opacity:1;transform:none;filter:none}
+  .sk-g{transition:none;opacity:1;transform:none}
+  .hx-c,.hx-fig,.hx-shade,.hx-txt,.hx-s,.hx-n,.hx-l{transition:none}
+}
+
+/* ---------- 행동 유도: 포트폴리오 연락 카드 ---------- */
+.cta .wrap{display:block}
+.ct{border-radius:32px;padding:56px;overflow:hidden}
+.ct-in{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+/* 카드 안에서 천천히 떠다니는 빛. 포트폴리오의 보라는 V9 에 없어 흰빛으로 바꿨다 */
+.ct-blob{position:absolute;z-index:-1;border-radius:50%;pointer-events:none}
+.ct-blob.a{right:-96px;top:-96px;width:320px;height:320px;background:radial-gradient(closest-side,rgba(36,94,255,.35),transparent);animation:ct-drift-a 14s ease-in-out infinite}
+.ct-blob.b{left:40px;bottom:-128px;width:288px;height:288px;background:radial-gradient(closest-side,rgba(255,255,255,.12),transparent);animation:ct-drift-b 18s ease-in-out infinite}
+@keyframes ct-drift-a{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-120px,90px) scale(1.15)}}
+@keyframes ct-drift-b{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(140px,-60px) scale(.9)}}
+/* 테두리를 도는 빛 */
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+.beam>.beam-ring{position:absolute;inset:0;z-index:5;border-radius:inherit;padding:1.5px;pointer-events:none;
+  background:conic-gradient(from var(--a),transparent 0 78%,rgba(36,94,255,.9) 88%,rgba(255,255,255,.9) 92%,transparent 96%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:beam 7s linear infinite}
+@keyframes beam{to{--a:360deg}}
+/* 상태 알약: 점이 퍼지며 깜빡인다 */
+.ct-live{display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;padding:4px 12px;border-radius:9999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);font-size:13px;font-weight:500;color:#a8a8a8}
+.ct-live b{color:#f5f5f5;font-weight:700}
+.ct-live .dot{position:relative;display:flex;width:8px;height:8px}
+.ct-live .dot i{position:absolute;inset:0;border-radius:50%;background:var(--color-primary)}
+.ct-live .dot i:first-child{opacity:.7;animation:ct-ping 1s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ct-ping{75%,100%{transform:scale(2);opacity:0}}
+/* 제목 위를 빛이 한 번 지나가고 쉰다 */
+.shimmer{background:linear-gradient(100deg,#f5f5f5 40%,#7da2ff 50%,#f5f5f5 60%) 100% 0/300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 5s ease-in-out infinite}
+@keyframes shimmer{0%{background-position:100% 0}45%,100%{background-position:0 0}}
+/* 주 버튼: 흰 알약 안에 검정 동그라미. 비스듬한 광택이 지나간다 */
+.ct-go{display:inline-flex;align-items:center;gap:16px;height:56px;padding:0 8px 0 24px;border-radius:9999px;background:#f5f5f5;color:#000;font-size:16px;font-weight:700;transition:transform .2s}
+.ct-go:active{transform:scale(.98)}
+.ct-go .ic{width:40px;height:40px;border-radius:50%;background:#000;display:grid;place-items:center;transition:transform .45s var(--spring)}
+.ct-go:hover .ic{transform:rotate(-45deg)}
+.sheen{position:relative;overflow:hidden}
+.sheen::after{content:"";position:absolute;inset:0 auto 0 0;width:35%;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:sheen 4.5s ease-in-out 1s infinite}
+@keyframes sheen{0%{transform:translateX(-120%) skewX(-20deg)}30%,100%{transform:translateX(320%) skewX(-20deg)}}
+.cta .acts{align-items:center}
+.cta .btn2{height:56px;padding:0 24px}
+@media (max-width:860px){
+  .ct{padding:32px 22px;border-radius:28px}
+  .ct-in{grid-template-columns:1fr;gap:40px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ct-blob,.beam>.beam-ring,.ct-live .dot i:first-child,.shimmer,.sheen::after{animation:none}
+  .shimmer{color:#f5f5f5;background:none}
+}
 
 /* ---------- 폰 ---------- */
 @media (max-width:860px){
-  .nav{display:none}
-  .hd{padding:0 16px;height:62px}
-  .hd-cta{height:36px;padding:0 14px;font-size:13px}
-  .logo b{font-size:15px}
+  .nav,.hd .nav{display:none}
+  .hd{top:12px;padding:0 12px}
+  .hd-pill{padding-left:14px}
+  .hd-cta{font-size:13px;padding:0 12px}
   .stage{flex-direction:column;gap:22px;text-align:center}
   .link{flex:none;width:44vw}
   .motif{width:30vw;opacity:.7}
@@ -629,12 +725,6 @@ body{font-weight:500}
   .ft-top{grid-template-columns:1fr 1fr;gap:32px}
   .ft-top>div:first-child{grid-column:1/-1}
   .tech{padding:110px 0 90px}
-  .tech-grid{grid-template-columns:1fr;gap:48px}
-  .orbit{--size:330px;--r1:88px;--r2:150px}
-  .orbit .it>span,.orbit .it .glass{width:42px;height:42px}
-  .orbit .it>span{left:-21px;top:-21px}
-  .orbit .core{width:104px;height:104px}
-  .loops{margin-top:64px}
 }
 @media (prefers-reduced-motion:reduce){
   .rv,.ch,.vd,.chips7 span,.pm{opacity:1;transform:none;transition:none}
@@ -656,18 +746,21 @@ body{font-weight:500}
 </svg>
 
 <header class="hd" id="hd">
-  <a class="logo" href="#top" aria-label="MUSINSA TrendCheck 처음으로">
-    <img src="assets/musinsa-logo.png" alt="">
-    <span><small>MUSINSA</small><b>TrendCheck</b></span>
-  </a>
-  <nav class="nav" aria-label="주요 메뉴">
-    <a href="#stack">기술</a>
-    <a href="#what">무엇을 하나요</a>
-    <a href="#nums">결과</a>
-    <a href="#rules">원칙</a>
-    <a href="#news">소식</a>
+  <!-- 포트폴리오 상단 메뉴(Aceternity Navbar Menu 를 옮긴 것)의 모양: 가운데 떠 있는 유리 알약 -->
+  <nav class="hd-pill" aria-label="주요 메뉴">
+    <a class="logo" href="#top" aria-label="MUSINSA TrendCheck 처음으로">
+      <img src="assets/musinsa-logo.png" alt="">
+      <b>TrendCheck</b>
+    </a>
+    <div class="nav">
+    <a href="#stack">Stack</a>
+    <a href="#what">How it works</a>
+    <a href="#nums">Results</a>
+    <a href="#rules">Principles</a>
+    <a href="#news">Changelog</a>
+  </div>
+    <a class="hd-cta" href="app/">Open Trend Monitor <span aria-hidden="true">↗</span></a>
   </nav>
-  <a class="hd-cta glass pri" href="app/">트렌드 모니터 열기 <span aria-hidden="true">↗</span></a>
 </header>
 
 <main id="top">
@@ -732,54 +825,36 @@ body{font-weight:500}
   <!-- 01 기술 -->
   <section class="tech dark" id="stack">
     <div class="aura" aria-hidden="true"><i style="--c:#245eff;--s:520px;--x:-6%;--y:10%;--o:.16;--t:26s"></i><i style="--c:#ffffff;--s:460px;--x:64%;--y:50%;--o:.07;--t:30s"></i></div>
-    <div class="wrap">
+    <div class="wrap" data-ss>
       <div class="sh">
         <div>
           <p class="lbl rv"><b>01</b>Built with</p>
-          <h2 class="h2 rv d1">사용한 기술<br><span class="dim">언어와 도구</span></h2>
+          <h2 class="h2 words" data-words>The stack<br><span class="dim">사용한 언어와 도구</span></h2>
         </div>
         <p class="lead rv d2">데이터 수집과 분석, 판정, 배포, 화면과 3D 영상에 사용한 기술입니다.</p>
       </div>
-      <div class="tech-grid">
-        <div class="orbit" id="orbit" aria-label="사용 언어와 도구 궤도">
-          <div class="ring a"></div><div class="ring b"></div>
-          <div class="spin" style="--dur:30s" data-ring="lang" data-r="var(--r1)"></div>
-          <div class="spin rev" style="--dur:52s" data-ring="tool" data-r="var(--r2)"></div>
-          <div class="core"><img src="assets/musinsa-logo.png" alt=""><b>TrendCheck</b></div>
-        </div>
-        <div class="stack-list" id="stackList"></div>
-      </div>
-    </div>
-    <div class="loops">
-      <div><p class="loop-cap">DATA SOURCES</p><div class="loop"><div class="track" style="--dur:38s" data-loop="src"></div></div></div>
-      <div><p class="loop-cap">STACK</p><div class="loop"><div class="track rev" style="--dur:46s" data-loop="tech"></div></div></div>
+      <!-- 로고 벽: 포트폴리오 TechWall (Tween UI Logo Wall Shuffle) 을 옮겼다 -->
+      <div class="lw" id="logoWall" role="img" aria-label="사용한 언어와 도구 로고"></div>
+      <div class="sk" id="skillList"></div>
     </div>
   </section>
 
   <!-- 02 하는 일: 스크롤하면 위에 붙어 쌓이는 네 단계 -->
   <section class="pipe dark" id="what">
     <div class="aura" aria-hidden="true"><i style="--c:#e0e0e0;--s:560px;--x:-10%;--y:4%;--o:.26"></i><i style="--c:#9e9e9e;--s:620px;--x:60%;--y:24%;--o:.2;--t:28s;--dx:-90px"></i><i style="--c:#245eff;--s:520px;--x:6%;--y:52%;--o:.24;--t:32s;--dy:60px"></i><i style="--c:#bdbdbd;--s:460px;--x:68%;--y:74%;--o:.18;--t:26s"></i></div>
-    <div class="wrap">
+    <div class="wrap" data-ss>
       <div class="sh">
         <div>
           <p class="lbl rv"><b>02</b>How it works</p>
-          <h2 class="h2 rv d1">유행을 맞히는 것이 아니라<br><span class="dim">유행이었는지를 검증합니다</span></h2>
+          <h2 class="h2 words" data-words>We don't predict trends.<br><span class="dim">유행이었는지를 검증합니다</span></h2>
         </div>
         <p class="lead rv d2">네 단계를 차례로 거칩니다. 앞 단계를 통과한 후보만 다음 단계로 넘어갑니다.</p>
       </div>
 
-      <div class="stack">
-        <article class="pc" style="--i:0;--c:#e0e0e0">
-          <header class="pc-head"><b><i></i>01 수집</b><span>7 CHANNELS</span></header>
-          <div class="pc-body">
-            <h3>일곱 채널을<br>매일 같은 형식으로 쌓습니다</h3>
-            <p>검색, 쇼핑, 해외, 뉴스와 커머스 랭킹을 모읍니다. 형식과 주기가 달라도 결과는 하나의 기록 형식으로 맞춥니다.</p>
-            <dl class="spec">
-              <div><dt>채널</dt><dd>7개</dd></div>
-              <div><dt>주기</dt><dd>매일</dd></div>
-              <div><dt>시점 기록</dt><dd>observed_at, collected_at</dd></div>
-            </dl>
-          </div>
+      <!-- 네 단계: 포트폴리오 HoverExpand (Tween UI Card Hover Expand) 를 옮겼다 -->
+      <div class="hx">
+        <article class="hx-c gcard" tabindex="0" style="--c:#e0e0e0" aria-label="01 수집">
+          <div class="hx-fig">
           <div class="win">
             <div class="win-bar"><span><b>수집 현황</b>오늘</span><span class="ex">예시 화면</span></div>
             <div class="win-body">
@@ -792,19 +867,17 @@ body{font-weight:500}
               <div class="ch" style="--c:#e0e0e0;--d:420ms"><span class="nm"><img src="assets/brands/hiver.svg" alt="hiver" style="height:10px"></span><span class="ty">커머스</span><svg class="spark" viewBox="0 0 100 22" preserveAspectRatio="none"></svg><time class="today"></time></div>
             </div>
           </div>
-        </article>
-
-        <article class="pc" style="--i:1;--c:#bdbdbd">
-          <header class="pc-head"><b><i></i>02 교차 확인</b><span>2+ CHANNELS</span></header>
-          <div class="pc-body">
-            <h3>두 채널 이상에서<br>잡힌 것만 남깁니다</h3>
-            <p>한 곳에서만 튀는 숫자는 후보가 되지 못합니다. 성격이 다른 채널끼리 서로를 확인합니다.</p>
-            <dl class="spec">
-              <div><dt>통과 기준</dt><dd>채널 2개 이상</dd></div>
-              <div><dt>비교 축</dt><dd>검색, 쇼핑, 해외, 커머스</dd></div>
-              <div><dt>탈락 사유</dt><dd>한 채널에서만 상승</dd></div>
-            </dl>
           </div>
+          <div class="hx-shade" aria-hidden="true"></div>
+          <div class="hx-txt">
+            <p class="hx-l"><i></i>수집 <span>7 CHANNELS</span></p>
+            <h3>일곱 채널을<br>매일 같은 형식으로 쌓습니다</h3>
+            <p class="hx-s">검색, 쇼핑, 해외, 뉴스와 커머스 랭킹을 모읍니다. 형식과 주기가 달라도 결과는 하나의 기록 형식으로 맞춥니다.</p>
+          </div>
+          <p class="hx-n" aria-hidden="true">.01</p>
+        </article>
+        <article class="hx-c gcard" tabindex="0" style="--c:#bdbdbd" aria-label="02 교차 확인">
+          <div class="hx-fig">
           <div class="win">
             <div class="win-bar"><span><b>교차 확인</b>후보 4건</span><span class="ex">예시 화면</span></div>
             <div class="win-body">
@@ -820,19 +893,17 @@ body{font-weight:500}
               <p class="mx-note">점은 그 채널에서 상승 신호가 잡혔다는 뜻입니다.</p>
             </div>
           </div>
-        </article>
-
-        <article class="pc" style="--i:2;--c:#9e9e9e">
-          <header class="pc-head"><b><i></i>03 누수 차단</b><span>OBSERVED_AT &lt; T_CUT</span></header>
-          <div class="pc-body">
-            <h3>과거에 알 수 있던 것만<br>씁니다</h3>
-            <p>판정 시점 T_cut 이후의 관측치는 문제지에 들어가지 않습니다. 한 건이라도 섞이면 생성 전체를 멈춥니다.</p>
-            <dl class="spec">
-              <div><dt>기준</dt><dd>observed_at &lt; T_cut</dd></div>
-              <div><dt>검사</dt><dd>내보내기 직전 재검증</dd></div>
-              <div><dt>위반 시</dt><dd>생성 전체 중단</dd></div>
-            </dl>
           </div>
+          <div class="hx-shade" aria-hidden="true"></div>
+          <div class="hx-txt">
+            <p class="hx-l"><i></i>교차 확인 <span>2+ CHANNELS</span></p>
+            <h3>두 채널 이상에서<br>잡힌 것만 남깁니다</h3>
+            <p class="hx-s">한 곳에서만 튀는 숫자는 후보가 되지 못합니다. 성격이 다른 채널끼리 서로를 확인합니다.</p>
+          </div>
+          <p class="hx-n" aria-hidden="true">.02</p>
+        </article>
+        <article class="hx-c gcard" tabindex="0" style="--c:#9e9e9e" aria-label="03 누수 차단">
+          <div class="hx-fig">
           <div class="win">
             <div class="win-bar"><span><b>문제지 생성</b>관측 구간</span><span class="ex">예시 화면</span></div>
             <div class="win-body cut">
@@ -853,19 +924,17 @@ body{font-weight:500}
               </div>
             </div>
           </div>
-        </article>
-
-        <article class="pc" style="--i:3;--c:#245eff">
-          <header class="pc-head"><b><i></i>04 판정</b><span>CONFIRM / HOLD / REJECT</span></header>
-          <div class="pc-body">
-            <h3>확정, 보류, 기각으로<br>판정합니다</h3>
-            <p>판정마다 근거 문장을 남깁니다. 정답을 가린 문제지로 채점해 판정기 자체를 검증합니다.</p>
-            <dl class="spec">
-              <div><dt>판정</dt><dd>확정, 보류, 기각</dd></div>
-              <div><dt>근거</dt><dd>판정마다 문장으로</dd></div>
-              <div><dt>채점</dt><dd>정답을 가린 문제지</dd></div>
-            </dl>
           </div>
+          <div class="hx-shade" aria-hidden="true"></div>
+          <div class="hx-txt">
+            <p class="hx-l"><i></i>누수 차단 <span>OBSERVED_AT &lt; T_CUT</span></p>
+            <h3>과거에 알 수 있던 것만<br>씁니다</h3>
+            <p class="hx-s">판정 시점 T_cut 이후의 관측치는 문제지에 들어가지 않습니다. 한 건이라도 섞이면 생성 전체를 멈춥니다.</p>
+          </div>
+          <p class="hx-n" aria-hidden="true">.03</p>
+        </article>
+        <article class="hx-c gcard" tabindex="0" style="--c:#245eff" aria-label="04 판정">
+          <div class="hx-fig">
           <div class="win">
             <div class="win-bar"><span><b>판정</b>근거 포함</span><span class="ex">예시 화면</span></div>
             <div class="win-body">
@@ -874,6 +943,14 @@ body{font-weight:500}
               <div class="vd" style="--d:500ms"><div class="vd-top"><span>레더 봄버</span><span class="vc no">기각</span></div><p>캠페인 직후 반짝 오른 뒤 2주 만에 원래 수준으로 돌아갔습니다.</p></div>
             </div>
           </div>
+          </div>
+          <div class="hx-shade" aria-hidden="true"></div>
+          <div class="hx-txt">
+            <p class="hx-l"><i></i>판정 <span>CONFIRM / HOLD / REJECT</span></p>
+            <h3>확정, 보류, 기각으로<br>판정합니다</h3>
+            <p class="hx-s">판정마다 근거 문장을 남깁니다. 정답을 가린 문제지로 채점해 판정기 자체를 검증합니다.</p>
+          </div>
+          <p class="hx-n" aria-hidden="true">.04</p>
         </article>
       </div>
     </div>
@@ -886,7 +963,7 @@ body{font-weight:500}
       <div class="sh">
         <div>
           <p class="lbl rv"><b>03</b>Results</p>
-          <h2 class="h2 rv d1">검증 기록을<br><span class="dim">숫자로 남깁니다</span></h2>
+          <h2 class="h2 rv d1">The record, in numbers.<br><span class="dim">검증 기록을 숫자로 남깁니다</span></h2>
         </div>
         <p class="lead rv d2">숫자마다 기준을 함께 적습니다. 기준이 없는 숫자는 쓰지 않습니다.</p>
       </div>
@@ -935,7 +1012,7 @@ body{font-weight:500}
       <div class="sh">
         <div>
           <p class="lbl rv"><b>04</b>Principles</p>
-          <h2 class="h2 rv d1">결과보다 먼저<br><span class="dim">세 가지를 지킵니다</span></h2>
+          <h2 class="h2 rv d1">Three rules<br><span class="dim">결과보다 먼저 지키는 세 가지</span></h2>
         </div>
       </div>
       <div class="figs">
@@ -1000,7 +1077,7 @@ body{font-weight:500}
       <div class="sh">
         <div>
           <p class="lbl rv"><b>05</b>Changelog</p>
-          <h2 class="h2 rv d1">최근 <span class="dim">소식입니다</span></h2>
+          <h2 class="h2 rv d1">Latest <span class="dim">소식</span></h2>
         </div>
       </div>
       <div class="tl-scroll">
@@ -1019,18 +1096,21 @@ body{font-weight:500}
     <div class="aura" aria-hidden="true"><i style="--c:#ffffff;--s:520px;--x:-6%;--y:36%;--o:.12;--t:22s"></i><i style="--c:#245eff;--s:460px;--x:58%;--y:-10%;--o:.12;--t:30s"></i></div>
     <canvas id="fgrid" aria-hidden="true"></canvas>
     <div class="wrap">
-      <div class="rv">
-        <h2 class="h2">지금 뜨는 것이 진짜인지<br><span class="dim">트렌드 모니터에서<br>확인하실 수 있습니다.</span></h2>
-        <p class="lead">이번 주 신호와 판정 근거를 한 화면에서 보실 수 있습니다.</p>
-        <div class="acts">
-          <a class="atb" href="app/" aria-label="트렌드 모니터 열기">
-            <span class="atb-l glass pri">트렌드 모니터 열기</span>
-            <span class="atb-t glass pri" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M3 9 H15 M10 4 L15 9 L10 14" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          </a>
-          <a class="glass btn2" href="#what">하는 일 다시 보기</a>
-        </div>
-      </div>
-      <div class="pm">
+      <!-- 포트폴리오 연락 카드: 테두리를 도는 빛, 떠다니는 빛 두 덩이, 상태 알약, 빛이 훑는 제목, 광택이 지나가는 버튼 -->
+      <div class="ct gcard beam rv">
+        <span class="beam-ring" aria-hidden="true"></span>
+        <i class="ct-blob a" aria-hidden="true"></i><i class="ct-blob b" aria-hidden="true"></i>
+        <div class="ct-in">
+          <div>
+            <p class="ct-live"><span class="dot" aria-hidden="true"><i></i><i></i></span><b>Live</b>매일 오전 10시 수집</p>
+            <h2 class="h2"><span class="shimmer">Find out what's real.</span><br><span class="dim">트렌드 모니터에서<br>확인하실 수 있습니다.</span></h2>
+            <p class="lead">이번 주 신호와 판정 근거를 한 화면에서 보실 수 있습니다.</p>
+            <div class="acts">
+              <a class="ct-go sheen" href="app/"><span>트렌드 모니터 열기</span><span class="ic"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9 H15 M10 4 L15 9 L10 14" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+              <a class="glass btn2" href="#what">하는 일 다시 보기</a>
+            </div>
+          </div>
+          <div class="pm">
         <div class="pm-bar"><i></i><i></i><i></i><span>trendcheck/app</span></div>
         <div class="pm-body">
           <div class="pm-top"><b>이번 주 신호</b><small>예시 화면</small></div>
@@ -1040,6 +1120,7 @@ body{font-weight:500}
             <p class="swap"><span class="a">커머스 순위는 올랐지만 검색 지수가 아직 평이합니다.</span><span class="b">검색 지수가 뒤따라 오르며 두 채널이 맞았습니다.</span></p>
           </div>
           <div class="pm-row"><div class="t"><span>레더 봄버</span><span class="pc2 no">기각</span></div></div>
+        </div>
         </div>
       </div>
     </div>
@@ -1052,8 +1133,8 @@ body{font-weight:500}
       <span class="logo"><img src="assets/musinsa-logo.png" alt=""><span><small>MUSINSA</small><b>TrendCheck</b></span></span>
       <p class="desc">흩어진 패션 신호를 모으고, 과거의 데이터만으로 진짜 트렌드였는지 판정합니다. 아주대학교 소프트웨어학과 2026-2 자기주도프로젝트, 산업체 연계 무신사.</p>
     </div>
-    <nav aria-label="서비스"><h5>SERVICE</h5><a class="tlink" href="app/">트렌드 모니터</a></nav>
-    <nav aria-label="소개"><h5>ABOUT</h5><a class="tlink" href="#stack">기술</a><a class="tlink" href="#what">하는 일</a><a class="tlink" href="#nums">결과</a><a class="tlink" href="#rules">원칙</a><a class="tlink" href="#news">소식</a></nav>
+    <nav aria-label="서비스"><h5>SERVICE</h5><a class="tlink" href="app/">Trend Monitor</a></nav>
+    <nav aria-label="소개"><h5>ABOUT</h5><a class="tlink" href="#stack">Stack</a><a class="tlink" href="#what">How it works</a><a class="tlink" href="#nums">Results</a><a class="tlink" href="#rules">Principles</a><a class="tlink" href="#news">Changelog</a></nav>
   </div>
   <div class="ft-meta"><span>ⓒ2026 MUSINSA TrendCheck</span><span>SEOUL KST <span id="clk"></span></span></div>
   <div class="wm" aria-hidden="true"></div>
@@ -1066,10 +1147,10 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const DUR = 5200, OUT = 520;
 // V9 단계 색: 수집, 검색, 분석, 판정
 const SLIDES = [
-  {l:'흩어진 신호를',   r:'한곳에 모읍니다',         tag:'수집',     c:'#e0e0e0'},
-  {l:'스치는 유행과',   r:'진짜 트렌드를 가려냅니다', tag:'판별',     c:'#bdbdbd'},
-  {l:'과거의 데이터로', r:'지금을 증명합니다',        tag:'누수 차단', c:'#9e9e9e'},
-  {l:'근거를 남기고',   r:'판정을 내립니다',          tag:'판정',     c:'#245eff'},
+  {l:'흩어진 신호를',   r:'한곳에 모읍니다',         tag:'Collect',     c:'#e0e0e0'},
+  {l:'스치는 유행과',   r:'진짜 트렌드를 가려냅니다', tag:'Filter',     c:'#bdbdbd'},
+  {l:'과거의 데이터로', r:'지금을 증명합니다',        tag:'No leakage', c:'#9e9e9e'},
+  {l:'근거를 남기고',   r:'판정을 내립니다',          tag:'Verdict',     c:'#245eff'},
 ];
 const C = {pri:'36,94,255', paper:'255,255,255', collect:'224,224,224', search:'189,189,189', analyze:'158,158,158', verify:'214,214,214', ok:'36,94,255', hold:'204,204,204', err:'243,17,16'};
 const NIGHT = '#000000';
@@ -1263,8 +1344,21 @@ hero.style.opacity=0; hero.style.transition='opacity 1.2s ease';
 requestAnimationFrame(()=>{ hero.style.opacity=1; show(0); requestAnimationFrame(loop); });
 
 /* ---------- 헤더: 내리면 숨고 올리면 나타난다 ---------- */
-const hd=document.getElementById('hd'); let lastY=0;
-addEventListener('scroll',()=>{ const y=scrollY; hd.classList.toggle('hide',y>lastY&&y>200); hd.classList.toggle('solid',y>innerHeight*.85); lastY=y; },{passive:true});
+// 상단 메뉴. 포트폴리오처럼 숨지 않고 늘 떠 있다. 밑에 깔린 칸이 밝으면 밝은 유리로, 지금 칸의 메뉴는 켜 둔다
+const hd=document.getElementById('hd');
+const LIGHT=['nums','rules','news'];
+const navA=[...hd.querySelectorAll('.nav a')];
+let hdQueued=false;
+const hdPaint=()=>{
+  hdQueued=false;
+  const y=hd.querySelector('.hd-pill').getBoundingClientRect().bottom/2+8;
+  let under=null;
+  document.querySelectorAll('main > section, footer').forEach(s=>{ const r=s.getBoundingClientRect(); if(r.top<=y&&r.bottom>y) under=s; });
+  hd.classList.toggle('light',!!under&&LIGHT.includes(under.id));
+  navA.forEach(a=>a.classList.toggle('cur',!!under&&a.getAttribute('href')==='#'+under.id));
+};
+addEventListener('scroll',()=>{ if(!hdQueued){ hdQueued=true; requestAnimationFrame(hdPaint); } },{passive:true});
+addEventListener('resize',hdPaint); hdPaint();
 
 /* ---------- 아래 섹션 ---------- */
 // 오늘 날짜
@@ -1306,7 +1400,7 @@ document.querySelectorAll('.atb-l').forEach(l=>{
 
 // 버튼에 올리면 미리보기의 보류가 확정으로 넘어간다
 const pm=document.querySelector('.pm');
-document.querySelectorAll('.cta .atb').forEach(b=>{
+document.querySelectorAll('.cta .ct-go').forEach(b=>{
   b.addEventListener('mouseenter',()=>pm&&pm.classList.add('peek'));
   b.addEventListener('mouseleave',()=>pm&&pm.classList.remove('peek'));
   b.addEventListener('focus',()=>pm&&pm.classList.add('peek'));
@@ -1322,57 +1416,145 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{
 document.querySelectorAll('.rv,.pc,.cell,.fig,.tl,.wm,.pm').forEach(el=>io.observe(el));
 
 
-// 기술 섹션: 궤도, 묶음 목록, 로고 띠를 한 곳의 목록에서 만든다
-const IC=n=>`<i class="ico" style="--i:url(assets/stack/${n}.svg)" aria-hidden="true"></i>`;
-const LANG=[['python','Python'],['javascript','JavaScript'],['sqlite','SQL'],['html5','HTML/CSS'],['gnubash','Bash']];
-const TOOL=[['pandas','pandas'],['sqlite','SQLite'],['claude','Claude API'],['githubactions','GitHub Actions'],['cloudflare','Cloudflare'],['react','React'],['blender','Blender'],['ffmpeg','ffmpeg'],['pytest','pytest'],['huggingface','sentence-transformers']];
+// ---------------------------------------------------------------- 포트폴리오에서 옮긴 것
+// 원본은 ~/portfolio_site 의 React 컴포넌트다. 이 랜딩은 빌드 없는 한 파일이라 같은 움직임을 바닐라로 다시 짰다.
+
+// 아이콘. 그림 파일을 가면으로 씌우고 글자색으로 칠한다
+const IC=(n,c)=>`<i class="ico" style="--i:url(assets/stack/${n}.svg)${c?';color:'+c:''}" aria-hidden="true"></i>`;
+// 로고는 각 회사 색. 색 토큰이 아니라 로고 자체라 V9 회색으로 바꾸지 않는다
+const BRAND={python:'#5a9fd4',javascript:'#f7df1e',sqlite:'#5ab4e5',html5:'#e34f26',css:'#3d8fe0',gnubash:'#4eaa25',
+  pandas:'#e70488',claude:'#e08a68',anthropic:'#d9c9b6',githubactions:'#2088ff',cloudflare:'#f38020',cloudflareworkers:'#f38020',
+  react:'#61dafb',blender:'#f5792a',ffmpeg:'#3fbf3f',pytest:'#0a9edc',huggingface:'#ffd21e',git:'#f05032',github:'#e8eaed'};
+// 벽은 14칸이다. 같은 로고가 두 칸에 동시에 뜨지 않으려면 14개보다 많아야 돌아간다
+const WALL=[['python','Python'],['claude','Claude'],['cloudflare','Cloudflare'],['react','React'],['sqlite','SQLite'],
+  ['pandas','pandas'],['githubactions','GitHub Actions'],['javascript','JavaScript'],['blender','Blender'],['pytest','pytest'],
+  ['huggingface','sentence-transformers'],['git','Git'],['anthropic','Anthropic'],['ffmpeg','ffmpeg'],['gnubash','Bash'],
+  ['html5','HTML'],['css','CSS'],['github','GitHub'],['cloudflareworkers','Cloudflare Workers']];
 const GROUPS=[
-  ['사용 언어',LANG],
+  ['사용 언어',[['python','Python'],['javascript','JavaScript'],['sqlite','SQL'],['html5','HTML/CSS'],['gnubash','Bash']]],
   ['수집과 분석',[['python','requests'],['python','BeautifulSoup'],['pandas','pandas'],['python','pytrends'],['sqlite','SQLite, sqlite-vec'],['huggingface','sentence-transformers']]],
   ['판정',[['claude','Claude API'],['anthropic','Anthropic SDK']]],
   ['운영과 배포',[['githubactions','GitHub Actions'],['cloudflareworkers','Cloudflare Pages, Workers'],['pytest','pytest'],['git','Git']]],
   ['화면과 영상',[['react','React'],['blender','Blender'],['ffmpeg','ffmpeg']]],
 ];
-document.querySelectorAll('#orbit .spin').forEach(sp=>{
-  const list=sp.dataset.ring==='lang'?LANG:TOOL, r=sp.dataset.r;
-  sp.innerHTML=list.map(([ic,nm],k)=>`<div class="it" style="--n:${list.length};--k:${k};--r:${r}"><span><a class="glass" tabindex="-1" aria-label="${nm}">${IC(ic)}</a><em>${nm}</em></span></div>`).join('');
-});
-const sl=document.getElementById('stackList');
-if(sl) sl.innerHTML=GROUPS.map(([h,items],g)=>`<div class="sg rv${g?' d'+Math.min(3,g):''}"><h4>${h}</h4><div>${items.map(([ic,nm])=>`<span class="chipx">${IC(ic)}${nm}</span>`).join('')}</div></div>`).join('');
-const SRC=[
-  '<span class="lg-it"><img src="assets/brands/29cm.svg" alt="29CM" style="height:18px"></span>',
-  '<span class="lg-it"><img src="assets/brands/kolonmall.png" alt="KOLON MALL" style="height:13px"></span>',
-  '<span class="lg-it"><img src="assets/brands/hiver.svg" alt="hiver" style="height:16px"></span>',
-  `<span class="lg-it">${IC('naver')}NAVER<small>데이터랩, 쇼핑인사이트</small></span>`,
-  '<span class="lg-it">Google Trends</span>',
-  '<span class="lg-it">뉴스 아카이브</span>',
-  '<span class="lg-it">MUSINSA<small>산업체 연계</small></span>',
-];
-const TECH=[...LANG,...TOOL.filter(t=>t[1]!=='SQLite')].map(([ic,nm])=>`<span class="lg-it">${IC(ic)}${nm}</span>`);
-document.querySelectorAll('[data-loop]').forEach(tr=>{
-  const items=(tr.dataset.loop==='src'?SRC:TECH).join('');
-  // 같은 줄을 두 번 이어 붙이고 절반만큼 흘려서 끊김 없이 돈다
-  tr.innerHTML=`<div>${items}</div><div aria-hidden="true">${items}</div>`;
-});
-document.querySelectorAll('#stackList .rv').forEach(el=>io.observe(el));
 
-// 쌓이는 카드: 뒤 카드가 덮을수록 앞 카드를 조금 작고 어둡게
-const pcs=[...document.querySelectorAll('.pc')];
-const stackOn=matchMedia('(min-width: 861px)');
-let stackQueued=false;
-function stackFx(){
-  stackQueued=false;
-  pcs.forEach((c,i)=>{
-    const next=pcs[i+1];
-    if(!next||!stackOn.matches||reduce){ c.style.transform=''; c.style.filter=''; return; }
-    const top=parseFloat(getComputedStyle(c).top)||0, h=c.offsetHeight;
-    const k=Math.min(1,Math.max(0,1-(next.getBoundingClientRect().top-top)/h));
-    c.style.transform=k?`scale(${(1-k*.04).toFixed(4)})`:'';
-    c.style.filter=k?`brightness(${(1-k*.4).toFixed(3)})`:'';
-  });
+// 분류별 목록. 세 칸씩 조금씩 늦게 떠오른다
+const skl=document.getElementById('skillList');
+if(skl){
+  skl.innerHTML=GROUPS.map(([h,items],g)=>`<div class="sk-g" style="--dl:${(g%3)*0.08}s"><h4>${h}</h4><div>${
+    items.map(([ic,nm])=>`<span class="sk-p">${IC(ic,BRAND[ic])}${nm}</span>`).join('')}</div></div>`).join('');
+  skl.querySelectorAll('.sk-g').forEach(el=>io.observe(el));
 }
-addEventListener('scroll',()=>{ if(!stackQueued){ stackQueued=true; requestAnimationFrame(stackFx); } },{passive:true});
-addEventListener('resize',stackFx);
+
+// 로고 벽 (Tween UI Logo Wall Shuffle). 1.65초 쉬고 0.6초 동안 한 칸이 바뀐다
+const lw=document.getElementById('logoWall');
+if(lw){
+  const COLS=[1,2,3,2,3,2,1], N=COLS.reduce((a,b)=>a+b,0), DUR=600, REST=1650, TRAVEL=40;
+  const EASE='cubic-bezier(.455,.03,.515,.955)';   // GSAP power1.inOut
+  const mark=i=>`<i class="ico" role="img" aria-label="${WALL[i][1]}" title="${WALL[i][1]}" style="--i:url(assets/stack/${WALL[i][0]}.svg);color:${BRAND[WALL[i][0]]}"></i>`;
+  const shown=Array.from({length:N},(_,i)=>i%WALL.length);
+  let k=0;
+  lw.innerHTML=COLS.map(sz=>`<div class="lw-col">${Array.from({length:sz},()=>{ const i=k++; return `<div class="lw-t"><figure class="lw-f"><span>${mark(shown[i])}</span></figure></div>`; }).join('')}</div>`).join('');
+  const figs=[...lw.querySelectorAll('.lw-f')];
+  const shuffle=a=>{ const c=a.slice(); for(let i=c.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [c[i],c[j]]=[c[j],c[i]]; } return c; };
+  let order=shuffle([...Array(N).keys()]), cur=0, nextLogo=N, timer=0, playing=false;
+  const swap=()=>{
+    // 모든 칸을 한 번씩 돈 뒤에 다시 섞는다
+    if(cur>=order.length){ order=shuffle(order); cur=0; }
+    const t=order[cur++], seen=new Set(shown);
+    let inc=nextLogo%WALL.length;
+    for(let n=0;n<WALL.length&&seen.has(inc);n++) inc=(inc+1)%WALL.length;
+    nextLogo=inc+1;
+    if(seen.has(inc)) return;
+    shown[t]=inc;
+    const fig=figs[t], old=fig.lastElementChild, el=document.createElement('span');
+    el.innerHTML=mark(inc); fig.appendChild(el);
+    // 나가는 것은 위로 흐려지며 사라지고, 들어오는 것은 아래에서 떠오른다
+    old.animate([{transform:'translateY(0)',opacity:1,filter:'blur(0)'},{transform:`translateY(-${TRAVEL}px)`,opacity:0,filter:'blur(4px)'}],
+      {duration:DUR,easing:EASE,fill:'forwards'}).onfinish=()=>old.remove();
+    el.animate([{transform:`translateY(${TRAVEL}px)`,opacity:0,filter:'blur(4px)'},{transform:'translateY(0)',opacity:1,filter:'blur(0)'}],
+      {duration:DUR,easing:EASE});
+  };
+  const tick=()=>{ swap(); timer=setTimeout(tick,DUR+REST); };
+  const play=()=>{ if(playing||reduce||document.hidden) return; playing=true; timer=setTimeout(tick,REST); };
+  const stop=()=>{ playing=false; clearTimeout(timer); };
+  // 화면에 보일 때만 돈다. 다른 탭을 보는 동안에도 멈춘다
+  let inView=false;
+  new IntersectionObserver(es=>es.forEach(e=>{ inView=e.isIntersecting; inView?play():stop(); })).observe(lw);
+  document.addEventListener('visibilitychange',()=>{ document.hidden?stop():(inView&&play()); });
+}
+
+// 네 단계 카드 (Tween UI Card Hover Expand). 올린 카드가 펼쳐지고, 펼칠 때마다 예시 화면이 다시 재생된다
+const hx=document.querySelector('.hx');
+if(hx){
+  const cards=[...hx.querySelectorAll('.hx-c')], wide=matchMedia('(min-width: 1024px)');
+  let act=0;
+  // 펼친 카드 폭. 예시 화면을 이 폭으로 고정해 두면 펼치는 동안 표가 흔들리지 않는다
+  const setFw=()=>{
+    // flex-basis 가 0 이라 카드마다 안쪽 여백(좌우 28px)을 먼저 빼고 남은 폭을 1.9 대 1 로 나눈다
+    const g=parseFloat(getComputedStyle(hx).columnGap)||20, rest=cards.length-1, pad=56;
+    const free=hx.clientWidth-g*rest-pad*cards.length;
+    hx.style.setProperty('--fw',(free*1.9/(1.9+rest)+pad).toFixed(1)+'px');
+  };
+  const paint=()=>cards.forEach((c,i)=>{
+    c.classList.toggle('act',i===act);
+    // 넓은 화면은 펼친 카드만 켜서 다시 재생되게 하고, 좁은 화면은 본 카드를 모두 켜 둔다
+    c.classList.toggle('on',!!c.dataset.seen&&(wide.matches?i===act:true));
+  });
+  cards.forEach((c,i)=>{
+    const go=()=>{ if(act!==i){ act=i; paint(); } };
+    c.addEventListener('mouseenter',go); c.addEventListener('focus',go);
+  });
+  const ho=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    // 넓은 화면에서는 한 장만 보여도 줄 전체를 본 것으로 친다
+    (wide.matches?cards:[e.target]).forEach(c=>c.dataset.seen=1);
+    paint();
+  }),{threshold:.3});
+  cards.forEach(c=>ho.observe(c));
+  wide.addEventListener('change',()=>{ setFw(); paint(); });
+  addEventListener('resize',setFw);
+  setFw(); paint();
+}
+
+// 제목을 단어로 쪼갠다. 줄바꿈과 흐린 글자(.dim)는 그대로 둔다
+const wo=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); wo.unobserve(e.target); } }),{threshold:.6});
+document.querySelectorAll('[data-words]').forEach(el=>{
+  let k=0;
+  (function walk(n){ [...n.childNodes].forEach(c=>{
+    if(c.nodeType===3){
+      const f=document.createDocumentFragment();
+      c.textContent.split(/(\s+)/).forEach(w=>{
+        if(!w) return;
+        if(/^\s+$/.test(w)){ f.append(w); return; }
+        const s=document.createElement('span'); s.className='wd'; s.style.setProperty('--k',k++); s.textContent=w; f.append(s);
+      });
+      c.replaceWith(f);
+    } else if(c.nodeType===1&&c.tagName!=='BR') walk(c);
+  }); })(el);
+  reduce?el.classList.add('on'):wo.observe(el);
+});
+
+// 섹션이 들어오는 동안 스크롤에 붙어 0.93 에서 1 로 커지며 또렷해진다 (포트폴리오 ScrollScale)
+// 섹션 윗변이 화면 바닥에 닿을 때 0, 화면 55% 높이에 올 때 1. 스프링 대신 매 프레임 남은 거리의 16% 를 따라간다
+const ssList=[...document.querySelectorAll('[data-ss]')].map(el=>({el,box:el.parentElement,cur:-1}));
+let ssRaf=0;
+const ssFrame=()=>{
+  ssRaf=0; const vh=innerHeight; let again=false;
+  ssList.forEach(s=>{
+    const top=s.box.getBoundingClientRect().top;
+    const goal=Math.min(1,Math.max(0,(vh-top)/(vh*.45)));
+    s.cur=s.cur<0?goal:s.cur+(goal-s.cur)*.16;
+    if(Math.abs(goal-s.cur)<.001) s.cur=goal; else again=true;
+    const p=s.cur;
+    // 다 들어오면 변형을 지운다. 투명도가 남아 있으면 그 안의 유리가 뒤 빛을 못 비춘다
+    if(p>=.999){ s.el.style.transform=''; s.el.style.opacity=''; }
+    else { s.el.style.transform=`translateY(${(50*(1-p)).toFixed(1)}px) scale(${(.93+.07*p).toFixed(4)})`; s.el.style.opacity=(.35+.65*p).toFixed(3); }
+  });
+  if(again) ssRaf=requestAnimationFrame(ssFrame);
+};
+const ssKick=()=>{ if(!ssRaf) ssRaf=requestAnimationFrame(ssFrame); };
+if(!reduce&&ssList.length){ addEventListener('scroll',ssKick,{passive:true}); addEventListener('resize',ssKick); ssKick(); }
 
 // 행동 유도 배경: 은은하게 깜빡이는 격자
 const fg=document.getElementById('fgrid');
@@ -1387,7 +1569,7 @@ if(fg){
 
 
 // 유리 반사광이 커서를 따라간다
-const glassSel='.glass,.pc,.cell,.ev,.fig svg';
+const glassSel='.glass,.gcard,.pc,.cell,.ev,.fig svg';
 document.addEventListener('pointermove',e=>{
   const el=e.target.closest&&e.target.closest(glassSel); if(!el) return;
   const r=el.getBoundingClientRect();

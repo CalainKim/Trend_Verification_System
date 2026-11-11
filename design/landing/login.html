@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>로그인 | MUSINSA TrendCheck</title>
+<title>Sign in | Trend Monitor</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0b0b0b">
 <link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png">
@@ -53,7 +53,9 @@ a{color:inherit;text-decoration:none}
   linear-gradient(90deg,rgba(11,11,11,.92) 0%,rgba(11,11,11,.72) 38%,rgba(11,11,11,.2) 70%,rgba(11,11,11,.35) 100%),
   linear-gradient(0deg,rgba(11,11,11,.85) 0%,rgba(11,11,11,0) 40%)}
 
-.top{position:fixed;inset:0 0 auto 0;z-index:3;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 30px}
+.top{position:fixed;inset:0 0 auto 0;z-index:3;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;transition:background .3s,box-shadow .3s}
+/* 아래 소개 칸으로 내리면 로고가 글자 위에 겹치지 않게 흐린 바탕을 깐다 */
+.top.scrolled{background:rgba(11,11,11,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(255,255,255,.06)}
 .logo{display:flex;align-items:center;gap:10px}
 .logo img{width:34px;height:34px;border-radius:50%;display:block;box-shadow:0 0 0 1px rgba(255,255,255,.2)}
 .logo small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.12em;opacity:.6}
@@ -72,43 +74,55 @@ a{color:inherit;text-decoration:none}
 .card{animation-delay:.12s}
 @keyframes rise{from{opacity:0;transform:translateY(22px)}}
 
-/* 진한 유리 카드. 겹친 테두리와 윗면 반사, 커서를 따라가는 빛 */
+/* 로그인 카드: 랜딩 행동 유도 카드와 같은 계열 (포트폴리오 연락 카드에서 옮긴 것)
+   유리 판, 테두리를 도는 빛, 안에서 떠다니는 빛 한 덩이, 커서를 따라가는 반사광 */
 .card{
-  position:relative;isolation:isolate;justify-self:end;width:min(440px,100%);
-  padding:36px 34px 30px;border-radius:var(--r-card);
-  background:
-    radial-gradient(420px circle at var(--mx,30%) var(--my,0%),rgba(255,255,255,.16),transparent 55%),
-    linear-gradient(150deg,rgba(255,255,255,.2),rgba(255,255,255,.05) 45%,rgba(255,255,255,.08)),
-    rgba(20,20,20,.28);
-  -webkit-backdrop-filter:blur(40px) saturate(190%) contrast(1.05);backdrop-filter:blur(40px) saturate(190%) contrast(1.05);
-  border:1px solid rgba(255,255,255,.26);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.5),
-    inset 0 -1px 0 rgba(255,255,255,.1),
-    inset 0 0 40px rgba(255,255,255,.04),
-    0 40px 100px -40px rgba(0,0,0,.85);
+  position:relative;isolation:isolate;justify-self:end;width:min(440px,100%);overflow:hidden;
+  padding:30px 30px 24px;border-radius:28px;
+  background:linear-gradient(140deg,rgba(255,255,255,.13),rgba(255,255,255,.03) 55%,rgba(255,255,255,.07)),rgba(16,16,16,.35);
+  -webkit-backdrop-filter:blur(28px) saturate(170%);backdrop-filter:blur(28px) saturate(170%);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24),inset 0 -1px 0 rgba(255,255,255,.04),0 40px 100px -40px rgba(0,0,0,.85);
 }
-/* 안쪽 한 겹 더: 유리 두께 */
-.card::after{content:"";position:absolute;inset:6px;border-radius:calc(var(--r-card) - 6px);border:1px solid rgba(255,255,255,.08);pointer-events:none}
-/* 윗면 반사 */
-.card::before{content:"";position:absolute;left:0;right:0;top:0;height:46%;border-radius:var(--r-card) var(--r-card) 0 0;background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.09),rgba(255,255,255,0) 70%);pointer-events:none;z-index:-1}
+.card::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,-20%),rgba(255,255,255,.12),transparent 45%);opacity:0;transition:opacity .35s ease}
+.card:hover::before{opacity:1}
+.card::after{content:"";position:absolute;inset:1px;border-radius:inherit;border:1px solid rgba(255,255,255,.05);pointer-events:none}
+.blob{position:absolute;z-index:-1;right:-90px;top:-110px;width:300px;height:300px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(36,94,255,.32),transparent);animation:drift 14s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-80px,70px) scale(1.12)}}
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+.beam-ring{position:absolute;inset:0;z-index:5;border-radius:inherit;padding:1.5px;pointer-events:none;
+  background:conic-gradient(from var(--a),transparent 0 78%,rgba(36,94,255,.9) 88%,rgba(255,255,255,.9) 92%,transparent 96%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:beam 7s linear infinite}
+@keyframes beam{to{--a:360deg}}
 
-.card h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.lock{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:var(--paper);background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18)}
+.lock svg{width:20px;height:20px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:9999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);font-size:12.5px;font-weight:600;color:var(--dim)}
+.chip .dot{position:relative;display:flex;width:7px;height:7px}
+.chip .dot i{position:absolute;inset:0;border-radius:50%;background:var(--blue)}
+.chip .dot i:first-child{opacity:.7;animation:ping 1s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{75%,100%{transform:scale(2.2);opacity:0}}
+
+.card h2{font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
 .card .sub{margin-top:8px;font-size:14px;line-height:1.6;color:var(--dim)}
 
-form{margin-top:28px;display:grid;gap:8px}
+form{margin-top:24px;display:grid;gap:8px}
 label{font-size:13px;font-weight:600;color:#d6d6d6}
 .field{position:relative}
 .field input{
-  width:100%;height:56px;padding:0 56px 0 18px;border:0;outline:0;border-radius:var(--r-ctl);
+  width:100%;height:56px;padding:0 56px 0 20px;border:0;outline:0;border-radius:16px;
   font:inherit;font-size:16px;font-weight:600;letter-spacing:.04em;color:var(--paper);
-  background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.16));
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),inset 0 2px 6px rgba(0,0,0,.35);
+  background:linear-gradient(180deg,rgba(0,0,0,.3),rgba(0,0,0,.16));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),inset 0 2px 6px rgba(0,0,0,.35);
   transition:box-shadow .25s ease,background .25s ease;
 }
-.field input:focus{box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),inset 0 2px 6px rgba(0,0,0,.35),0 0 0 4px rgba(36,94,255,.28)}
+.field input:focus{box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 2px 6px rgba(0,0,0,.35),0 0 0 4px rgba(36,94,255,.28)}
 .field input[aria-invalid="true"]{box-shadow:inset 0 0 0 1px rgba(255,107,106,.7),inset 0 2px 6px rgba(0,0,0,.35)}
-.eye{position:absolute;right:8px;top:8px;width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--dim);cursor:pointer;display:grid;place-items:center;transition:background .2s,color .2s}
+.eye{position:absolute;right:8px;top:8px;width:40px;height:40px;border:0;border-radius:12px;background:transparent;color:var(--dim);cursor:pointer;display:grid;place-items:center;transition:background .2s,color .2s}
 .eye:hover{background:rgba(255,255,255,.1);color:var(--paper)}
 .eye .off{display:none}
 .eye[aria-pressed="true"] .on{display:none}
@@ -118,23 +132,81 @@ label{font-size:13px;font-weight:600;color:#d6d6d6}
 .err.shake{animation:shake .45s var(--out)}
 @keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 
-/* 흰 유리 버튼 */
+/* 흰 알약 버튼 안에 검정 동그라미 화살표. 비스듬한 광택이 지나간다 */
 .go{
-  position:relative;isolation:isolate;margin-top:10px;height:56px;border:0;border-radius:var(--r-ctl);cursor:pointer;
-  font:inherit;font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:10px;
-  background:
-    radial-gradient(160px circle at var(--mx,50%) var(--my,-30%),rgba(255,255,255,.95),transparent 62%),
-    linear-gradient(180deg,rgba(255,255,255,.96),rgba(236,236,236,.84));
-  box-shadow:inset 0 1px 0 #fff,inset 0 -1px 1px rgba(0,0,0,.08),0 16px 34px -16px rgba(0,0,0,.7);
-  transition:transform .35s var(--spring),opacity .2s;
+  margin-top:12px;height:56px;border:0;border-radius:9999px;cursor:pointer;padding:0 8px 0 24px;
+  font:inherit;font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:space-between;
+  background:var(--paper);box-shadow:0 16px 34px -16px rgba(0,0,0,.7);transition:transform .2s,opacity .2s;
 }
-.go .ico{width:18px;height:18px;transition:transform .4s var(--spring)}
-.go:hover .ico{transform:translateX(3px)}
+.go .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--paper);transition:transform .45s var(--spring)}
+.go .ic .ico{width:18px;height:18px}
+.go:hover .ic{transform:rotate(-45deg)}
 .go:active{transform:scale(.98)}
 .go[aria-busy="true"]{opacity:.75;cursor:progress}
-.go[aria-busy="true"] .ico{animation:nudge .9s var(--out) infinite}
+.go[aria-busy="true"] .ic{animation:nudge .9s var(--out) infinite}
 @keyframes nudge{50%{transform:translateX(4px)}}
-.help{margin-top:18px;font-size:13px;line-height:1.6;color:var(--mute)}
+.sheen{position:relative;overflow:hidden}
+.sheen::after{content:"";position:absolute;inset:0 auto 0 0;width:35%;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);animation:sheen 4.5s ease-in-out 1s infinite}
+@keyframes sheen{0%{transform:translateX(-120%) skewX(-20deg)}30%,100%{transform:translateX(320%) skewX(-20deg)}}
+
+.meta{list-style:none;margin:20px 0 0;padding:18px 0 0;border-top:1px solid rgba(255,255,255,.08);display:grid;gap:8px}
+.meta li{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.5;color:var(--mute)}
+.meta svg{width:14px;height:14px;flex:none;color:#7da2ff}
+
+/* 첫 화면 아래로 이어진다는 표시 */
+.more{margin-top:40px;display:inline-flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--dim);transition:color .2s}
+.more .ar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);animation:bob 2.4s ease-in-out infinite}
+.more .ar svg{width:14px;height:14px}
+.more:hover{color:var(--paper)}
+@keyframes bob{50%{transform:translateY(4px)}}
+
+/* ---------- Inside Trend Monitor: Tween UI Project Hover Reveal 을 옮겼다 ----------
+   왼쪽은 화면 이름 목록, 오른쪽은 무대 하나. 이름을 가리키면 그 줄에서 가장 가까운 가장자리부터
+   그림이 동그랗게 열리고, 아래 네 칸이 한 줄씩 굴러 들어온다. 색은 원본의 청록 대신 V9 파랑 */
+.inside{position:relative;z-index:2;padding:120px 30px 140px;background:linear-gradient(180deg,rgba(11,11,11,.55),var(--ink) 120px)}
+.in-wrap{max-width:1100px;margin:0 auto}
+.in-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.15)}
+.in-head h2{font-size:clamp(36px,5vw,60px);font-weight:500;letter-spacing:-.03em;line-height:.98}
+.in-head p{margin-top:16px;font-size:15px;line-height:1.6;color:var(--dim)}
+.in-count{flex:none;font-size:14px;color:rgba(125,162,255,.85);font-variant-numeric:tabular-nums}
+.phr{display:grid;gap:32px;padding-top:24px}
+@media (min-width:860px){.phr{grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:48px;padding-top:32px}}
+@media (min-width:1100px){.phr{grid-template-columns:minmax(0,1fr) 440px;gap:64px}}
+.phr-list{list-style:none;margin:0;padding:0;align-self:center}
+.phr-row{position:relative;border-bottom:1px solid rgba(255,255,255,.1)}
+.phr-row:last-child{border-bottom:0}
+.phr-touch{display:none;margin-top:16px;width:100%;aspect-ratio:4/3;border-radius:10px;object-fit:cover;object-position:top left}
+.phr-a{position:relative;width:100%;display:flex;align-items:baseline;gap:16px;padding:16px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;outline:none}
+.phr-a::after{content:"";position:absolute;inset:0;border-radius:4px}
+.phr-a:focus-visible::after{box-shadow:inset 0 0 0 2px #7da2ff}
+.phr-n{width:28px;flex:none;font-size:12px;color:rgba(255,255,255,.35);font-variant-numeric:tabular-nums;transition:color .5s}
+.phr-t{display:flex;min-width:0;flex-direction:column;gap:4px}
+.phr-title{font-size:30px;font-weight:500;letter-spacing:-.02em;line-height:1.05;color:rgba(255,255,255,.3);transition:color .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+.phr-sub{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.phr-arrow{margin-left:auto;align-self:center;color:#7da2ff;opacity:0;transform:translateX(-8px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+.phr-arrow svg{display:block;width:20px;height:20px}
+.phr-row[data-active="true"] .phr-n{color:#7da2ff}
+.phr-row[data-active="true"] .phr-title{color:#fff;transform:translateX(8px)}
+.phr-row[data-active="true"] .phr-arrow{opacity:1;transform:none}
+@media (min-width:860px){.phr-a{padding:20px 0}.phr-title{font-size:40px}}
+@media (min-width:1100px){.phr-title{font-size:44px}}
+.phr-stage{order:-1}
+@media (min-width:860px){.phr-stage{order:0}}
+.phr-frame{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:12px;background:#111;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 60px -30px rgba(0,0,0,.8)}
+.phr-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left;visibility:hidden;opacity:0}
+.phr-img.first{visibility:visible;opacity:1}
+.phr-fields{margin:24px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:20px 32px}
+.phr-fields dt{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(125,162,255,.75)}
+.phr-fields dd{margin:8px 0 0;display:grid;overflow:hidden;font-size:15px;color:var(--paper)}
+.phr-v{grid-area:1/1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;visibility:hidden;opacity:0}
+.phr-v.first{visibility:visible;opacity:1}
+/* 손가락으로 쓰는 화면: 무대 대신 줄마다 그림을 펼쳐 둔다 */
+@media (pointer:coarse){
+  .phr-stage,.phr-arrow{display:none}
+  .phr-touch{display:block}
+  .phr-title,.phr-row[data-active="true"] .phr-title{color:#fff;transform:none}
+  .phr-sub{position:static;width:auto;height:auto;clip:auto;white-space:normal;font-size:14px;color:rgba(255,255,255,.6)}
+}
 
 @media (max-width:860px){
   .top{height:62px;padding:0 16px}
@@ -143,12 +215,13 @@ label{font-size:13px;font-weight:600;color:#d6d6d6}
   .page{grid-template-columns:1fr;gap:28px;padding:92px 16px 32px;align-items:end}
   .lead h1{font-size:clamp(34px,10vw,44px)}
   .lead p{margin-top:14px}
-  .card{justify-self:stretch;width:100%;padding:28px 22px 24px;border-radius:20px}
-  .card::after{border-radius:14px}
+  .card{justify-self:stretch;width:100%;padding:26px 20px 22px;border-radius:24px}
+  .more{margin-top:24px}
+  .inside{padding:80px 16px 100px}
   .bg::after{background:linear-gradient(0deg,rgba(11,11,11,.94) 0%,rgba(11,11,11,.6) 50%,rgba(11,11,11,.82) 100%)}
 }
 @media (prefers-reduced-motion:reduce){
-  .lead,.card,.err.shake,.go[aria-busy="true"] .ico{animation:none}
+  .lead,.card,.err.shake,.go[aria-busy="true"] .ic,.blob,.beam-ring,.chip .dot i,.sheen::after,.more .ar{animation:none}
 }
 /* 투명도를 줄여 달라는 설정이면 유리 대신 단색으로 */
 @media (prefers-reduced-transparency:reduce){
@@ -172,13 +245,20 @@ label{font-size:13px;font-weight:600;color:#d6d6d6}
 
 <main class="page">
   <section class="lead">
-    <h1>트렌드<br>모니터</h1>
+    <h1>Trend<br>Monitor</h1>
     <p>이번 주 신호와 판정 근거를 한 화면에서 봅니다.</p>
+    <a class="more" href="#inside"><span class="ar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>Inside Trend Monitor</a>
   </section>
 
   <section class="card" aria-labelledby="t">
-    <h2 id="t">로그인</h2>
-    <p class="sub">전달받은 비밀번호를 입력해 주세요. 7일 동안 로그인이 유지됩니다.</p>
+    <span class="beam-ring" aria-hidden="true"></span>
+    <i class="blob" aria-hidden="true"></i>
+    <div class="card-top">
+      <span class="lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+      <span class="chip"><span class="dot" aria-hidden="true"><i></i><i></i></span>Private access</span>
+    </div>
+    <h2 id="t">Sign in</h2>
+    <p class="sub">전달받은 비밀번호를 입력해 주세요.</p>
 
     <form method="post" action="/auth/login" id="f" novalidate>
       <input type="hidden" name="next" id="next" value="/app/">
@@ -190,11 +270,85 @@ label{font-size:13px;font-weight:600;color:#d6d6d6}
         </button>
       </div>
       <p class="err" id="err" role="alert"></p>
-      <button class="go" type="submit" id="go"><span id="goLabel">들어가기</span><svg class="ico" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></button>
+      <button class="go sheen" type="submit" id="go"><span id="goLabel">들어가기</span><span class="ic"><svg class="ico" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></span></button>
     </form>
-    <p class="help">비밀번호가 필요하시면 프로젝트 담당자에게 문의해 주세요.</p>
+    <ul class="meta">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>7일 동안 로그인이 유지됩니다</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>비밀번호는 프로젝트 담당자에게 받으실 수 있습니다</li>
+    </ul>
   </section>
 </main>
+
+<section class="inside" id="inside" aria-labelledby="insideT">
+  <div class="in-wrap">
+    <div class="in-head">
+      <div>
+        <h2 id="insideT">Inside Trend Monitor</h2>
+        <p>들어가면 보시게 될 다섯 화면입니다. 이름을 가리키면 실제 화면이 열립니다.</p>
+      </div>
+      <p class="in-count" aria-hidden="true">05</p>
+    </div>
+    <div class="phr" id="phr">
+      <ul class="phr-list">
+        <li class="phr-row" data-active="true">
+          <img class="phr-touch" src="assets/monitor/types.jpg" alt="유형과 상품 (1차) 화면" loading="lazy">
+          <button class="phr-a" type="button" aria-label="Weekly overview, 유형과 상품 (1차). 들어가서 보기">
+            <span class="phr-n" aria-hidden="true">01</span>
+            <span class="phr-t"><span class="phr-title">Weekly overview</span><span class="phr-sub">유형과 상품 (1차), 1위 유형과 유형 점수</span></span>
+            <span class="phr-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+          </button>
+        </li>
+        <li class="phr-row" data-active="false">
+          <img class="phr-touch" src="assets/monitor/now.jpg" alt="지금 유행 (2차) 화면" loading="lazy">
+          <button class="phr-a" type="button" aria-label="Trends now, 지금 유행 (2차). 들어가서 보기">
+            <span class="phr-n" aria-hidden="true">02</span>
+            <span class="phr-t"><span class="phr-title">Trends now</span><span class="phr-sub">지금 유행 (2차), 카테고리를 넘는 공통점</span></span>
+            <span class="phr-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+          </button>
+        </li>
+        <li class="phr-row" data-active="false">
+          <img class="phr-touch" src="assets/monitor/rising.jpg" alt="급상승 상품 화면" loading="lazy">
+          <button class="phr-a" type="button" aria-label="Rising items, 급상승 상품. 들어가서 보기">
+            <span class="phr-n" aria-hidden="true">03</span>
+            <span class="phr-t"><span class="phr-title">Rising items</span><span class="phr-sub">급상승 상품, 10계단 상승, 신규 진입</span></span>
+            <span class="phr-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+          </button>
+        </li>
+        <li class="phr-row" data-active="false">
+          <img class="phr-touch" src="assets/monitor/log.jpg" alt="검증 기록 화면" loading="lazy">
+          <button class="phr-a" type="button" aria-label="Verification log, 검증 기록. 들어가서 보기">
+            <span class="phr-n" aria-hidden="true">04</span>
+            <span class="phr-t"><span class="phr-title">Verification log</span><span class="phr-sub">검증 기록, 일주일 뒤에도 남았는지</span></span>
+            <span class="phr-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+          </button>
+        </li>
+        <li class="phr-row" data-active="false">
+          <img class="phr-touch" src="assets/monitor/weekly.jpg" alt="주간 요약 화면" loading="lazy">
+          <button class="phr-a" type="button" aria-label="Weekly brief, 주간 요약. 들어가서 보기">
+            <span class="phr-n" aria-hidden="true">05</span>
+            <span class="phr-t"><span class="phr-title">Weekly brief</span><span class="phr-sub">주간 요약, 보고용 요약 문장과 CSV</span></span>
+            <span class="phr-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+          </button>
+        </li>
+      </ul>
+      <div class="phr-stage" aria-hidden="true">
+        <div class="phr-frame">
+            <img class="phr-img first" src="assets/monitor/types.jpg" alt="" decoding="async">
+            <img class="phr-img" src="assets/monitor/now.jpg" alt="" decoding="async">
+            <img class="phr-img" src="assets/monitor/rising.jpg" alt="" decoding="async">
+            <img class="phr-img" src="assets/monitor/log.jpg" alt="" decoding="async">
+            <img class="phr-img" src="assets/monitor/weekly.jpg" alt="" decoding="async">
+        </div>
+        <dl class="phr-fields">
+            <div class="phr-f"><dt>Screen</dt><dd><span class="phr-v first">유형과 상품</span><span class="phr-v">지금 유행</span><span class="phr-v">급상승 상품</span><span class="phr-v">검증 기록</span><span class="phr-v">주간 요약</span></dd></div>
+            <div class="phr-f"><dt>Shows</dt><dd><span class="phr-v first">1위 유형과 유형 점수</span><span class="phr-v">카테고리를 넘는 공통점</span><span class="phr-v">10계단 상승, 신규 진입</span><span class="phr-v">일주일 뒤에도 남았는지</span><span class="phr-v">보고용 요약 문장과 CSV</span></dd></div>
+            <div class="phr-f"><dt>Source</dt><dd><span class="phr-v first">29CM 상의 TOP100</span><span class="phr-v">네 카테고리 1차 후보</span><span class="phr-v">29CM 순위</span><span class="phr-v">1주 뒤 순위</span><span class="phr-v">이번 주 판정 전체</span></dd></div>
+            <div class="phr-f"><dt>Refresh</dt><dd><span class="phr-v first">매주</span><span class="phr-v">누를 때마다</span><span class="phr-v">매주</span><span class="phr-v">매주</span><span class="phr-v">매주</span></dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
 
 <script>
 (() => {
@@ -237,6 +391,76 @@ label{font-size:13px;font-weight:600;color:#d6d6d6}
   });
   // 뒤로 가기로 돌아왔을 때 버튼이 확인 중에 멈춰 있지 않게
   addEventListener('pageshow', () => { go.removeAttribute('aria-busy'); document.getElementById('goLabel').textContent = '들어가기'; });
+
+  // Inside Trend Monitor (Tween UI Project Hover Reveal). 원본은 GSAP 이고 여기서는 Web Animations 로 같은 움직임을 낸다
+  const phr = document.getElementById('phr');
+  if (phr) {
+    const rows = [...phr.querySelectorAll('.phr-row')], imgs = [...phr.querySelectorAll('.phr-img')];
+    const fields = [...phr.querySelectorAll('.phr-f')], frame = phr.querySelector('.phr-frame');
+    const FULL = 'inset(0% 0% 0% 0%)';
+    const P3O = 'cubic-bezier(.215,.61,.355,1)', P2O = 'cubic-bezier(.165,.84,.44,1)', P3IO = 'cubic-bezier(.645,.045,.355,1)';
+    let active = 0;
+    const stop = (el) => el && el.getAnimations().forEach((a) => a.cancel());
+    const vis = (el, on, z) => { el.style.visibility = on ? 'visible' : 'hidden'; el.style.opacity = on ? '1' : '0'; if (z != null) el.style.zIndex = z; };
+    // 가리킨 줄의 가운데를 무대에 비춰 가장자리에 붙인다. 목록 옆이면 왼쪽 가장자리, 무대가 위로 올라가면 아래 가장자리
+    const origin = (i) => {
+      const b = frame.getBoundingClientRect(), r = rows[i].getBoundingClientRect();
+      if (!b.width || !b.height) return '0% 50%';
+      const pin = (v) => Math.round(Math.min(Math.max(v, 0), 100));
+      return pin((r.left + r.width / 2 - b.left) / b.width * 100) + '% ' + pin((r.top + r.height / 2 - b.top) / b.height * 100) + '%';
+    };
+    // 새 그림은 동그랗게 열리고, 이전 그림은 아래에 남아 어두워진다. 그래서 그 사이에 빈 무대가 보이지 않는다
+    const swap = (from, to, anim) => {
+      const next = imgs[to], prev = from >= 0 && from !== to ? imgs[from] : null;
+      imgs.forEach((im) => { if (im === next || im === prev) return; stop(im); vis(im, false, 0); });
+      stop(next); stop(prev);
+      next.style.clipPath = FULL;
+      if (!anim || !prev) { vis(next, true, 2); if (prev) vis(prev, false, 0); return; }
+      vis(prev, true, 1); prev.style.clipPath = FULL;
+      prev.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(.55)' }], { duration: 800, easing: P2O, fill: 'forwards' });
+      vis(next, true, 2);
+      const at = origin(to);
+      next.animate([{ clipPath: `circle(0% at ${at})`, transform: 'scale(1.2)' }, { clipPath: `circle(150% at ${at})`, transform: 'scale(1)' }], { duration: 800, easing: P3O })
+        .onfinish = () => { if (active === to) { stop(prev); vis(prev, false, 0); } };
+    };
+    // 네 칸이 한 줄씩, 앞 칸보다 조금 늦게, 목록을 움직인 방향으로 굴러 들어온다
+    const roll = (from, to, anim) => {
+      const dir = to > from ? 1 : -1;
+      fields.forEach((f, fi) => {
+        const lines = [...f.querySelectorAll('.phr-v')], next = lines[to], prev = from >= 0 && from !== to ? lines[from] : null;
+        lines.forEach((l) => { if (anim && l === prev) return; stop(l); vis(l, l === next); });
+        if (!anim) return;
+        const delay = fi * 50;
+        if (prev) {
+          stop(prev); vis(prev, true);
+          const a = prev.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(${-100 * dir}%)`, opacity: 0 }], { duration: 400, easing: P3IO, delay, fill: 'forwards' });
+          a.onfinish = () => { vis(prev, false); a.cancel(); };
+        }
+        next.animate([{ transform: `translateY(${100 * dir}%)`, opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 550, easing: P3O, delay, fill: 'backwards' });
+      });
+    };
+    const activate = (i) => {
+      if (i < 0 || i === active) return;
+      const from = active; active = i;
+      rows.forEach((r, k) => { r.dataset.active = k === i ? 'true' : 'false'; });
+      swap(from, i, !reduce); roll(from, i, !reduce);
+    };
+    swap(-1, 0, false); roll(-1, 0, false);
+    phr.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') return; const r = e.target.closest('.phr-row'); if (r) activate(rows.indexOf(r)); });
+    phr.addEventListener('focusin', (e) => {
+      let fv = true; try { fv = e.target.matches(':focus-visible'); } catch (_) {}
+      const r = e.target.closest('.phr-row'); if (r && fv) activate(rows.indexOf(r));
+    });
+    // 이름을 누르면 위로 올라가 비밀번호 칸으로. 들어가야 볼 수 있는 화면이라서
+    phr.querySelectorAll('.phr-a').forEach((b) => b.addEventListener('click', () => {
+      scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      setTimeout(() => pw.focus({ preventScroll: true }), reduce ? 0 : 450);
+    }));
+  }
+
+  const top = document.querySelector('.top');
+  const onScroll = () => top.classList.toggle('scrolled', scrollY > 40);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
   // 유리 반사광이 커서를 따라간다
   document.querySelectorAll('.card,.go').forEach((el) => el.addEventListener('pointermove', (e) => {

@@ -13,6 +13,33 @@ cd "$(dirname "$0")/.."
 SRC="design/Trend Monitor v9.dc.html"
 OUT="build/web"
 
+# 실제 자료를 먼저 내보내고 점검한다. 배포 폴더를 지우기 전에 해야 막혔을 때 지난 빌드가 남는다
+VERDICTS="${VERDICTS:-runs/benchmark-model-v6/verdicts.json}"
+SCORE_ARG=""
+[ -f "$VERDICTS" ] && SCORE_ARG="--verdicts $VERDICTS"
+# 주를 고를 수 있다. 검색 수집이 늦어 최신 주의 기준일까지 검색 자료가 없으면
+# 모든 상품이 "검색 교차에서 걸러짐" 이 된다. 그때는 자료가 다 있는 주로 만든다.
+#   WEEK=2026-11-03 ./scripts/build_web.sh
+WEEK_ARG=""
+[ -n "${WEEK:-}" ] && WEEK_ARG="--week $WEEK"
+./.venv/bin/python scripts/export_frontend.py --json $WEEK_ARG $SCORE_ARG
+# 검색 자료가 기준일까지 없는 속성이 많으면 화면 대부분이 "검색 교차에서 걸러짐" 이 된다.
+# 2026-11-11 에 아무 경고 없이 그런 화면이 올라갔다. 절반이 안 되면 멈추고 고칠 길을 알려 준다.
+# 그래도 올려야 하면 ALLOW_STALE_SEARCH=1 을 붙인다.
+./.venv/bin/python - <<'PYCHK' || [ "${ALLOW_STALE_SEARCH:-}" = "1" ] || exit 1
+import json, sys
+d = json.load(open("build/frontend_data.json", encoding="utf-8"))
+w, G = d["WEEK"], d["G"]
+ok = sum(1 for v in G.values() if v["last"] >= w["baseISO"])
+last = max((v["last"] for v in G.values()), default="?")
+print(f"  검색 자료 점검: 기준일 {w['baseISO']} 까지 있는 속성 {ok}/{len(G)} (가장 최근 {last})")
+if ok * 2 < len(G):
+    print("  멈춘다. 이대로면 대부분의 상품이 검색 교차에서 걸러진다")
+    print("  구글 트렌드 갱신을 기다리거나 (data/gtrends.log), 자료가 다 있는 주로 만든다")
+    print(f"    예: WEEK=<확인일> ./scripts/build_web.sh   지금 주의 확인일은 {w['holdISO']}")
+    sys.exit(1)
+PYCHK
+
 rm -rf "$OUT"
 mkdir -p "$OUT"
 
@@ -20,7 +47,13 @@ echo "### 1. 시안을 중계판으로 묶는다 (/app/)"
 # 첫 화면(/)은 랜딩이고 모니터는 /app/ 에 둔다. 중계 주소는 /api/complete
 # 절대경로라 모니터 위치가 바뀌어도 그대로 닿는다.
 mkdir -p "$OUT/app"
-./.venv/bin/python scripts/bundle_design.py "$SRC" \
+# 실제 수집 자료와 상품 사진을 시안에 끼워 넣은 뒤 묶는다. build_viewer.sh 와 같은 순서다.
+# 이 두 단계를 건너뛰면 시안 원본의 예시 자료로 올라가고 상품 사진 칸이 모두 빈다.
+# 2026-11-11 운영에서 옷 사진이 안 뜨던 원인이다.
+WORK="build/.web"
+mkdir -p "$WORK"
+./.venv/bin/python scripts/patch_design.py "$SRC" -o "$WORK/patched.html"
+./.venv/bin/python scripts/bundle_design.py "$WORK/patched.html" \
     --assets design/runtime --relay -o "$OUT/app/index.html"
 # 랜딩과 같은 무신사 색감. 원본은 다시 받아오는 파일이라 여기서 덧씌운다
 ./.venv/bin/python scripts/apply_monitor_theme.py "$OUT/app/index.html"
@@ -35,6 +68,8 @@ mkdir -p "$OUT/assets/fonts"
 cp "$LANDING/assets/musinsa-logo.png" "$OUT/assets/"
 cp -R "$LANDING/assets/brands" "$OUT/assets/brands"
 cp -R "$LANDING/assets/stack" "$OUT/assets/stack"
+# 로그인 화면 아래 "Inside Trend Monitor" 가 쓰는 실제 모니터 화면 다섯 장
+cp -R "$LANDING/assets/monitor" "$OUT/assets/monitor"
 # 홈 화면 앱(PWA). 서비스 워커는 범위가 사이트 전체가 되도록 맨 위에 둔다
 cp "$LANDING/manifest.webmanifest" "$LANDING/sw.js" "$LANDING/offline.html" "$OUT/"
 cp -R "$LANDING/assets/pwa" "$OUT/assets/pwa"

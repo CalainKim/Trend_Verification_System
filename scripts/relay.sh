@@ -53,7 +53,14 @@ printf '%s' "$UNTIL" | npx wrangler pages secret put RELAY_OPEN_UNTIL --project-
 echo "  RELAY_OPEN_UNTIL = $UNTIL"
 
 echo "### 2. 반영되도록 다시 배포한다"
-./scripts/build_web.sh >/dev/null
+# 빌드가 막혀도(검색 자료 점검 등) 멈추지 않는다. 멈추면 위에서 바꾼 비밀값이 반영되지
+# 않아 close 를 했는데도 열린 채로 남는다. build_web.sh 는 막힐 때 지난 빌드를 남기므로
+# 그것을 그대로 다시 올린다.
+if ! ./scripts/build_web.sh >/dev/null; then
+  echo "  새로 빌드하지 못해 지난 빌드를 그대로 다시 올린다"
+  echo "  (검색 자료 점검에 걸렸다면 WEEK=<확인일> 을 앞에 붙여 다시 돌리면 그 주로 만든다)"
+fi
+[ -f build/web/index.html ] || { echo "  올릴 빌드가 없다. ./scripts/build_web.sh 를 먼저 돌린다"; exit 1; }
 (cd build/web && npx wrangler pages deploy . --project-name "$PROJECT" --branch main --commit-dirty=true 2>&1 | grep -E "Deployment complete|ERROR" || true)
 
 if [ "$UNTIL" = "closed" ]; then

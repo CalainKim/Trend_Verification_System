@@ -498,8 +498,11 @@ def swap_model(html: str, to: str = MODEL_TO) -> tuple[str, int]:
     """
     n = html.count(f"'{MODEL_FROM}'")
     if n == 0:
-        # 이름이 사라지면 API 가 404 를 돌려주고, 그 원인을 찾기 어렵다.
-        # 조용히 넘기지 않고 멈춘다.
+        # patch_design.py 를 거친 시안은 이미 다른 모델 이름으로 바뀌어 있다.
+        # 그때는 그 결정을 존중하고 건너뛴다. 모델 이름이 아예 없을 때만 멈춘다.
+        # 이름이 사라지면 API 가 404 를 돌려주고, 그 원인을 찾기 어렵기 때문이다.
+        if re.search(r"model:\s*'claude-[a-z0-9-]+'", html):
+            return html, 0
         raise SystemExit(f"모델 이름 {MODEL_FROM} 을 찾지 못했다. 시안이 바뀌었다")
     return html.replace(f"'{MODEL_FROM}'", f"'{to}'"), n
 

@@ -113,3 +113,102 @@ def test_max_new_counts_keywords_not_requests(monkeypatch, db):
                           "--missing-only", "--max-new", "2"], fake)
     assert len({c for c, _ in fake.seen}) == 2
     assert len(fake.seen) == 4
+
+
+# ---------------------------------------------------------------- 새 주 갱신 (2026-11-11)
+# 처음 채우기만 있던 탓에 시계열이 2026-10-25 에서 멈췄고, 화면은 최신 주의 기준일까지
+# 검색 자료가 없다며 모든 상품을 "검색 교차에서 걸러짐" 으로 떨어뜨렸다.
+
+def seed_at(conn, keyword, observed_at, value=50.0, geo="KR"):
+    storage.insert_raw(conn, [
+        RawRecord(channel="gtrends", keyword_raw=keyword, entity=f"geo={geo}",
+                  metric_type="search_index", metric_value=value,
+                  observed_at=observed_at)])
+
+
+def test_fresh_terms_picks_only_recent(db):
+    _, conn = db
+    seed_at(conn, "기모", "2026-10-25")      # 17일 전
+    seed_at(conn, "니트", "2026-11-08")      # 3일 전
+    assert cg.fresh_terms(conn, "gtrends", "", 9, "2026-11-11") == {"니트"}
+
+
+class RecCollector(FakeCollector):
+    """새 창으로 받은 값을 돌려준다. fail 이면 한도에 걸린다."""
+
+    def __init__(self, fail=False):
+        super().__init__()
+        self.fail = fail
+
+    def collect(self, keywords, start, end, geos=(), keywords_by_geo=None,
+                candidate=None, run_id=None, gprop=""):
+        self.seen.append((candidate, gprop))
+        if self.fail:
+            raise GoogleTrendsUnavailable("429 code 429")
+        return iter([RawRecord(channel="gtrends", keyword_raw=candidate, entity="geo=KR",
+                               metric_type="search_index", metric_value=99.0,
+                               observed_at=d) for d in ("2026-10-25", "2026-11-01")])
+
+
+def kr_rows(conn, kw):
+    return conn.execute("SELECT observed_at, metric_value FROM signal_raw WHERE keyword_raw=? "
+                        "ORDER BY observed_at", (kw,)).fetchall()
+
+
+def test_stale_refresh_replaces_whole_series(monkeypatch, db, tmp_path):
+    _, conn = db
+    seed_at(conn, "기모", "2021-12-26", 10.0)   # 옛 눈금, 새 창이 닿지 않는 해
+    seed_at(conn, "기모", "2026-10-25", 40.0)
+    fake = RecCollector()
+    run(monkeypatch, db, ["--limit", "74", "--geos", "KR", "--stale-days", "9", "--replace",
+                          "--end", "2026-11-11", "--snapshot-dir", str(tmp_path / "snap")], fake)
+    rows = [tuple(r) for r in kr_rows(conn, "기모")]
+    # 옛 눈금 행은 하나도 남지 않고 새 창의 값만 남는다
+    assert rows == [("2026-10-25", 99.0), ("2026-11-01", 99.0)]
+    # 새 창이 닿지 않은 2021 년 CSV 도 다시 써서 옛 행이 파일에 남지 않는다
+    y2021 = (tmp_path / "snap" / "gtrends" / "2021.csv").read_text(encoding="utf-8")
+    assert "기모" not in y2021
+
+
+def test_refresh_keeps_data_when_blocked(monkeypatch, db):
+    """받다가 한도에 걸리면 아무것도 지우지 않는다."""
+    _, conn = db
+    seed_at(conn, "기모", "2026-10-25", 40.0)
+    run(monkeypatch, db, ["--limit", "74", "--geos", "KR", "--stale-days", "9", "--replace",
+                          "--end", "2026-11-11", "--stop-on-block", "--snapshot-dir", ""],
+        RecCollector(fail=True))
+    assert [tuple(r) for r in kr_rows(conn, "기모")] == [("2026-10-25", 40.0)]
+
+
+def test_fresh_terms_are_not_requested_again(monkeypatch, db):
+    _, conn = db
+    seed_at(conn, "기모", "2026-11-08")
+    fake = RecCollector()
+    run(monkeypatch, db, ["--limit", "74", "--geos", "KR", "--stale-days", "9", "--replace",
+                          "--end", "2026-11-11", "--snapshot-dir", ""], fake)
+    assert ("기모", "") not in fake.seen
+
+
+def test_stale_days_requires_replace(monkeypatch, db):
+    path, _ = db
+    monkeypatch.setattr(cg, "GoogleTrendsCollector", lambda *a, **k: RecCollector())
+    assert cg.main(["--db", str(path), "--stale-days", "9"]) == 2
+
+
+def test_hourly_threshold_keeps_just_refreshed_terms_fresh(db):
+    """방금 받은 속성은 다음 시간에 다시 받지 않아야 한다.
+
+    받을 수 있는 마지막 완성 주는 오늘보다 7일에서 13일 전이다. 수요일 11-11 에
+    받으면 마지막 주는 11-01(10일 전)이다. 문턱이 이보다 짧으면 같은 속성만 매시간
+    다시 받고 뒤쪽 속성에는 차례가 오지 않는다.
+    """
+    _, conn = db
+    seed_at(conn, "티셔츠", "2026-11-01")    # 방금 갱신
+    seed_at(conn, "기모", "2026-10-25")      # 아직 옛 자료
+    sh = (ROOT / "scripts" / "collect_gtrends_hourly.sh").read_text(encoding="utf-8")
+    import re
+    days = int(re.search(r"GTRENDS_STALE_DAYS:-(\d+)", sh).group(1))
+    for today in ("2026-11-11", "2026-11-14"):    # 수요일, 토요일
+        fresh = cg.fresh_terms(conn, "gtrends", "", days, today)
+        assert "티셔츠" in fresh, (days, today)
+        assert "기모" not in fresh, (days, today)

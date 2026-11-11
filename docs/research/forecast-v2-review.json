@@ -1,0 +1,154 @@
+{
+  "review_type": "AI-assisted independent input/output semantic review; not truth-label scoring or human-rater agreement",
+  "reviewed_at": "2026-11-08T14:21:21.922885+00:00",
+  "prompt_version": "forecast-v2",
+  "source": "forecast-v2-outputs.json",
+  "source_state_sha256": "7c965ae5541244c4284b447675c7e1376f069992b522e494a084c94fe358529b",
+  "labels_or_scorecard_read": false,
+  "rubric_source": "docs/research/FORECAST_V2.md",
+  "definitions": {
+    "task_following_pass": "Raw final response uses actual past inputs for a forecast or a permitted specific HOLD; independent of machine schema validity and forecast accuracy.",
+    "future_absence_misused": "Missing future actual values used to stop prediction or as negative evidence for the verdict, not merely noted as a limitation.",
+    "past_grounding_sufficient_for_task": "Minimum task interpretation criterion, not a claim that the forecasting rationale is strong, complete, or correct.",
+    "threshold_as_future_value": "Assessment threshold substituted for an observed or independently predicted future mean.",
+    "fabricated_future_observation": "Unprovided future rank or collection date asserted as observed fact."
+  },
+  "counts": {
+    "cases": 8,
+    "task_following_pass": 3,
+    "schema_valid_and_task_following_pass": 2,
+    "future_absence_misused": 5,
+    "threshold_as_future_value": 0,
+    "fabricated_future_observation": 0,
+    "schema_complete": 5,
+    "schema_invalid": 3
+  },
+  "cases": [
+    {
+      "case_id": "rise_2026-10-12_29cm_2816996",
+      "status": "invalid",
+      "raw_verdict": "NOT_SUPPORTED",
+      "task_following_pass": false,
+      "future_absence_misused": true,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": false,
+      "explanation_quality_notes": [
+        "존재하지 않는 evidence ID limitations를 사용해 형식 검증에서 invalid 처리됐다. 정식 result는 null이며 원문 verdict만 진단했다.",
+        "NOT_SUPPORTED라는 표지와 달리 요약은 미래 실제값 부재로 판단할 수 없다고 설명한다."
+      ],
+      "rationale": "과거 감지 평균 41.29와 문턱 48.64를 읽었지만 미래 실측 부재를 반대 근거와 판단 불가 사유로 사용했다. 과거 근거를 통해 기준 미달을 예상한 답으로 볼 수 없다."
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_2824007",
+      "status": "complete",
+      "raw_verdict": "HOLD",
+      "task_following_pass": false,
+      "future_absence_misused": true,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": false,
+      "explanation_quality_notes": [
+        "감지 구간 평균 91이 확인 문턱 96보다 작다는 사실을 지속 기준을 만족한다고 표현했다. 과거 구간의 비교와 미래 지속성 판단을 구분하는 설명이 약하다.",
+        "미래 실제값 부재를 unknowns에 반복 기재했다."
+      ],
+      "rationale": "HOLD의 직접적인 이유를 미래 7개 관측일 평균이 96 이하인지 확인할 수 없는 데이터 부족으로 밝혔다. 구체적인 과거 자료 충돌에 따른 허용 HOLD가 아니다."
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_3450561",
+      "status": "invalid",
+      "raw_verdict": "NOT_SUPPORTED",
+      "task_following_pass": false,
+      "future_absence_misused": true,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": false,
+      "explanation_quality_notes": [
+        "존재하지 않는 evidence ID limitations를 사용해 invalid 처리됐다.",
+        "상승폭 12.71과 순위 수준 문턱 51.64를 상대적으로 크다고 비교해 기준 미달을 지지하는 근거로 사용했다. 변화량과 수준을 비교한 설명이며 적절한 예측 이유가 아니다.",
+        "support 안에 유지될 가능성이 낮다는 반대 방향 설명을 넣어 지속 지지/반대 구분 지시도 지키지 않았다."
+      ],
+      "rationale": "요약에는 기준 미달을 예상한다는 표현이 있으나 근거는 미래값 부재 및 의미가 맞지 않는 수치 비교에 기대고 있다. 미래 부재만 언급한 응답은 아니지만 실제 과거 흐름에서 선택한 방향으로 이어지는 근거가 충분하지 않다."
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4125187",
+      "status": "complete",
+      "raw_verdict": "HOLD",
+      "task_following_pass": false,
+      "future_absence_misused": true,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": false,
+      "explanation_quality_notes": [
+        "기준 구간과 감지 구간의 구분이 명확하지 않다고 주장하지만 실제 입력은 앞 7개와 뒤 7개 관측 구간을 명시한다."
+      ],
+      "rationale": "확인 구간의 실제 순위가 없어 예측 불가능하다는 요약으로 HOLD했다. 별도 과거 입력 문제도 언급했지만 입력에 명시된 구간 구분을 부정한 주장이라 허용 보류 근거로 인정하기 어렵다."
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4130049",
+      "status": "complete",
+      "raw_verdict": "WATCH",
+      "task_following_pass": true,
+      "future_absence_misused": false,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": true,
+      "explanation_quality_notes": [
+        "설명은 과거 평균 개선과 판정 문턱 계산에 집중한다. 최근 관측이 31에서 56으로 악화한 흐름 등 반대 근거는 다루지 않았다. 이는 설명의 범위 한계이며 이번 과제 해석 기준의 실패로 소급하지 않는다."
+      ],
+      "rationale": "실제 과거 평균 52에서 29.29로 개선된 흐름과 상승폭 22.71을 바탕으로 지속될 가능성을 예측했다. 문턱 40.64는 계산된 평가 기준으로 설명했으며 미래 관측으로 대입하거나 미래값 부재로 멈추지 않았다."
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4205647",
+      "status": "invalid",
+      "raw_verdict": "WATCH",
+      "task_following_pass": true,
+      "future_absence_misused": false,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": true,
+      "explanation_quality_notes": [
+        "history는 입력 필드 이름이지만 허용된 evidence ID가 아니므로 invalid다. 원문의 의미상 예측 수행과 정식 응답 채택 가능성을 분리해야 한다.",
+        "unknowns에 미래 실제값이 없어 정확한 판단이 어렵다는 한계를 넣어 이 필드를 과거 자료 한계로 제한한 지시를 지키지 않았다. 다만 미래값 부재를 이유로 예측을 중단한 것은 아니다.",
+        "85,32,77의 세 관측을 상승세로 요약하고 감지 구간 후반 4개 관측일의 목록 부재를 반대 근거로 다루지 않았다."
+      ],
+      "rationale": "실제 과거 평균 101에서 85.43의 개선과 감지 구간 내 85,32,77 관측을 지속 가능성의 근거로 연결해 WATCH를 예측했다. 문턱은 조건으로 다뤘고 미래 실측 부재는 한계로만 언급했다. 형식 검증 실패와 별도로 예측 과제 해석의 최소 기준은 충족한다."
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4205649",
+      "status": "complete",
+      "raw_verdict": "WATCH",
+      "task_following_pass": true,
+      "future_absence_misused": false,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": true,
+      "explanation_quality_notes": [
+        "감지 평균 59.57이 문턱 66.57 아래라는 비교는 상승 후보 정의에서 이미 따라오는 관계다. 미래 지속성을 충분히 설명하는 독립 근거로 보기는 어렵고 최근 개별 순위 흐름도 해석하지 않았다.",
+        "문턱을 미래 관측이나 이미 산출한 미래 평균으로 치환한 것은 아니므로 해당 오류와 구분한다."
+      ],
+      "rationale": "실제 과거 평균과 상승폭 14를 사용하며 유지 가능성이 있다고 WATCH 방향을 예측했다. 근거가 초기 상승과 문턱 비교의 재진술에 머무는 한계는 있으나 미래 실측을 요구하거나 사후 판정으로 멈추지 않았다. 이번 최소 과제 수행 기준은 충족한다."
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4216006",
+      "status": "complete",
+      "raw_verdict": "NOT_SUPPORTED",
+      "task_following_pass": false,
+      "future_absence_misused": true,
+      "threshold_as_future_value": false,
+      "fabricated_future_observation": false,
+      "past_grounding_sufficient_for_task": false,
+      "explanation_quality_notes": [
+        "NOT_SUPPORTED라는 표지와 달리 요약은 미래 평균 데이터가 없어 지속 여부 판단 불가라고 말한다.",
+        "unknowns에서 미래 실제 순위와 정확한 수집 날짜를 요구했다. 미래 관측을 만들어낸 것은 아니지만 예측 과제의 정상적인 미관측 상태를 결손으로 취급했다."
+      ],
+      "rationale": "기준 평균 101에서 감지 평균 59.86으로 개선된 과거 수치를 적었지만 그 흐름으로 기준 미달을 예측하지 않았다. 미래 평균 데이터 부재를 판단 불가 사유로 삼아 과제 의도에 맞지 않는다."
+    }
+  ],
+  "limitations": [
+    "One revised-prompt run on the same development cases; no causal attribution to individual wording or model-performance claim.",
+    "Forecast intent and explanation quality are assessed separately; passing intent is not validation of predictive accuracy.",
+    "Raw invalid responses are reviewed for diagnosis but are not promoted to valid model results."
+  ],
+  "frozen_prediction_sha256": "d6a8c5644f9bcbe47fd4f83759004037cbd9941cec798dab495d2bf1efd2a582"
+}

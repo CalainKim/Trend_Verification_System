@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1080" viewBox="0 0 1440 1080" role="img" aria-labelledby="title desc">
+<title id="title">시계열 근거와 리즈닝의 트렌드 지속성 연구 구조</title>
+<desc id="desc">고정한 맨투맨 8건의 입력을 A 정적, B 원시 이력, C 계산된 특징으로 분리한다. 이번 파일럿은 C만 Claude와 Qwen에 호출하고 네 기준선도 계산한다. 예측을 봉인한 뒤 미래 관측으로 정답을 복원하며 원본 해시가 일치해야 평가한다.</desc>
+<defs>
+<marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9 Z" fill="#087F72"/></marker>
+<marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9 Z" fill="#315D92"/></marker>
+<marker id="arrow-grey" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9 Z" fill="#A8B4C4"/></marker>
+<marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9 Z" fill="#AC3F43"/></marker>
+</defs>
+<rect width="1440" height="1080" fill="#F6F8FC"/>
+<g font-family="Malgun Gothic, Noto Sans KR, Arial, sans-serif">
+<path d="M296 360 L322 360 L322 212 L350 212" fill="none" stroke="#A8B4C4" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-grey)" stroke-dasharray="6 4"/>
+<path d="M296 360 L322 360 L322 352 L350 352" fill="none" stroke="#A8B4C4" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-grey)" stroke-dasharray="6 4"/>
+<path d="M296 360 L322 360 L322 492 L350 492" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M640 492 L690 492 L690 332 L740 332" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M640 492 L690 492 L690 482 L740 482" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M176 480 L176 575 L348 575 L348 620" fill="none" stroke="#315D92" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M1020 332 L1058 332 L1058 370 L1100 370" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M1020 482 L1058 482 L1058 430 L1100 430" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M640 685 L1068 685 L1068 470 L1100 470" fill="none" stroke="#315D92" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-blue)"/>
+<path d="M1240 500 L1240 575 L1215 575 L1215 635" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M1215 750 L1215 778 L1218 778 L1218 800" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M1128 855 L1055 855 L1055 897 L1000 897" fill="none" stroke="#087F72" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-teal)"/>
+<path d="M1218 910 L1218 930 L1222 930 L1222 950" fill="none" stroke="#AC3F43" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow-red)"/>
+<text x="56" y="68" font-size="34" font-weight="700" fill="#182B45" text-anchor="start">
+<tspan x="56" y="68.0">시계열 근거 × 리즈닝</tspan>
+</text>
+<text x="56" y="102" font-size="19" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="56" y="102.0">트렌드 지속성 판단 연구  ·  맨투맨 8상품  ·  순위 시계열만으로 입력 효과 분리</tspan>
+</text>
+<text x="850" y="137" font-size="16" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="850" y="137.0">실선: 이번 파일럿   /   점선: 후속 비교 준비</tspan>
+</text>
+<rect x="56" y="240" width="240" height="240" rx="12" fill="#FFFFFF" stroke="#C4D0E0" stroke-width="1.5"/>
+<text x="78" y="276" font-size="16" font-weight="700" fill="#315D92" text-anchor="start">
+<tspan x="78" y="276.0">01  입력 고정</tspan>
+</text>
+<text x="78" y="322" font-size="23" font-weight="700" fill="#182B45" text-anchor="start">
+<tspan x="78" y="322.0">맨투맨 8상품</tspan>
+</text>
+<text x="78" y="361" font-size="17" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="78" y="361.0">같은 판단 시점 · 7브랜드</tspan>
+<tspan x="78" y="386.5">색상 변형 2건 포함</tspan>
+<tspan x="78" y="412.0">원본 커밋·해시 보관</tspan>
+</text>
+<text x="78" y="455" font-size="16" font-weight="700" fill="#087F72" text-anchor="start">
+<tspan x="78" y="455.0">미래 정답은 넣지 않음</tspan>
+</text>
+<rect x="350" y="160" width="290" height="105" rx="12" fill="#F1F4F8" stroke="#B8C4D3" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="371" y="198" font-size="21" font-weight="700" fill="#596C83" text-anchor="start">
+<tspan x="371" y="198.0">A  현재 상태만</tspan>
+</text>
+<text x="371" y="229" font-size="16" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="371" y="229.0">상품 정보·현재 순위 / 추후 실행</tspan>
+</text>
+<rect x="350" y="300" width="290" height="105" rx="12" fill="#F1F4F8" stroke="#B8C4D3" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="371" y="338" font-size="21" font-weight="700" fill="#596C83" text-anchor="start">
+<tspan x="371" y="338.0">B  원시 순위 이력</tspan>
+</text>
+<text x="371" y="369" font-size="16" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="371" y="369.0">A + 이전 14개 관측일 / 추후 실행</tspan>
+</text>
+<rect x="350" y="440" width="290" height="105" rx="12" fill="#E8F6F1" stroke="#087F72" stroke-width="1.5"/>
+<text x="371" y="478" font-size="21" font-weight="700" fill="#087F72" text-anchor="start">
+<tspan x="371" y="478.0">C  계산된 시계열 근거</tspan>
+</text>
+<text x="371" y="510" font-size="17" font-weight="400" fill="#182B45" text-anchor="start">
+<tspan x="371" y="510.0">B + 평균·상승폭·관측 범위</tspan>
+</text>
+<text x="350" y="570" font-size="16" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="350" y="570.0">A·B·C의 숫자·본문 혼입 검사</tspan>
+</text>
+<rect x="740" y="280" width="280" height="105" rx="12" fill="#FFFFFF" stroke="#087F72" stroke-width="1.5"/>
+<text x="762" y="318" font-size="21" font-weight="700" fill="#182B45" text-anchor="start">
+<tspan x="762" y="318.0">Claude Sonnet 5.5</tspan>
+</text>
+<text x="762" y="351" font-size="17" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="762" y="351.0">동일 질문·근거 / 8건</tspan>
+</text>
+<rect x="740" y="430" width="280" height="105" rx="12" fill="#FFFFFF" stroke="#087F72" stroke-width="1.5"/>
+<text x="762" y="468" font-size="21" font-weight="700" fill="#182B45" text-anchor="start">
+<tspan x="762" y="468.0">Qwen3-8B · A40</tspan>
+</text>
+<text x="762" y="501" font-size="17" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="762" y="501.0">동일 질문·근거 / 8건</tspan>
+</text>
+<text x="740" y="572" font-size="17" font-weight="700" fill="#087F72" text-anchor="start">
+<tspan x="740" y="572.0">기본 16회 · 학습 없이 추론</tspan>
+</text>
+<rect x="56" y="620" width="584" height="130" rx="12" fill="#EDF3FC" stroke="#7C9BC3" stroke-width="1.5"/>
+<text x="80" y="660" font-size="21" font-weight="700" fill="#315D92" text-anchor="start">
+<tspan x="80" y="660.0">추가 API 비용 없는 기준선 4종</tspan>
+</text>
+<text x="80" y="698" font-size="18" font-weight="400" fill="#182B45" text-anchor="start">
+<tspan x="80" y="698.0">① 전부 지속   ② 전부 소멸</tspan>
+<tspan x="80" y="725.0">③ 마지막 순위 유지   ④ 최근 3개 관측일 평균 유지</tspan>
+</text>
+<rect x="1100" y="300" width="280" height="200" rx="12" fill="#E8F6F1" stroke="#087F72" stroke-width="1.5"/>
+<text x="1122" y="336" font-size="16" font-weight="700" fill="#087F72" text-anchor="start">
+<tspan x="1122" y="336.0">예측 먼저 고정</tspan>
+</text>
+<text x="1122" y="378" font-size="23" font-weight="700" fill="#182B45" text-anchor="start">
+<tspan x="1122" y="378.0">예측 파일 봉인</tspan>
+</text>
+<text x="1122" y="414" font-size="17" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="1122" y="414.0">판정·근거·오류 보관</tspan>
+<tspan x="1122" y="439.5">입력·프롬프트·설정 해시</tspan>
+<tspan x="1122" y="465.0">모델·시간·토큰·비용 기록</tspan>
+</text>
+<text x="1090" y="564" font-size="16" font-weight="700" fill="#087F72" text-anchor="start">
+<tspan x="1090" y="564">봉인 후에만</tspan>
+<tspan x="1090" y="588">정답에 접근</tspan>
+</text>
+<rect x="1050" y="635" width="330" height="115" rx="12" fill="#FFF8E8" stroke="#D5AD60" stroke-width="1.5"/>
+<text x="1072" y="671" font-size="21" font-weight="700" fill="#182B45" text-anchor="start">
+<tspan x="1072" y="671.0">확인 구간의 정답 복원</tspan>
+</text>
+<text x="1072" y="706" font-size="17" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="1072" y="706.0">다음 7개 관측일 평균 순위</tspan>
+<tspan x="1072" y="731.5">상승분의 50% 이상 유지 → 지속</tspan>
+</text>
+<path d="M1218.0 800 L1308 855.0 L1218.0 910 L1128 855.0 Z" fill="#FFF8E8" stroke="#BD944F" stroke-width="1.5"/>
+<text x="1218.0" y="845" font-size="18" font-weight="700" fill="#182B45" text-anchor="middle">
+<tspan x="1218.0" y="845">원본 봉인</tspan>
+<tspan x="1218.0" y="870">해시 일치?</tspan>
+</text>
+<text x="1040" y="833" font-size="16" font-weight="700" fill="#087F72" text-anchor="start">
+<tspan x="1040" y="833.0">일치</tspan>
+</text>
+<text x="1250" y="933" font-size="16" font-weight="700" fill="#AC3F43" text-anchor="start">
+<tspan x="1250" y="933.0">불일치</tspan>
+</text>
+<rect x="1110" y="950" width="225" height="62" rx="12" fill="#FBEDEE" stroke="#C57B7E" stroke-width="1.5"/>
+<text x="1222.5" y="985" font-size="18" font-weight="700" fill="#AC3F43" text-anchor="middle">
+<tspan x="1222.5" y="985.0">채점 중단 · 원인 확인</tspan>
+</text>
+<rect x="400" y="815" width="600" height="165" rx="12" fill="#FFFFFF" stroke="#8AA2BF" stroke-width="1.5"/>
+<text x="424" y="858" font-size="23" font-weight="700" fill="#182B45" text-anchor="start">
+<tspan x="424" y="858.0">결과를 함께 읽는 수치표</tspan>
+</text>
+<text x="424" y="898" font-size="18" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="424" y="898.0">정답 · 오답 · HOLD · 기술 실패를 구분</tspan>
+<tspan x="424" y="925.0">답변율 / 답변 정확도 / 지속 예측 적중률·재현율</tspan>
+<tspan x="424" y="952.0">근거·수치 오류 / 사례당 시간·비용</tspan>
+</text>
+<text x="56" y="1040" font-size="16" font-weight="400" fill="#596C83" text-anchor="start">
+<tspan x="56" y="1040.0">이번 결과는 예비 비교다. 같은 시점의 8상품으로 시간 일반화나 A·B·C 결합 효과를 입증했다고 쓰지 않는다.</tspan>
+</text>
+</g></svg>

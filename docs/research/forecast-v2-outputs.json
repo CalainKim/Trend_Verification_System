@@ -1,0 +1,355 @@
+{
+  "purpose": "Task-interpretation check only; no outcome labels or accuracy scoring",
+  "prompt_version": "forecast-v2",
+  "prompt_source_commit": "4c55349",
+  "frozen_at": "2026-11-08T14:20:10.063960+00:00",
+  "frozen_prediction_sha256": "d6a8c5644f9bcbe47fd4f83759004037cbd9941cec798dab495d2bf1efd2a582",
+  "prior_frozen_prediction_sha256": "2235f1e082a397f5e046ab888d04bd7d7af13edd3f12f5a3349f4353fba8f04e",
+  "same_input_and_user_strings": 8,
+  "calls": 8,
+  "retries": 0,
+  "records": [
+    {
+      "case_id": "rise_2026-10-12_29cm_2816996",
+      "status": "invalid",
+      "validated_result": null,
+      "raw_response_text": "{\n  \"verdict\": \"NOT_SUPPORTED\",\n  \"summary\": \"감지 구간의 평균 순위(41.29위)는 문턱(48.64위)보다 낮지만, 확인 구간의 실제 순위 데이터가 입력에 없어 지속 여부를 판단할 수 없다.\",\n  \"support\": [\n    {\n      \"text\": \"감지 구간의 평균 순위(41.29위)가 문턱(48.64위)보다 낮아 상승분의 절반 이상 유지 가능성이 있다.\",\n      \"evidence_ids\": [\"rank_history\"]\n    }\n  ],\n  \"against\": [\n    {\n      \"text\": \"확인 구간의 실제 순위 데이터가 입력에 없어 지속 여부를 판단할 수 없다.\",\n      \"evidence_ids\": [\"limitations\"]\n    }\n  ],\n  \"unknowns\": [\"확인 구간의 실제 순위 데이터가 입력에 없어 분석 불가능\"]\n}",
+      "raw_response_json": {
+        "verdict": "NOT_SUPPORTED",
+        "summary": "감지 구간의 평균 순위(41.29위)는 문턱(48.64위)보다 낮지만, 확인 구간의 실제 순위 데이터가 입력에 없어 지속 여부를 판단할 수 없다.",
+        "support": [
+          {
+            "text": "감지 구간의 평균 순위(41.29위)가 문턱(48.64위)보다 낮아 상승분의 절반 이상 유지 가능성이 있다.",
+            "evidence_ids": [
+              "rank_history"
+            ]
+          }
+        ],
+        "against": [
+          {
+            "text": "확인 구간의 실제 순위 데이터가 입력에 없어 지속 여부를 판단할 수 없다.",
+            "evidence_ids": [
+              "limitations"
+            ]
+          }
+        ],
+        "unknowns": [
+          "확인 구간의 실제 순위 데이터가 입력에 없어 분석 불가능"
+        ]
+      },
+      "validation_errors": [
+        "against[0]:unknown_evidence_id"
+      ],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2586,
+        "output_tokens": 3915
+      },
+      "elapsed_seconds": 127.056285,
+      "input_hash": "bed63435ad7ca77d627388a50387d67159a2bbb05df904801d313e8cdfe06b83",
+      "prompt_hash": "3ffd50e0d356514f7bf574a06957149e4a0685abb70b88c663dee0252b10b5d2"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_2824007",
+      "status": "complete",
+      "validated_result": {
+        "verdict": "HOLD",
+        "summary": "감지 구간 평균 91위는 지속 기준 96.0위를 만족하지만, 미래 7개 관측일 평균이 96.0위 이하인지 확인할 수 없는 데이터 부족으로 예측 불가",
+        "support": [
+          {
+            "text": "감지 구간 평균 91위는 기준 구간 평균 101위 대비 10계단 상승하며, 지속 기준 문턱 96.0위를 하향 전환 시켰다.",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": [
+          "미래 7개 관측일의 실제 순위 데이터 부재",
+          "계산용 경계값 101위 기준으로 목록 부재일 수 있는 날 수"
+        ]
+      },
+      "raw_response_text": "{\n  \"verdict\": \"HOLD\",\n  \"summary\": \"감지 구간 평균 91위는 지속 기준 96.0위를 만족하지만, 미래 7개 관측일 평균이 96.0위 이하인지 확인할 수 없는 데이터 부족으로 예측 불가\",\n  \"support\": [\n    {\n      \"text\": \"감지 구간 평균 91위는 기준 구간 평균 101위 대비 10계단 상승하며, 지속 기준 문턱 96.0위를 하향 전환 시켰다.\",\n      \"evidence_ids\": [\"rank_features\"]\n    }\n  ],\n  \"against\": [],\n  \"unknowns\": [\n    \"미래 7개 관측일의 실제 순위 데이터 부재\",\n    \"계산용 경계값 101위 기준으로 목록 부재일 수 있는 날 수\"\n  ]\n}",
+      "raw_response_json": {
+        "verdict": "HOLD",
+        "summary": "감지 구간 평균 91위는 지속 기준 96.0위를 만족하지만, 미래 7개 관측일 평균이 96.0위 이하인지 확인할 수 없는 데이터 부족으로 예측 불가",
+        "support": [
+          {
+            "text": "감지 구간 평균 91위는 기준 구간 평균 101위 대비 10계단 상승하며, 지속 기준 문턱 96.0위를 하향 전환 시켰다.",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": [
+          "미래 7개 관측일의 실제 순위 데이터 부재",
+          "계산용 경계값 101위 기준으로 목록 부재일 수 있는 날 수"
+        ]
+      },
+      "validation_errors": [],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2718,
+        "output_tokens": 745
+      },
+      "elapsed_seconds": 23.791886,
+      "input_hash": "17225ee4366878027eabad6b69515c33d13788a8df5f9c7ab252c9596a87cc50",
+      "prompt_hash": "56943d2bc994a544ca41ff645b3bbe5f8d893c39286ff4c31feeaccc95e0edf7"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_3450561",
+      "status": "invalid",
+      "validated_result": null,
+      "raw_response_text": "{\n  \"verdict\": \"NOT_SUPPORTED\",\n  \"summary\": \"지속 예측 기준에 미달할 것으로 예상\",\n  \"support\": [\n    {\n      \"text\": \"기준 구간 평균 58위에서 감지 구간 평균 45.29위로 상승폭 12.71계단을 기록했으나, 확인 구간 평균이 51.64위 이하로 유지될 가능성은 낮다.\",\n      \"evidence_ids\": [\"rank_features\"]\n    }\n  ],\n  \"against\": [\n    {\n      \"text\": \"확인 구간의 실제 순위 데이터가 입력에 없어 평균 계산이 불가능하며, 감지 구간의 상승분(12.71)이 확인 구간 기준(51.64)에 비해 상대적으로 크다.\",\n      \"evidence_ids\": [\"limitations\"]\n    }\n  ],\n  \"unknowns\": [\n    \"확인 구간의 실제 순위 데이터가 입력에 없어 평균 계산 불가\",\n    \"감지 구간의 상승분이 확인 구간 기준에 비해 상대적으로 크지만, 실제 데이터 부재로 확정적 예측 불가\"\n  ]\n}",
+      "raw_response_json": {
+        "verdict": "NOT_SUPPORTED",
+        "summary": "지속 예측 기준에 미달할 것으로 예상",
+        "support": [
+          {
+            "text": "기준 구간 평균 58위에서 감지 구간 평균 45.29위로 상승폭 12.71계단을 기록했으나, 확인 구간 평균이 51.64위 이하로 유지될 가능성은 낮다.",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [
+          {
+            "text": "확인 구간의 실제 순위 데이터가 입력에 없어 평균 계산이 불가능하며, 감지 구간의 상승분(12.71)이 확인 구간 기준(51.64)에 비해 상대적으로 크다.",
+            "evidence_ids": [
+              "limitations"
+            ]
+          }
+        ],
+        "unknowns": [
+          "확인 구간의 실제 순위 데이터가 입력에 없어 평균 계산 불가",
+          "감지 구간의 상승분이 확인 구간 기준에 비해 상대적으로 크지만, 실제 데이터 부재로 확정적 예측 불가"
+        ]
+      },
+      "validation_errors": [
+        "against[0]:unknown_evidence_id"
+      ],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2548,
+        "output_tokens": 2863
+      },
+      "elapsed_seconds": 91.272423,
+      "input_hash": "e22a13f84081416550194f0d5b96e8f21bda3d4cc7fc1448bf077c9d17a46922",
+      "prompt_hash": "8dcf534f38f7e90f74071efa7d91c0a63c88224668851f667609ccc4cfab0093"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4125187",
+      "status": "complete",
+      "validated_result": {
+        "verdict": "HOLD",
+        "summary": "확인 구간의 실제 순위 데이터가 입력에 없어 예측 불가능",
+        "support": [],
+        "against": [],
+        "unknowns": [
+          "확인 구간의 7개 관측일 평균 순위 데이터가 입력에 누락됨",
+          "기준 구간과 감지 구간의 구분이 명확하지 않음"
+        ]
+      },
+      "raw_response_text": "{\n  \"verdict\": \"HOLD\",\n  \"summary\": \"확인 구간의 실제 순위 데이터가 입력에 없어 예측 불가능\",\n  \"support\": [],\n  \"against\": [],\n  \"unknowns\": [\"확인 구간의 7개 관측일 평균 순위 데이터가 입력에 누락됨\", \"기준 구간과 감지 구간의 구분이 명확하지 않음\"]\n}",
+      "raw_response_json": {
+        "verdict": "HOLD",
+        "summary": "확인 구간의 실제 순위 데이터가 입력에 없어 예측 불가능",
+        "support": [],
+        "against": [],
+        "unknowns": [
+          "확인 구간의 7개 관측일 평균 순위 데이터가 입력에 누락됨",
+          "기준 구간과 감지 구간의 구분이 명확하지 않음"
+        ]
+      },
+      "validation_errors": [],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2721,
+        "output_tokens": 771
+      },
+      "elapsed_seconds": 24.717999,
+      "input_hash": "414bf094f163ceeb8c8cdde47732c7b62149f88e70ea8137a133d220fe95fc55",
+      "prompt_hash": "d6f99ff358846c3d94f62fa4344ae75c083992ecc41badb3ce402bae5c44a06d"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4130049",
+      "status": "complete",
+      "validated_result": {
+        "verdict": "WATCH",
+        "summary": "감지 구간 평균 순위(29.29위)가 기준 구간 평균(52위) 대비 22.71계단 상승했으며, 확인 문턱(40.64위)은 감지 상승분의 절반(11.36계단)을 기준 구간 평균에서 차감한 값으로, 감지 구간의 상승세가 지속될 가능성이 있음",
+        "support": [
+          {
+            "text": "감지 구간 평균 순위(29.29위)가 기준 구간 평균(52위) 대비 22.71계단 상승했으며, 확인 문턱(40.64위)은 감지 상승분의 절반(11.36계단)을 기준 구간 평균에서 차감한 값으로, 감지 구간의 상승세가 지속될 가능성이 있음",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": []
+      },
+      "raw_response_text": "{\n  \"verdict\": \"WATCH\",\n  \"summary\": \"감지 구간 평균 순위(29.29위)가 기준 구간 평균(52위) 대비 22.71계단 상승했으며, 확인 문턱(40.64위)은 감지 상승분의 절반(11.36계단)을 기준 구간 평균에서 차감한 값으로, 감지 구간의 상승세가 지속될 가능성이 있음\",\n  \"support\": [\n    {\n      \"text\": \"감지 구간 평균 순위(29.29위)가 기준 구간 평균(52위) 대비 22.71계단 상승했으며, 확인 문턱(40.64위)은 감지 상승분의 절반(11.36계단)을 기준 구간 평균에서 차감한 값으로, 감지 구간의 상승세가 지속될 가능성이 있음\",\n      \"evidence_ids\": [\"rank_features\"]\n    }\n  ],\n  \"against\": [],\n  \"unknowns\": []\n}",
+      "raw_response_json": {
+        "verdict": "WATCH",
+        "summary": "감지 구간 평균 순위(29.29위)가 기준 구간 평균(52위) 대비 22.71계단 상승했으며, 확인 문턱(40.64위)은 감지 상승분의 절반(11.36계단)을 기준 구간 평균에서 차감한 값으로, 감지 구간의 상승세가 지속될 가능성이 있음",
+        "support": [
+          {
+            "text": "감지 구간 평균 순위(29.29위)가 기준 구간 평균(52위) 대비 22.71계단 상승했으며, 확인 문턱(40.64위)은 감지 상승분의 절반(11.36계단)을 기준 구간 평균에서 차감한 값으로, 감지 구간의 상승세가 지속될 가능성이 있음",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": []
+      },
+      "validation_errors": [],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2480,
+        "output_tokens": 3397
+      },
+      "elapsed_seconds": 109.402028,
+      "input_hash": "4e07b0dc9f469cd0883bc3731a5ea16eadeafad1f9ab517ab8c5e97d2c97f905",
+      "prompt_hash": "bbd6a6ba9e7c602ca9f7f10830a16d5fb80de835200cd6cb8b062e8623803df6"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4205647",
+      "status": "invalid",
+      "validated_result": null,
+      "raw_response_text": "{\"verdict\":\"WATCH\",\"summary\":\"감지 구간 평균 순위 85.43위로 상승분 15.57계단을 기록했으며, 확인 구간 평균이 93.21위 이하일 경우 지속 기준을 충족함을 기준으로 예측.\",\"support\":[{\"text\":\"기준 구간 평균 101위에서 감지 구간 평균 85.43위로 15.57계단 상승했으며, 확인 구간 평균이 93.21위 이하일 경우 상승분의 절반 이상을 유지할 가능성이 있음\",\"evidence_ids\":[\"rank_features\"]},{\"text\":\"감지 구간 내 3일(10.6, 10.7, 10.8)에 85, 32, 77위로 상승세를 확인할 수 있으며, 이는 상승분의 지속 가능성을 지지함\",\"evidence_ids\":[\"history\"]}], \"against\":[],\"unknowns\":[\"확인 구간의 실제 순위 데이터가 입력에 없어 정확한 지속 여부 판단이 어려움\"]}",
+      "raw_response_json": {
+        "verdict": "WATCH",
+        "summary": "감지 구간 평균 순위 85.43위로 상승분 15.57계단을 기록했으며, 확인 구간 평균이 93.21위 이하일 경우 지속 기준을 충족함을 기준으로 예측.",
+        "support": [
+          {
+            "text": "기준 구간 평균 101위에서 감지 구간 평균 85.43위로 15.57계단 상승했으며, 확인 구간 평균이 93.21위 이하일 경우 상승분의 절반 이상을 유지할 가능성이 있음",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          },
+          {
+            "text": "감지 구간 내 3일(10.6, 10.7, 10.8)에 85, 32, 77위로 상승세를 확인할 수 있으며, 이는 상승분의 지속 가능성을 지지함",
+            "evidence_ids": [
+              "history"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": [
+          "확인 구간의 실제 순위 데이터가 입력에 없어 정확한 지속 여부 판단이 어려움"
+        ]
+      },
+      "validation_errors": [
+        "support[1]:unknown_evidence_id"
+      ],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2719,
+        "output_tokens": 1929
+      },
+      "elapsed_seconds": 61.322703,
+      "input_hash": "0e254ba5297f24bf561f28f4bfe26274a334b465e24902ac73b795d98ec09698",
+      "prompt_hash": "d28e75e0d54c3408a8a0b60d85350a9e8542cb2269d03010020118fccf310585"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4205649",
+      "status": "complete",
+      "validated_result": {
+        "verdict": "WATCH",
+        "summary": "감지 구간 평균 순위(59.57)가 문턱(66.57)을 이미 하회하며 상승분(14.0)의 절반 이상 유지 가능성 있음",
+        "support": [
+          {
+            "text": "감지 구간 평균 순위(59.57)가 확인 문턱(66.57)을 하회하며, 기준 구간 평균(73.57) 대비 상승폭(14.0)이 충분히 유지될 가능성이 있음",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": []
+      },
+      "raw_response_text": "{\n  \"verdict\": \"WATCH\",\n  \"summary\": \"감지 구간 평균 순위(59.57)가 문턱(66.57)을 이미 하회하며 상승분(14.0)의 절반 이상 유지 가능성 있음\",\n  \"support\": [\n    {\n      \"text\": \"감지 구간 평균 순위(59.57)가 확인 문턱(66.57)을 하회하며, 기준 구간 평균(73.57) 대비 상승폭(14.0)이 충분히 유지될 가능성이 있음\",\n      \"evidence_ids\": [\"rank_features\"]\n    }\n  ],\n  \"against\": [],\n  \"unknowns\": []\n}",
+      "raw_response_json": {
+        "verdict": "WATCH",
+        "summary": "감지 구간 평균 순위(59.57)가 문턱(66.57)을 이미 하회하며 상승분(14.0)의 절반 이상 유지 가능성 있음",
+        "support": [
+          {
+            "text": "감지 구간 평균 순위(59.57)가 확인 문턱(66.57)을 하회하며, 기준 구간 평균(73.57) 대비 상승폭(14.0)이 충분히 유지될 가능성이 있음",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": []
+      },
+      "validation_errors": [],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2599,
+        "output_tokens": 2647
+      },
+      "elapsed_seconds": 84.415622,
+      "input_hash": "d5108a64b5fa1dea67b676190be8d64506f83927698784301d4d7e4cce4aa848",
+      "prompt_hash": "0aa5d18926cfcd040a77f882f24cb149c060fe84776a235d87abf9368dd4d7e3"
+    },
+    {
+      "case_id": "rise_2026-10-12_29cm_4216006",
+      "status": "complete",
+      "validated_result": {
+        "verdict": "NOT_SUPPORTED",
+        "summary": "예측 기준에 필요한 미래 평균 순위 데이터가 부재하여 지속 여부 판단 불가",
+        "support": [
+          {
+            "text": "기준 구간 7일 평균 101위에서 감지 구간 7일 평균 59.86위로 41.14계단 상승한 점",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": [
+          "감지 구간 이후 7개 관측일의 실제 순위 데이터",
+          "미래 평균 순위 계산을 위한 정확한 수집 일자 및 순위 정보"
+        ]
+      },
+      "raw_response_text": "{\n  \"verdict\": \"NOT_SUPPORTED\",\n  \"summary\": \"예측 기준에 필요한 미래 평균 순위 데이터가 부재하여 지속 여부 판단 불가\",\n  \"support\": [\n    {\n      \"text\": \"기준 구간 7일 평균 101위에서 감지 구간 7일 평균 59.86위로 41.14계단 상승한 점\",\n      \"evidence_ids\": [\"rank_features\"]\n    }\n  ],\n  \"against\": [],\n  \"unknowns\": [\n    \"감지 구간 이후 7개 관측일의 실제 순위 데이터\",\n    \"미래 평균 순위 계산을 위한 정확한 수집 일자 및 순위 정보\"\n  ]\n}",
+      "raw_response_json": {
+        "verdict": "NOT_SUPPORTED",
+        "summary": "예측 기준에 필요한 미래 평균 순위 데이터가 부재하여 지속 여부 판단 불가",
+        "support": [
+          {
+            "text": "기준 구간 7일 평균 101위에서 감지 구간 7일 평균 59.86위로 41.14계단 상승한 점",
+            "evidence_ids": [
+              "rank_features"
+            ]
+          }
+        ],
+        "against": [],
+        "unknowns": [
+          "감지 구간 이후 7개 관측일의 실제 순위 데이터",
+          "미래 평균 순위 계산을 위한 정확한 수집 일자 및 순위 정보"
+        ]
+      },
+      "validation_errors": [],
+      "actual_model": "Qwen/Qwen3-8B",
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 2662,
+        "output_tokens": 736
+      },
+      "elapsed_seconds": 23.888446,
+      "input_hash": "811e3659b48ea139a8c59d4e18531eeb57c4bb8e46d974d8a2d7638be44ac8f4",
+      "prompt_hash": "69b831b726c42403adc94704f53b837c05a09f2ebafd6bd0118373437c26402f"
+    }
+  ]
+}

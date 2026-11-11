@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1140" viewBox="0 0 1600 1140" role="img" aria-label="02 검증과 사람 평가">
+<style>text{font-family:"Malgun Gothic","Noto Sans KR",sans-serif}</style>
+<rect x="0" y="0" width="1600" height="1140" rx="0" fill="#F4F7FB" stroke="#F4F7FB" stroke-width="1.5"/>
+<rect x="0" y="0" width="1600" height="159" rx="0" fill="#172C45" stroke="#172C45" stroke-width="1.5"/>
+<text x="60" y="37.0" font-size="17" fill="#9DD7D1" font-weight="700">EVIDENCE PRIORITY  /  02</text>
+<text x="60" y="91.0" font-size="36" fill="#FFFFFF" font-weight="700">같은 근거로 비교하고, 두 사람이 독립적으로 검증</text>
+<text x="60" y="131.0" font-size="20" fill="#CEDBEB" font-weight="400">검증 대상: 출력과 원자료의 관계  ·  미래 유행의 적중률이나 내부 사고 과정의 정확성을 뜻하지 않음</text>
+<text x="60" y="207.0" font-size="23" fill="#087F77" font-weight="700">평가 순서  |  기준표 작성이 모델 출력 열람보다 먼저다</text>
+<rect x="60" y="236" width="450" height="284" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="60" y="256" width="5" height="35" rx="0" fill="#087F77" stroke="#087F77" stroke-width="1.5"/>
+<text x="82" y="283.0" font-size="26" fill="#172C45" font-weight="700">01  사전 근거 기준표</text>
+<text x="82" y="332.0" font-size="22" fill="#53677F" font-weight="400">평가자 A와 B가 각각 원자료 검토</text>
+<text x="82" y="366.1" font-size="22" fill="#53677F" font-weight="400">확인 가능한 사실 / 중요한 반대 근거</text>
+<text x="82" y="400.2" font-size="22" fill="#53677F" font-weight="400">알려지지 않은 정보를 표시</text>
+<text x="82" y="434.3" font-size="22" fill="#53677F" font-weight="400">최초 기록 보존 후 공통 기준표 고정</text>
+<rect x="575" y="236" width="450" height="284" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="575" y="256" width="5" height="35" rx="0" fill="#285DAB" stroke="#285DAB" stroke-width="1.5"/>
+<text x="597" y="283.0" font-size="26" fill="#172C45" font-weight="700">02  비교와 익명화</text>
+<text x="597" y="332.0" font-size="22" fill="#53677F" font-weight="400">기본 판정 ↔ 구조적 검토</text>
+<text x="597" y="366.1" font-size="22" fill="#53677F" font-weight="400">Claude / Qwen 각각 같은 입력 사용</text>
+<text x="597" y="400.2" font-size="22" fill="#53677F" font-weight="400">모델명·비교군 이름을 가림</text>
+<text x="597" y="434.3" font-size="22" fill="#53677F" font-weight="400">입력·설정·방법 버전은 별도 보관</text>
+<rect x="1090" y="236" width="450" height="284" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="1090" y="256" width="5" height="35" rx="0" fill="#7057A3" stroke="#7057A3" stroke-width="1.5"/>
+<text x="1112" y="283.0" font-size="26" fill="#172C45" font-weight="700">03  독립 평가와 합의</text>
+<text x="1112" y="332.0" font-size="22" fill="#53677F" font-weight="400">A와 B가 서로의 평가를 보지 않음</text>
+<text x="1112" y="366.1" font-size="22" fill="#53677F" font-weight="400">출처·수치·반증·판정 논리 확인</text>
+<text x="1112" y="400.2" font-size="22" fill="#53677F" font-weight="400">불일치를 기록하고 근거로 논의</text>
+<text x="1112" y="434.3" font-size="22" fill="#53677F" font-weight="400">합의 전 평가와 합의 결과를 분리</text>
+<polyline points="510,377 567,377" fill="none" stroke="#087F77" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="567.0,377.0 556.0,372.0 556.0,382.0" fill="#087F77"/>
+<polyline points="1025,377 1082,377" fill="none" stroke="#285DAB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1082.0,377.0 1071.0,372.0 1071.0,382.0" fill="#285DAB"/>
+<polyline points="1315,520 1315,585" fill="none" stroke="#7057A3" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1315.0,585.0 1320.0,574.0 1310.0,574.0" fill="#7057A3"/>
+<text x="60" y="579.0" font-size="23" fill="#285DAB" font-weight="700">04  결과표  |  여러 지표를 함께 제시하고 임의의 종합 점수를 만들지 않는다</text>
+<rect x="60" y="612" width="930" height="384" rx="18" fill="#FFFFFF" stroke="#C6D4E6" stroke-width="1.5"/>
+<text x="84" y="658.0" font-size="26" fill="#172C45" font-weight="700">근거와 판단의 품질</text>
+<rect x="78" y="684" width="894" height="42" rx="0" fill="#F6F8FC" stroke="#F6F8FC" stroke-width="1.5"/>
+<text x="94" y="710.0" font-size="21" fill="#172C45" font-weight="700">주장 근거 충실도</text>
+<text x="335" y="709.0" font-size="20" fill="#53677F" font-weight="400">뒷받침되는 사실 주장 ÷ 검토한 사실 주장</text>
+<text x="94" y="756.0" font-size="21" fill="#172C45" font-weight="700">반대 근거 반영률</text>
+<text x="335" y="755.0" font-size="20" fill="#53677F" font-weight="400">적절히 다룬 반대 근거 ÷ 기준표의 중요 반대 근거</text>
+<rect x="78" y="776" width="894" height="42" rx="0" fill="#F6F8FC" stroke="#F6F8FC" stroke-width="1.5"/>
+<text x="94" y="802.0" font-size="21" fill="#172C45" font-weight="700">중대한 오류 발생률</text>
+<text x="335" y="801.0" font-size="20" fill="#53677F" font-weight="400">수치·시점·대상 오류 또는 과도한 단정 사례 ÷ 전체</text>
+<text x="94" y="848.0" font-size="21" fill="#172C45" font-weight="700">판정·보류 적절성</text>
+<text x="335" y="847.0" font-size="20" fill="#53677F" font-weight="400">판정 사유와 제공된 근거의 일치 여부</text>
+<rect x="78" y="868" width="894" height="42" rx="0" fill="#F6F8FC" stroke="#F6F8FC" stroke-width="1.5"/>
+<text x="94" y="894.0" font-size="21" fill="#172C45" font-weight="700">평가자 일치도</text>
+<text x="335" y="893.0" font-size="20" fill="#53677F" font-weight="400">합의 전 항목별 일치율과 판정 일치표</text>
+<text x="94" y="940.0" font-size="21" fill="#172C45" font-weight="700">판단 논리의 타당성</text>
+<text x="335" y="939.0" font-size="20" fill="#53677F" font-weight="400">근거 → 해석 → 판정의 연결 / 비약·순환 여부</text>
+<rect x="1030" y="612" width="510" height="384" rx="18" fill="#EEF3FB" stroke="#C6D4E6" stroke-width="1.5"/>
+<text x="1054" y="658.0" font-size="26" fill="#172C45" font-weight="700">전체 사례의 처리 결과</text>
+<text x="1054" y="711" font-size="22" fill="#53677F" font-weight="400">우선 관찰 / 우선순위 낮춤 / 보류</text>
+<text x="1054" y="754" font-size="22" fill="#53677F" font-weight="400">형식 오류 / API 실패를 별도로 집계</text>
+<text x="1054" y="797" font-size="22" fill="#53677F" font-weight="400">미평가·판정 불가도 숨기지 않고 표시</text>
+<text x="1054" y="840" font-size="22" fill="#53677F" font-weight="400">분모가 없으면 0점 대신 해당 없음</text>
+<text x="1054" y="883" font-size="22" fill="#53677F" font-weight="400">답변을 줄이거나 보류를 늘려 얻는</text>
+<text x="1054" y="926" font-size="22" fill="#53677F" font-weight="400">지표 상승을 다른 지표와 함께 해석</text>
+<rect x="60" y="1029" width="1480" height="67" rx="12" fill="#EAF7F4" stroke="#C5E5DB" stroke-width="1.5"/>
+<text x="80" y="1068.0" font-size="20" fill="#087F77" font-weight="700">필수 점검: 미래 자료 차단 · 재게시 중복 · 수치/단위/기간 · 대상 집단 · 반대 근거 · 기술 실패와 HOLD 분리 · 과제 버전 분리</text>
+</svg>

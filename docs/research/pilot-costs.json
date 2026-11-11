@@ -1,0 +1,10 @@
+{
+  "session_started_at_conservative": "2026-11-08T12:38:34+00:00",
+  "stopped_verified_at": "2026-11-08T12:53:20+00:00",
+  "elapsed_seconds_upper_estimate": 886.0,
+  "displayed_hourly_usd": 0.6,
+  "rental_cost_estimate_usd": 0.14766666666666667,
+  "claude_usage_cost_usd": 0.10114000000000001,
+  "gpu_stopped": true,
+  "note": "GPU time estimated conservatively from pre-start timestamp through stopped-state verification. Not an invoice. Persistent Global volume storage/IOPS are separate ongoing charges."
+}

@@ -1,0 +1,36 @@
+{
+  "task_version": "evidence-priority-v1",
+  "verdict": null,
+  "summary": "",
+  "claims": [
+    {
+      "id": "",
+      "kind": null,
+      "direction": null,
+      "text": "",
+      "evidence_ids": []
+    }
+  ],
+  "numeric_references": [
+    {
+      "evidence_id": "",
+      "metric": "",
+      "value": null,
+      "unit": "",
+      "period": ""
+    }
+  ],
+  "unknowns": [
+    {
+      "information": "",
+      "why_needed": ""
+    }
+  ],
+  "change_conditions": [
+    {
+      "observation": "",
+      "reconsider_verdict": null,
+      "reason": ""
+    }
+  ]
+}

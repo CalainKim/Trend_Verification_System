@@ -50,7 +50,7 @@
 <text x="431" y="692" font-size="19" fill="#53677F" font-weight="400">대상·출처·지지·반증</text>
 <text x="431" y="717" font-size="19" fill="#53677F" font-weight="400">불확실성 → 판정</text>
 <text x="84" y="772.0" font-size="22" fill="#172C45" font-weight="700">각 방법을 Claude와 Qwen에서 수행</text>
-<text x="84" y="804.0" font-size="17" fill="#53677F" font-weight="400">모델 내 설정·출력 예산 동일  /  신규 호출은 이번 범위 밖</text>
+<text x="84" y="804.0" font-size="17" fill="#53677F" font-weight="400">모델 내 설정·출력 조건 동일  /  신규 호출은 이번 범위 밖</text>
 <rect x="820" y="551" width="350" height="271" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
 <rect x="820" y="571" width="5" height="35" rx="0" fill="#285DAB" stroke="#285DAB" stroke-width="1.5"/>
 <text x="842" y="598.0" font-size="26" fill="#172C45" font-weight="700">06  우선순위 카드</text>
@@ -84,5 +84,5 @@
 <text x="1096" y="926.0" font-size="26" fill="#172C45" font-weight="700">후속 반응은 별도 기록</text>
 <text x="1096" y="975.0" font-size="22" fill="#53677F" font-weight="400">보류·우선순위 낮춤 후보도 추적</text>
 <text x="1096" y="1009.1" font-size="22" fill="#53677F" font-weight="400">4주 내 미확산을 실패로 판정하지 않음</text>
-<text x="60" y="1099.0" font-size="19" fill="#53677F" font-weight="400">유의: 트리거는 상승 예고가 아니다. SNS 자동 수집 확대·모델 학습·새 유료 호출은 이번 범위에 포함하지 않는다.</text>
+<text x="60" y="1099.0" font-size="19" fill="#53677F" font-weight="400">유의: 트리거는 상승 예고가 아니다. SNS 자동 수집 확대·모델 학습·새 모델 실행은 이번 범위에 포함하지 않는다.</text>
 </svg>

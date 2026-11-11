@@ -24,7 +24,7 @@
 <rect x="1090" y="256" width="5" height="35" rx="0" fill="#7057A3" stroke="#7057A3" stroke-width="1.5"/>
 <text x="1112" y="283.0" font-size="26" fill="#172C45" font-weight="700">03  독립 평가와 합의</text>
 <text x="1112" y="332.0" font-size="22" fill="#53677F" font-weight="400">A와 B가 서로의 평가를 보지 않음</text>
-<text x="1112" y="366.1" font-size="22" fill="#53677F" font-weight="400">출처·수치·반증·판정 사유 확인</text>
+<text x="1112" y="366.1" font-size="22" fill="#53677F" font-weight="400">출처·수치·반증·판정 논리 확인</text>
 <text x="1112" y="400.2" font-size="22" fill="#53677F" font-weight="400">불일치를 기록하고 근거로 논의</text>
 <text x="1112" y="434.3" font-size="22" fill="#53677F" font-weight="400">합의 전 평가와 합의 결과를 분리</text>
 <polyline points="510,377 567,377" fill="none" stroke="#087F77" stroke-width="3" stroke-linejoin="round"/>
@@ -49,8 +49,8 @@
 <rect x="78" y="868" width="894" height="42" rx="0" fill="#F6F8FC" stroke="#F6F8FC" stroke-width="1.5"/>
 <text x="94" y="894.0" font-size="21" fill="#172C45" font-weight="700">평가자 일치도</text>
 <text x="335" y="893.0" font-size="20" fill="#53677F" font-weight="400">합의 전 항목별 일치율과 판정 일치표</text>
-<text x="94" y="940.0" font-size="21" fill="#172C45" font-weight="700">실행 비용</text>
-<text x="335" y="939.0" font-size="20" fill="#53677F" font-weight="400">사례당 시간·토큰·API / GPU 비용</text>
+<text x="94" y="940.0" font-size="21" fill="#172C45" font-weight="700">판단 논리의 타당성</text>
+<text x="335" y="939.0" font-size="20" fill="#53677F" font-weight="400">근거 → 해석 → 판정의 연결 / 비약·순환 여부</text>
 <rect x="1030" y="612" width="510" height="384" rx="18" fill="#EEF3FB" stroke="#C6D4E6" stroke-width="1.5"/>
 <text x="1054" y="658.0" font-size="26" fill="#172C45" font-weight="700">전체 사례의 처리 결과</text>
 <text x="1054" y="711" font-size="22" fill="#53677F" font-weight="400">우선 관찰 / 우선순위 낮춤 / 보류</text>

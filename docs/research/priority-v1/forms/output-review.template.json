@@ -35,6 +35,21 @@
       "reason": null
     }
   ],
+  "logical_connection_review": {
+    "assessment": null,
+    "premise_claim_ids": [],
+    "inference_output_locations": [],
+    "verdict_output_location": null,
+    "issues": [
+      {
+        "kind": null,
+        "output_locations": [],
+        "evidence_ids": [],
+        "reason_and_effect_on_decision": null
+      }
+    ],
+    "reason": null
+  },
   "counterevidence_checks": [
     {
       "reference_counter_id": null,

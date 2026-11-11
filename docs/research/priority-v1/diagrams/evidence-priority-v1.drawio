@@ -159,7 +159,7 @@
         <mxCell id="models-0" value="각 방법을 Claude와 Qwen에서 수행" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="84" y="750.0" width="652" height="34.1" as="geometry" />
         </mxCell>
-        <mxCell id="settings-0" value="모델 내 설정·출력 예산 동일  /  신규 호출은 이번 범위 밖" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+        <mxCell id="settings-0" value="모델 내 설정·출력 조건 동일  /  신규 호출은 이번 범위 밖" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="84" y="787.0" width="652" height="26.35" as="geometry" />
         </mxCell>
         <mxCell id="priority-card" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
@@ -261,7 +261,7 @@
         <mxCell id="future-status-body-1" value="4주 내 미확산을 실패로 판정하지 않음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="1096" y="987.1" width="422" height="34.1" as="geometry" />
         </mxCell>
-        <mxCell id="footer-0" value="유의: 트리거는 상승 예고가 아니다. SNS 자동 수집 확대·모델 학습·새 유료 호출은 이번 범위에 포함하지 않는다." style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=19;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+        <mxCell id="footer-0" value="유의: 트리거는 상승 예고가 아니다. SNS 자동 수집 확대·모델 학습·새 모델 실행은 이번 범위에 포함하지 않는다." style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=19;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="60" y="1080.0" width="1480" height="29.45" as="geometry" />
         </mxCell>
       </root>
@@ -344,7 +344,7 @@
         <mxCell id="independent-body-0" value="A와 B가 서로의 평가를 보지 않음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="1112" y="310.0" width="406" height="34.1" as="geometry" />
         </mxCell>
-        <mxCell id="independent-body-1" value="출처·수치·반증·판정 사유 확인" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+        <mxCell id="independent-body-1" value="출처·수치·반증·판정 논리 확인" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="1112" y="344.1" width="406" height="34.1" as="geometry" />
         </mxCell>
         <mxCell id="independent-body-2" value="불일치를 기록하고 근거로 논의" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
@@ -419,10 +419,10 @@
         <mxCell id="metric-right-4-0" value="합의 전 항목별 일치율과 판정 일치표" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="335" y="873.0" width="627" height="31.0" as="geometry" />
         </mxCell>
-        <mxCell id="metric-left-5-0" value="실행 비용" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=21;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+        <mxCell id="metric-left-5-0" value="판단 논리의 타당성" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=21;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="94" y="919.0" width="235" height="32.550000000000004" as="geometry" />
         </mxCell>
-        <mxCell id="metric-right-5-0" value="사례당 시간·토큰·API / GPU 비용" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+        <mxCell id="metric-right-5-0" value="근거 → 해석 → 판정의 연결 / 비약·순환 여부" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
           <mxGeometry x="335" y="919.0" width="627" height="31.0" as="geometry" />
         </mxCell>
         <mxCell id="outcome-panel" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EEF3FB;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">

@@ -33,14 +33,5 @@
   "validation_errors": [],
   "error_category": null,
   "raw_response_file": null,
-  "usage": {
-    "input_tokens": null,
-    "output_tokens": null,
-    "reasoning_tokens": null,
-    "request_elapsed_seconds": null,
-    "api_cost_usd": null,
-    "usage_complete": null
-  },
-  "gpu_session_cost_record": null,
   "notes": null
 }

@@ -19,8 +19,9 @@
 - `template`은 작성 사본에서 false로 바꾸고 실제 ID·시간대 포함 시각·파일 해시를 기록한다. 빈 템플릿은 집계 대상에서 제외한다.
 - 배열에 있는 빈 항목은 필드 설명용이다. 실제 항목 수만큼 복사하고 쓰지 않는 빈 항목은 제거한다. 없는 근거를 채워 넣지 않는다.
 - 같은 사실이 summary와 claims에 반복되면 사실 주장은 한 번만 세고 출력 위치를 모두 기록한다. 인용이 없는 사실 주장도 평가에서 빠뜨리지 않는다.
+- 출력 평가 합의의 `claim_alignment`에는 두 평가자가 나눈 사실 주장을 원문 위치·동일 명제로 대응시킨다. 일대일 대응이 안 되는 분할·병합·미대응 항목은 최초 일치도에서 제외하고 수와 이유를 남긴다. 기준표 합의에서 이 배열은 사용하지 않는다.
 - 근거 ID는 동결 묶음의 실제 ID만 쓴다. 원문 위치는 줄 번호·표 행·문단·URL의 발췌 위치 등 다른 사람이 찾을 수 있게 적는다.
-- 평가는 `SPEC.md`, 수식과 분모는 `EVALUATION.md`를 따른다. 작성 형식이 있다고 해서 자동 검증기나 집계 프로그램이 구현된 것은 아니다.
+- 평가는 `SPEC.md`, 수식과 분모는 `EVALUATION.md`를 따른다. 논리 항목은 공개된 전제·해석·판정의 연결을 평가하며 내부 사고 과정을 요구하지 않는다. 작성 형식이 있다고 해서 자동 검증기나 집계 프로그램이 구현된 것은 아니다.
 - 이름 대신 reviewer ID를 써도 되지만 두 평가자를 구분할 수 있어야 한다. 독립 평가 파일을 합의 결과로 덮어쓰지 않는다.
 - 추후 저장 기본 위치는 버전이 분리된 `private/evidence-priority-v1/`로 정한다. 이 폴더의 공개 템플릿에는 API 키·개인 정보·가림 대응의 실제 값을 넣지 않는다.
 
@@ -36,6 +37,8 @@
 | 판정 적절성 `assessment` | 모든 판정에 대해 `appropriate`, `inappropriate`, `unresolved`, `not_assessable` 중 하나 |
 | HOLD 전용 적절성 `assessment` | HOLD일 때 위 네 값 중 하나. HOLD가 아닌 경우에만 null |
 | `execution_status` | `valid`, `invalid`, `incomplete`, `failed`, `not_run` |
+| 논리적 연결 `assessment` | `coherent`, `invalid`, `unresolved`, `not_assessable` |
+| 논리 오류 `kind` | `unsupported_leap`, `self_contradiction`, `circular_reasoning`, `ignored_counterevidence`, `scope_shift` |
 | `has_major_error` | true, false, null. null은 오류 여부 미확정 |
 | `agreement_status` | `agreed`, `disagreed`, `unresolved` |
 

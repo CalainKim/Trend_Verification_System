@@ -11,6 +11,16 @@
     {"record_id": null, "reviewer_id": null, "file_hash": null},
     {"record_id": null, "reviewer_id": null, "file_hash": null}
   ],
+  "claim_alignment": [
+    {
+      "reviewer_1_claim_ids": [],
+      "reviewer_2_claim_ids": [],
+      "output_locations": [],
+      "same_atomic_proposition": null,
+      "comparable_for_initial_agreement": null,
+      "split_merge_or_unmatched_reason": null
+    }
+  ],
   "item_decisions": [
     {
       "item_id": null,

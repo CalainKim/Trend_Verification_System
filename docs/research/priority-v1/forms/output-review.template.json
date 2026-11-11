@@ -1,0 +1,72 @@
+{
+  "template": true,
+  "task_version": "evidence-priority-v1",
+  "record_id": null,
+  "phase": "output_independent",
+  "reviewer_id": null,
+  "created_at": null,
+  "case_id": null,
+  "blind_output_id": null,
+  "packet_hash": null,
+  "reference_record_id": null,
+  "reference_hash": null,
+  "output_hash": null,
+  "execution_status": null,
+  "semantic_assessment_possible": null,
+  "not_assessable_reason": null,
+  "all_factual_claims_identified": null,
+  "fact_checks": [
+    {
+      "atomic_claim_id": null,
+      "output_locations": [],
+      "claim_text": null,
+      "assessment": null,
+      "evidence_ids": [],
+      "source_locations": [],
+      "reason": null
+    }
+  ],
+  "inference_checks": [
+    {
+      "output_location": null,
+      "inference_text": null,
+      "within_evidence_scope": null,
+      "evidence_ids": [],
+      "reason": null
+    }
+  ],
+  "counterevidence_checks": [
+    {
+      "reference_counter_id": null,
+      "assessment": null,
+      "output_locations": [],
+      "reason": null
+    }
+  ],
+  "has_major_error": null,
+  "major_errors": [
+    {
+      "kind": null,
+      "output_location": null,
+      "evidence_ids": [],
+      "reason_and_effect_on_decision": null
+    }
+  ],
+  "verdict_appropriateness": {
+    "assessment": null,
+    "reason": null,
+    "evidence_ids": []
+  },
+  "hold_appropriateness": {
+    "assessment": null,
+    "reason": null
+  },
+  "change_conditions_check": {
+    "specific_and_checkable": null,
+    "reason": null
+  },
+  "review_complete": false,
+  "missing_items": [],
+  "notes": null,
+  "frozen_at": null
+}

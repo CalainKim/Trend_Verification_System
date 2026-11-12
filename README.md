@@ -9,6 +9,10 @@
 소개 화면은 누구나 볼 수 있고, Trend Monitor 화면은 전달받은 비밀번호로 들어온다.
 이 문서의 숫자는 2026-11-12 기준이다.
 
+**26초 소개 영상** (소리 없음): 매일 순위를 모으고, 관측한 사실만 묶어 AI 에게 묻고, 일주일 뒤 정답을 열어 채점하는 흐름을 보여 준다.
+
+https://github.com/user-attachments/assets/c440cb43-df35-4e2c-8a3f-33d399b45cb6
+
 ![소개 화면](docs/images/readme/1-landing.jpg)
 
 이 문서는 두 장으로 되어 있다.

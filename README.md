@@ -1,74 +1,74 @@
+<div align="center">
+
+<img src="docs/images/readme/trend-hero.gif" alt="Trend Monitor 소개 영상" width="100%">
+
 # Trend Monitor
 
-**패션 신호를 모아, 반짝 유행인지 오래 갈 흐름인지를 과거 자료로 검증하는 시스템**
+쇼핑몰 순위와 검색량을 매일 모아, 지금 오르는 상품이 일주일 뒤에도 버틸지 판정한다.<br/>
+그 판정이 얼마나 맞는지는 정답을 가린 시험지로 채점해 숫자로 보여 준다.
 
-아주대학교 소프트웨어학과 2026-2학기 자기주도프로젝트, 산업체 연계 무신사
+**운영 중 (2026-11-12 기준)** &nbsp;|&nbsp; Built with [Python](https://www.python.org), [SQLite](https://www.sqlite.org), [Claude](https://www.anthropic.com/claude), [Cloudflare Pages](https://pages.cloudflare.com)
 
-**웹 주소: https://trend-monitor.pages.dev**
+[![Web](https://img.shields.io/badge/web-trend--monitor.pages.dev-F38020)](https://trend-monitor.pages.dev)
+[![Ajou](https://img.shields.io/badge/%EC%95%84%EC%A3%BC%EB%8C%80-%EC%9E%90%EA%B8%B0%EC%A3%BC%EB%8F%84%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%202026--2-0B3C8C)](#trend-monitor)
+[![MUSINSA](https://img.shields.io/badge/%EC%82%B0%EC%97%85%EC%B2%B4%20%EC%97%B0%EA%B3%84-MUSINSA-000000)](#trend-monitor)
 
-소개 화면은 누구나 볼 수 있고, Trend Monitor 화면은 전달받은 비밀번호로 들어온다.
-이 문서의 숫자는 2026-11-12 기준이다.
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![SQLite](https://img.shields.io/badge/SQLite-sqlite--vec-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org)
+[![Claude](https://img.shields.io/badge/Claude-%EC%8B%AC%EC%B8%B5%20%EA%B2%80%EC%A6%9D-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com/claude)
+[![Tests](https://img.shields.io/badge/tests-471-2EA44F)](tests)
+
+**[웹 사이트](https://trend-monitor.pages.dev)** &nbsp;|&nbsp; **[화면](#화면)** &nbsp;|&nbsp; **[결과](#결과)** &nbsp;|&nbsp; **[자세한 설명](#자세한-설명)** &nbsp;|&nbsp; **[개발자용](#개발자용)**
+
+</div>
+
+## 개요
+
+아주대학교 소프트웨어학과 2026-2학기 자기주도프로젝트이자 무신사 연계 산업체 프로젝트다.
+순위가 오른 상품 가운데 상당수는 할인, 광고, 한 브랜드의 기획전 때문에 잠깐 오른 것이다.
+문제는 **오른 그 순간에는 진짜 수요와 반짝 상승이 똑같아 보인다**는 것이다.
+이 시스템은 그 둘을 가를 근거를 만들고, 가르는 방법 자체를 과거 자료로 검증한다.
+
+- **여러 채널 교차 확인.** 29CM, 코오롱몰, 하이버 판매 순위와 네이버, 구글 검색량을 맞춰 보고, 한 곳에서만 오른 상품을 걸러 낸다.
+- **질문을 바꿨다.** "왜 올랐나" 는 밖에서 알 수 없다. 그래서 "일주일 뒤에도 상승분의 절반 이상 남는가" 를 묻는다. 확인할 수 있는 질문이 된다.
+- **미래를 보지 않는다.** "11월 3일에 판정했다면" 을 재현할 때는 그날까지 알 수 있던 자료만 쓴다. 이후 자료가 한 건이라도 섞이면 작업을 멈춘다.
+- **찍기와 항상 비교한다.** 정확도는 늘 기저율(많은 쪽으로 찍었을 때의 정확도)과 나란히 적는다. 판단 보류는 틀린 것과 따로 센다.
+- **AI 심층 검증.** 버튼 하나로 Claude 가 근거 숫자를 읽고 단계별 검증 보고서를 쓴다. 키는 서버에만 있다.
+
+소개 화면은 누구나 볼 수 있고, Trend Monitor 화면은 전달받은 비밀번호로 들어온다. 이 문서의 숫자는 2026-11-12 기준이다.
 
 **26초 소개 영상** (소리 없음): 매일 순위를 모으고, 관측한 사실만 묶어 AI 에게 묻고, 일주일 뒤 정답을 열어 채점하는 흐름을 보여 준다.
 
 https://github.com/user-attachments/assets/c440cb43-df35-4e2c-8a3f-33d399b45cb6
 
-![소개 화면](docs/images/readme/1-landing.jpg)
+## 동작 방식
 
-이 문서는 두 장으로 되어 있다.
-
-- **1장**은 개발자가 아닌 분이 3분 안에 읽고 전체를 이해하도록 썼다.
-- **2장**은 같은 내용을 자세히 풀었다. 구조, 자료, 판정 방법, 보안, 결과, 한계를 다룬다.
-- 맨 뒤 **부록**은 코드를 직접 돌릴 개발자용이다.
-
----
-
-# 1장. 3분 요약
-
-## 한 문장으로
-
-> 쇼핑몰 순위와 검색량을 매일 모아서, **"지금 오르는 이 상품이 일주일 뒤에도
-> 버틸까"** 를 판정하고, 그 판정이 얼마나 맞는지를 정답을 가린 시험지로 채점한다.
-
-## 왜 필요한가
-
-순위가 오른 상품 가운데 상당수는 오래 가지 않는다. 할인, 광고, 한 브랜드의
-기획전 때문에 잠깐 오른 것은 행사가 끝나면 내려온다. 반대로 여러 곳에서 함께
-오르는 것은 실제 수요일 가능성이 높다.
-
-문제는 **오른 그 순간에는 둘이 똑같아 보인다**는 것이다. 그래서 이 시스템은
-두 가지를 한다.
-
-1. 오른 상품을 여러 채널(검색, 다른 쇼핑몰)과 맞춰 보고 걸러 낸다.
-2. "그때 이렇게 판정했다면 맞았을까" 를 과거 자료로 반복해서 채점해, **판정 방법
-   자체를 숫자로 검증**한다.
-
-## 어떻게 동작하나
-
-```
- ① 모은다          29CM, 코오롱몰, 하이버 판매 순위 + 네이버, 구글 검색량
-                   매일 오전 10시와 오후 10시 자동 수집
+```text
+ 1. 모은다      29CM, 코오롱몰, 하이버 판매 순위 + 네이버, 구글 검색량
+                매일 오전 10시와 오후 10시 자동 수집
         ↓
- ② 거른다          오른 상품만 고른 뒤
-                   "검색도 같이 올랐나", "한 브랜드만 오른 건 아닌가" 를 확인한다
+ 2. 거른다      오른 상품만 고른 뒤
+                "검색도 같이 올랐나", "한 브랜드만 오른 건 아닌가" 를 확인한다
         ↓
- ③ 판정한다        일주일 뒤에도 상승분의 절반 이상 남을지 예측한다
-                   필요하면 AI(Claude)가 근거를 읽고 단계별 검증 보고서를 쓴다
+ 3. 판정한다    일주일 뒤에도 상승분의 절반 이상 남을지 예측한다
+                필요하면 AI(Claude)가 근거를 읽고 단계별 검증 보고서를 쓴다
         ↓
- ④ 채점한다        결과를 이미 아는 과거 사례로 판정을 채점한다
-                   "아무렇게나 찍었을 때" 보다 나은지를 항상 함께 잰다
+ 4. 채점한다    결과를 이미 아는 과거 사례로 판정을 채점한다
+                "아무렇게나 찍었을 때" 보다 나은지를 항상 함께 잰다
 ```
 
-가장 중요한 원칙은 **미래를 보지 않는 것**이다. "11월 3일에 판정했다면" 을
-재현할 때는 11월 3일까지 알 수 있던 자료만 쓴다. 그 뒤 자료가 한 건이라도
-섞이면 시스템이 작업을 멈춘다.
+## 화면
 
-## 화면에서 보는 것
+<p align="center">
+  <img src="docs/images/readme/trend-screen.gif" alt="Trend Monitor 화면 녹화" width="100%">
+</p>
 
-[https://trend-monitor.pages.dev](https://trend-monitor.pages.dev) 에서 "Open Trend
-Monitor" 를 누르고 비밀번호를 넣으면 Trend Monitor 화면이 열린다.
+[https://trend-monitor.pages.dev](https://trend-monitor.pages.dev) 에서 "Open Trend Monitor" 를 누르고 비밀번호를 넣으면 Trend Monitor 화면이 열린다.
 
-![로그인 화면](docs/images/readme/2-login.jpg)
+<p align="center">
+  <img src="docs/images/readme/1-landing.jpg" alt="소개 화면" width="49%">
+  <img src="docs/images/readme/2-login.jpg" alt="로그인 화면" width="49%">
+</p>
 
 | 화면 | 보여 주는 것 | 갱신 |
 | --- | --- | --- |
@@ -100,11 +100,11 @@ CSV 로 내려받는다.
 
 ![주간 요약](docs/images/readme/6-weekly-brief.jpg)
 
-## 지금까지의 결과
+## 결과
 
 정답을 가린 시험지 139건으로 채점한 최신 결과(2026-11-03, 6차)다.
 
-```
+```text
  AI 판정기가 답한 문항        95건 / 139건   (나머지 44건은 "판단 보류")
  답한 문항의 정확도            77.9%
  같은 문항을 전부 "내려간다"로
@@ -117,10 +117,10 @@ CSV 로 내려받는다.
 말하면 과장이 되므로 이 시스템은 항상 둘을 나란히 적는다.
 
 **아직 조심할 점.** 수집을 시작한 지 두 달(2026-09-06 부터)이라 사례가 겹치는
-기간에서 나왔다. 수집이 쌓일수록 숫자가 더 단단해진다. 자세한 한계는 2장 10절에
+기간에서 나왔다. 수집이 쌓일수록 숫자가 더 단단해진다. 자세한 한계는 아래 자세한 설명 10절에
 적었다.
 
-## 알아 두면 좋은 말 다섯 개
+## 알아 두면 좋은 말
 
 | 말 | 뜻 |
 | --- | --- |
@@ -130,15 +130,13 @@ CSV 로 내려받는다.
 | 판단 보류 (기권) | 근거가 모자라 답하지 않은 것. 틀린 것과 따로 센다 |
 | 봉인 시험지 | 정답을 저장소에 두지 않은 시험지. 답을 보고 맞추는 일을 막는다 |
 
----
+## 자세한 설명
 
-# 2장. 자세한 설명
-
-## 1. 전체 구조
+### 1. 전체 구조
 
 시스템은 다섯 덩어리다. 위에서 아래로 자료가 흐른다.
 
-```
+```text
 [1] 수집기                 사이트마다 하나씩. 형식은 달라도 같은 모양의 기록으로 바꾼다
      29CM  코오롱몰  하이버  네이버 데이터랩  네이버 쇼핑인사이트  구글 트렌드
         ↓
@@ -166,7 +164,7 @@ CSV 로 내려받는다.
 | 판정과 채점 | 판단을 내리고, 지난 판단이 맞았는지 채점 | `scoring.py`, `review_cases.py` |
 | 웹 서비스 | 결과를 보여 주는 창구와 출입문 | `design/`, `web/functions/` |
 
-## 2. 자료를 어디서 모으나
+### 2. 자료를 어디서 모으나
 
 | 채널 | 무엇을 | 왜 | 수집 시작 | 쌓인 기록 |
 | --- | --- | --- | --- | --- |
@@ -197,9 +195,9 @@ CSV 로 내려받는다.
 비교는 같은 요청 안에서만 하고, 새 주를 받을 때는 기간 전체를 다시 받아 통째로
 바꾼다.
 
-## 3. 모으고 보관하는 방법
+### 3. 모으고 보관하는 방법
 
-```
+```text
 매일 10:00, 22:00   쇼핑몰 세 곳 순위 수집 → CSV 와 DB 에 저장 → GitHub 에 올림
 매시 17분           구글 트렌드를 8개 속성씩 갱신 (한 번에 많이 부르면 막힘)
 ```
@@ -216,7 +214,7 @@ CSV 로 내려받는다.
 같은 날 두 번 수집하면 두 번 모두 따로 남긴다. 한쪽이 중간에 실패해도 다른
 쪽이 남아 그날 자료가 비지 않는다.
 
-## 4. 미래를 보지 않는 장치
+### 4. 미래를 보지 않는 장치
 
 과거를 재현하는 실험에서 가장 흔한 실수는 **나중에 알게 된 정보가 몰래 섞이는
 것**이다. 그러면 성적이 실제보다 좋게 나온다. 이를 막으려고 세 겹으로 지킨다.
@@ -230,7 +228,7 @@ CSV 로 내려받는다.
 
 정답(실제로 버텼는지)은 문제지와 다른 곳에 둔다. 판정하는 쪽은 정답을 볼 수 없다.
 
-## 5. 후보를 거르는 다섯 단계
+### 5. 후보를 거르는 다섯 단계
 
 Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 가지를 확인한다.
 
@@ -249,7 +247,7 @@ Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 �
 와플, 헨리넥, 긴팔을 찾는다. 속성 사전(`data/attributes.yml`)은 사람이 검수한다.
 검색량은 상품이 아니라 이 속성 단위로 비교한다.
 
-## 6. 판정: "왜 올랐나" 대신 "얼마나 버티나"
+### 6. 판정: "왜 올랐나" 대신 "얼마나 버티나"
 
 **질문을 바꾼 이유.** 순위가 왜 올랐는지(광고인지, 진짜 인기인지)는 쇼핑몰
 내부 자료가 없으면 알 수 없다. 하지만 광고로 오른 순위는 광고가 끝나면 내려가고,
@@ -258,7 +256,7 @@ Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 �
 
 **정답은 사람이 정하지 않는다.** 정해진 공식으로 자료가 답한다.
 
-```
+```text
 기준 주   →   감지 주 (순위가 오름)   →   확인 주 (일주일 뒤)
 
 오른 만큼의 절반 이상이 확인 주에도 남아 있으면  "지속"
@@ -288,7 +286,7 @@ Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 �
 **봉인 시험지는 아껴 쓴다.** 볼 때마다 정답에 맞춰 고칠 위험이 커지므로 제출
 횟수를 기록한다(`benchmark/submissions.tsv`). 지금까지 1회 제출했다.
 
-## 7. AI 심층 검증
+### 7. AI 심층 검증
 
 화면의 심층 검증 버튼을 누르면 Claude(Anthropic 의 AI)가 상품이나 유형 하나를
 단계별로 검증하고 보고서를 쓴다.
@@ -309,9 +307,9 @@ Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 �
 - 서버가 요청 내용을 검사한다. 허용한 모델만, 답 길이 상한(4,000 토큰), 요청 크기
   상한(256KB)을 넘으면 자르거나 거절한다.
 
-## 8. 웹 서비스와 보안
+### 8. 웹 서비스와 보안
 
-```
+```text
 누구나          https://trend-monitor.pages.dev        소개 화면
                         ↓ "Open Trend Monitor"
 비밀번호        /login                                  비밀번호 입력
@@ -332,7 +330,7 @@ Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 �
   자료가 기준일까지 충분히 들어오지 않았으면 빌드를 멈춘다. 그대로 내보내면 거의
   모든 후보가 "검색 교차" 에서 걸러져 화면이 비어 보이기 때문이다.
 
-## 9. 결과 자세히
+### 9. 결과 자세히
 
 **6차 채점 (봉인 시험지 139건, 2026-11-03)**
 
@@ -359,7 +357,7 @@ Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 �
 **맞힌 방향.** 답한 95건 중 실제 소멸 63건 가운데 55건을, 실제 지속 32건 가운데
 19건을 맞혔다. 소멸은 잘 잡고, 지속을 소멸로 보는 실수(13건)가 더 많다.
 
-## 10. 한계와 앞으로 할 일
+### 10. 한계와 앞으로 할 일
 
 솔직하게 적는다.
 
@@ -374,24 +372,22 @@ Rising items 화면은 순위가 오른 상품을 후보로 올린 뒤 다섯 �
   하이버로 대신한다.
 - **인플루언서 단계는 비어 있다.** 언급 자료를 모을 방법을 아직 정하지 않았다.
 
-## 11. 더 읽을 문서
+### 11. 더 읽을 문서
 
 | 문서 | 내용 |
 | --- | --- |
-| `docs/web-deploy.md` | 웹 배포 구조, 보안, AI 스위치 여닫기 |
-| `docs/commerce-channels.md` | 쇼핑몰 채널을 셋으로 늘린 과정 |
-| `docs/robots-compliance.md` | 사이트별 수집 규칙 확인 기록 |
-| `docs/verification-handoff.md` | 판정 파트 인수인계 (무엇을 받고 무엇을 내나) |
-| `docs/paper-and-release.md` | 논문 주제와 근거 |
-| `DEMO.md` | 미팅 시연 대본 |
+| [docs/web-deploy.md](docs/web-deploy.md) | 웹 배포 구조, 보안, AI 스위치 여닫기 |
+| [docs/commerce-channels.md](docs/commerce-channels.md) | 쇼핑몰 채널을 셋으로 늘린 과정 |
+| [docs/robots-compliance.md](docs/robots-compliance.md) | 사이트별 수집 규칙 확인 기록 |
+| [docs/verification-handoff.md](docs/verification-handoff.md) | 판정 파트 인수인계 (무엇을 받고 무엇을 내나) |
+| [docs/paper-and-release.md](docs/paper-and-release.md) | 논문 주제와 근거 |
+| [DEMO.md](DEMO.md) | 미팅 시연 대본 |
 
----
+## 개발자용
 
-# 부록. 개발자용
+### A. 디렉터리
 
-## A. 디렉터리
-
-```
+```text
 src/trend_pipeline/          파이프라인 핵심
   models.py                  RawRecord. 모든 채널이 공유하는 기록 형식
   schema.sql, storage.py     SQLite 스키마와 저장
@@ -418,33 +414,33 @@ tests/                       파이썬 시험 471개
 모든 파이썬 함수와 서버 함수에 한국어 설명이 달려 있다. `design/runtime/` 의
 부품과 `design/*.dc.html` 은 Claude Design 이 만든 파일이라 손대지 않는다.
 
-## B. 설치와 실행
+### B. 설치와 실행
 
-```
+```bash
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env                        네이버 키 입력 (수집할 때만 필요)
+cp .env.example .env  # 네이버 키 입력 (수집할 때만 필요)
 
-python scripts/load_snapshots.py            CSV 에서 DB 복원 (약 18만 행, 2초)
-python scripts/collect_daily.py             쇼핑몰 순위 수집
-python scripts/collect_daily.py --status    채널별 누적 현황
-python scripts/collect_gtrends.py           구글 트렌드 수집
-python scripts/report.py                    터미널 보고서
-./scripts/build_all_benchmarks.sh           시험지 세 종 다시 만들기
+python scripts/load_snapshots.py  # CSV 에서 DB 복원 (약 18만 행, 2초)
+python scripts/collect_daily.py  # 쇼핑몰 순위 수집
+python scripts/collect_daily.py --status  # 채널별 누적 현황
+python scripts/collect_gtrends.py  # 구글 트렌드 수집
+python scripts/report.py  # 터미널 보고서
+./scripts/build_all_benchmarks.sh  # 시험지 세 종 다시 만들기
 python scripts/score_verdicts.py --benchmark benchmark --baselines
-python -m pytest tests -q                   시험
-node web/functions/api/complete.test.mjs    AI 중계 시험
-node web/functions/auth.test.mjs            비밀번호 게이트 시험
+python -m pytest tests -q  # 시험
+node web/functions/api/complete.test.mjs  # AI 중계 시험
+node web/functions/auth.test.mjs  # 비밀번호 게이트 시험
 ```
 
 경로에 대괄호가 들어간 폴더(`[자주프]` 같은)에 두면 `pytest` 를 저장소 안에서
 `tests` 경로를 지정해 돌린다.
 
-## C. 다른 컴퓨터에서 이어서 하기
+### C. 다른 컴퓨터에서 이어서 하기
 
 DB 는 저장소에 없다(90MB 바이너리). `data/snapshots` 의 CSV 가 원본이다.
 
-```
+```bash
 git clone https://github.com/CalainKim/Trend_Verification_System
 python scripts/load_snapshots.py
 ./scripts/build_all_benchmarks.sh
@@ -456,22 +452,22 @@ python scripts/load_snapshots.py
 스냅샷 파일 단위는 채널마다 다르다. 순위는 관측일마다 한 파일, 검색 지수는 한
 요청에 몇 년치가 오므로 연도마다 한 파일이다.
 
-## D. 웹 배포
+### D. 웹 배포
 
-```
-./scripts/build_web.sh                       최신 주로 build/web 생성
+```bash
+./scripts/build_web.sh  # 최신 주로 build/web 생성
 cd build/web && npx wrangler pages deploy . --project-name trend-monitor --branch main
-./scripts/relay.sh open 2h                   AI 심층 검증 2시간 열기
-./scripts/relay.sh close                     바로 닫기
+./scripts/relay.sh open 2h  # AI 심층 검증 2시간 열기
+./scripts/relay.sh close  # 바로 닫기
 ```
 
 배포는 반드시 `build/web` 안에서 돌린다. 바깥에서 돌리면 서버 함수가 빠진 채
 올라가 심층 검증이 조용히 죽는다. 검색 자료 점검에 걸리면 `WEEK=<날짜>` 를 앞에
 붙여 그 주로 만든다. 자세한 내용은 `docs/web-deploy.md`.
 
-## E. 판정 파트가 시작하는 곳
+### E. 판정 파트가 시작하는 곳
 
-```
+```text
 1. docs/verification-handoff.md      무엇을 받고 무엇을 만드나
 2. benchmark/cases/                  문제지 139건
 3. verification/examples/            판정 출력 예시 3건과 읽는 법
@@ -480,16 +476,16 @@ cd build/web && npx wrangler pages deploy . --project-name trend-monitor --branc
 
 공개 시험지는 바로 채점된다.
 
-```
+```bash
 python scripts/score_verdicts.py --benchmark benchmark-index-long --verdicts <판정 경로>
 ```
 
 봉인 시험지는 판정을 묶어 수집 파트에 넘기면 채점해 돌려준다.
 
-```
+```bash
 python scripts/score_verdicts.py --verdicts <판정 경로> --pack verdicts.json
 ```
 
-## F. 월간 트렌드 검증 PoC
+### F. 월간 트렌드 검증 PoC
 
 [설치와 실행 안내](docs/MONTHLY_POC.md), [세 아이템 실행 결과와 화면](docs/MONTHLY_POC_RESULTS.md)

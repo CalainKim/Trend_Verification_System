@@ -69,6 +69,7 @@ class Source:
 
 
 def _run_29cm(args: argparse.Namespace, run_id: str) -> List[RawRecord]:
+    """29CM 순위를 받는다. 기본은 넓게 모으고, 분석은 그 안에서 상의만 본다."""
     # 기본은 넓게 모은다. 분석이 보는 범위는 이보다 좁고, 그쪽 기본값은
     # persistence.ANALYSIS_CATEGORY_CODES 에 따로 있다. 모으는 범위와 보는
     # 범위를 일부러 떼어 놓았다. 이유는 그 상수의 주석에 적었다.
@@ -84,6 +85,7 @@ def _run_29cm(args: argparse.Namespace, run_id: str) -> List[RawRecord]:
 
 
 def _note_29cm(args: argparse.Namespace) -> List[str]:
+    """분석 범위 밖 분류까지 모았으면 그 사실을 알리는 문장을 만든다."""
     codes = (args.categories or list(TOPS_CATEGORY_CODES if args.tops_only
                                      else ALL_CATEGORY_CODES))
     extra = [c for c in codes if c in EXTRA_CATEGORY_CODES]
@@ -95,11 +97,13 @@ def _note_29cm(args: argparse.Namespace) -> List[str]:
 
 
 def _run_kolon(args: argparse.Namespace, run_id: str) -> List[RawRecord]:
+    """코오롱몰 순위를 받는다. 요청 간격은 2초 이상이다."""
     collector = KolonRankCollector(min_interval_sec=max(args.interval, 2.0))
     return collector.collect_list(max_items=args.limit, run_id=run_id)
 
 
 def _run_hiver(args: argparse.Namespace, run_id: str) -> List[RawRecord]:
+    """하이버 순위를 받는다. 요청 간격은 2초 이상이다."""
     collector = HiverRankCollector(min_interval_sec=max(args.interval, 2.0))
     return collector.collect_list(run_id=run_id)
 
@@ -117,6 +121,7 @@ SOURCES: List[Source] = [
 
 
 def print_status(conn) -> None:
+    """채널별로 몇 건이 언제부터 언제까지 쌓였는지 표로 보여 준다."""
     rows = storage.channel_coverage(conn)
     if not rows:
         print("아직 수집된 데이터가 없다.")
@@ -132,6 +137,7 @@ def print_status(conn) -> None:
 
 
 def main(argv=None) -> int:
+    """명령줄 인자를 읽어 쇼핑몰 순위를 받고 DB 와 스냅샷 CSV 에 저장한다."""
     keys = [s.key for s in SOURCES]
     p = argparse.ArgumentParser(description="커머스 순위 일별 수집")
     p.add_argument("--period", default="ONE_DAY", choices=PERIOD_SORTS,

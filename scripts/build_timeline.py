@@ -91,6 +91,7 @@ def item_timeline(conn, cats=None) -> dict:
 
 
 def main(argv=None) -> int:
+    """속성별 흐름을 시간순으로 모은 타임라인 자료(JSON)를 만든다."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("-o", "--out", default="build/timeline.json")
     p.add_argument("--db", default=None)

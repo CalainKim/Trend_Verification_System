@@ -81,6 +81,7 @@ TOPS_KEYWORDS: Dict[str, list] = {
 
 
 class NaverShoppingCollector(NaverCollector):
+    """네이버 쇼핑인사이트 클릭 지수를 받아 오는 수집기다. 분야 전체와 키워드 단위를 모두 받는다."""
     channel = "naver_shopping"
     earliest_start_date = "2017-08-01"
 
@@ -288,6 +289,7 @@ class NaverShoppingCollector(NaverCollector):
         context: Dict[str, Any],
         run_id: Optional[str],
     ) -> Iterator[RawRecord]:
+        """쇼핑인사이트 응답을 날짜별 기록으로 바꾼다. 몇 일치가 왔는지도 함께 남긴다."""
         for result in self.series(response):
             title = result.get("title") or ""
             params: List[str] = result.get("keyword") or result.get("category") or []

@@ -151,6 +151,7 @@ def observed_at_from(calculated_at: Optional[str],
 
 
 class HiverRankCollector(Collector):
+    """하이버 판매 순위를 받아 오는 수집기다."""
     channel = "hiver_rank"
     platform = "hiver"
 
@@ -203,6 +204,7 @@ class HiverRankCollector(Collector):
         run_id: Optional[str] = None,
         now: Optional[datetime] = None,
     ) -> Iterator[RawRecord]:
+        """하이버 순위 페이지를 한 번 받아 상품마다 기록을 만든다."""
         products, meta = self.fetch_ranking()
         calculated_at = meta.get("calculated_at")
         observed_at = observed_at_from(calculated_at, now)
@@ -223,6 +225,7 @@ class HiverRankCollector(Collector):
         period: Optional[str],
         run_id: Optional[str],
     ) -> Iterator[RawRecord]:
+        """하이버 응답의 상품 하나를 순위 기록으로 바꾼다."""
         item_id = item.get("id")
         name = (item.get("name") or "").strip()
         if not item_id or not name:

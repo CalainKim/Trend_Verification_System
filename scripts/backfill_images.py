@@ -74,6 +74,7 @@ def fetch_from_product_page(item_no: int, session) -> str | None:
 
 
 def main(argv=None) -> int:
+    """사진 주소가 빠진 상품을 찾아 채운다. 명령줄 인자로 범위와 속도를 정한다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--db", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true")

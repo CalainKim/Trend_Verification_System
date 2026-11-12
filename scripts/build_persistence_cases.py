@@ -91,6 +91,7 @@ def _index_cases(series, w, wi, args):
 
 
 def main(argv=None) -> int:
+    """기준, 관측, 확인 구간을 밀어 가며 순위가 오른 사례를 뽑고 지속 여부 정답을 만든다."""
     p = argparse.ArgumentParser(description="지속성 케이스 생성")
     p.add_argument("--db", default=None)
     p.add_argument("--base", type=int, default=7, help="기준 구간 일수")

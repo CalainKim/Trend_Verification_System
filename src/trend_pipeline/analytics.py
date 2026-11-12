@@ -27,12 +27,14 @@ def item_key(entity: str) -> str:
 
 @dataclass
 class DayCoverage:
+    """하루치 수집이 얼마나 들어왔는지를 담는다. 스냅샷이 0개면 그날은 빠진 날이다."""
     day: str
     n_snapshots: int
     n_rows: int
 
     @property
     def missing(self) -> bool:
+        """그날 스냅샷이 하나도 없으면 참을 돌려준다."""
         return self.n_snapshots == 0
 
 
@@ -70,6 +72,7 @@ def coverage(conn: sqlite3.Connection, channel: str) -> List[DayCoverage]:
 
 @dataclass
 class Item:
+    """상품 하나의 날짜별 순위와 리뷰 수를 모은 묶음이다."""
     key: str
     name: str
     brand: str
@@ -81,6 +84,7 @@ class Item:
 
     @property
     def days(self) -> List[str]:
+        """이 상품이 순위에 잡힌 날짜를 오래된 순으로 돌려준다."""
         return sorted(self.ranks)
 
     def rank_delta(self, a: str, b: str) -> Optional[int]:
@@ -90,6 +94,7 @@ class Item:
         return self.ranks[a] - self.ranks[b]
 
     def review_delta(self, a: str, b: str) -> Optional[int]:
+        """두 날짜 사이에 늘어난 리뷰 수를 돌려준다. 한쪽이라도 기록이 없으면 None 이다."""
         if a not in self.reviews or b not in self.reviews:
             return None
         return self.reviews[b] - self.reviews[a]

@@ -174,6 +174,7 @@ def type_score(track: dict) -> dict:
 
 
 def main(argv=None) -> int:
+    """옷 유형별로 최근 몇 주 순위 흐름을 점수로 정리한다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--db", type=Path, default=None)
     ap.add_argument("--weeks", type=int, default=6, help="최대 몇 주를 볼지")

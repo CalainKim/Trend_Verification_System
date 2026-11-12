@@ -1,3 +1,8 @@
+"""AI 검토 단계(trend_poc.review) 시험.
+
+허용한 칸만 AI 에 넘기는지, 응답 형식을 검사하는지, 이미 받은 결과를 다시 부르지
+않는지(돈이 두 번 나가지 않는지)를 확인한다.
+"""
 import copy
 import json
 import sys

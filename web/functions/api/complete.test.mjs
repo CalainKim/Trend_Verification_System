@@ -1,3 +1,5 @@
+// 심층 검증 중계(complete.js) 검사. node web/functions/api/complete.test.mjs
+// 진짜 Anthropic 을 부르지 않도록 fetch 를 가짜로 바꿔 두고, 허용 목록과 상한, 열림과 닫힘을 확인한다.
 import { onRequestPost, onRequestGet, relayOpen } from './complete.js';
 
 let sent = null;

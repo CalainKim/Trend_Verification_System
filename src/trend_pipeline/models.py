@@ -57,6 +57,7 @@ def geo_entity(geo: str, gprop: str = "") -> str:
 
 
 def utcnow_iso() -> str:
+    """지금 시각을 세계 표준시(UTC) 초 단위 문자열로 돌려준다."""
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
@@ -83,6 +84,7 @@ class RawRecord:
     run_id: Optional[str] = None
 
     def __post_init__(self) -> None:
+        """기록을 만들자마자 필수 칸과 날짜 형식을 검사한다. 잘못된 값은 DB 에 들어가기 전에 막는다."""
         if not self.channel:
             raise RecordError("channel 은 비어 있을 수 없다")
         if self.channel not in CHANNELS:

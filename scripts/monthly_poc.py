@@ -11,6 +11,7 @@ from trend_poc.naver import NaverError
 
 
 def main():
+    """월간 사례 실험의 단계(준비, 수집, 검토, 평가, 보고)를 명령으로 하나씩 돌린다."""
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="3월 대비 4월 선정 이유 → 고정 AI 판단 → 5~10월 월별 관측")

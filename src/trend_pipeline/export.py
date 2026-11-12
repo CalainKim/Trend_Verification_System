@@ -31,6 +31,10 @@ class LeakageError(RuntimeError):
 
 @dataclass(frozen=True)
 class TrendCase:
+    """검증 파트에 넘길 사례 하나다.
+
+    label(진짜 유행인지 잡음인지)은 채점용 정답이라 산출물에 절대 넣지 않는다.
+    """
     case_id: str
     keyword: str
     t_peak: str      # 'YYYY-MM-DD'

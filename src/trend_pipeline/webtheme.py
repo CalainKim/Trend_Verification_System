@@ -100,6 +100,7 @@ TOOLTIP_JS = """
 
 
 def nav(current: str) -> str:
+    """정적 대시보드 상단의 메뉴 HTML 을 만든다. 지금 페이지는 강조한다."""
     items = [("index.html", "수집 현황"), ("cases.html", "케이스 분석")]
     return '<div class="nav">' + "".join(
         f'<a href="{href}"{" class=\"on\"" if href == current else ""}>{label}</a>'

@@ -51,6 +51,7 @@ def segment_key(
 
 
 class NaverApiError(RuntimeError):
+    """네이버 API 가 200 이 아닌 응답을 줬을 때 내는 오류다. 상태 코드와 본문 앞부분을 담는다."""
     def __init__(self, status: int, body: str, path: str):
         self.status, self.body, self.path = status, body, path
         super().__init__(f"네이버 API 실패 [{status}] {path}: {body[:300]}")
@@ -84,6 +85,7 @@ class NaverCollector(Collector):
         )
 
     def post(self, path: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """네이버 API 에 요청을 보내고 JSON 응답을 돌려준다. 요청 간격을 지킨다."""
         self.sleep()
         resp = self.session.post(
             API_HOST + path,

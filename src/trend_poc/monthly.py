@@ -18,11 +18,13 @@ VERDICTS = {"WATCH": "관찰 후보", "NOT_SUPPORTED": "관찰 기준 미충족"
 
 
 def read_json(path, default=None):
+    """JSON 파일을 읽는다. 파일이 없으면 default 를 돌려준다."""
     path = Path(path)
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
 
 
 def validate_manifest(manifest):
+    """사례 목록 파일이 정해진 조건(2025년, 서로 다른 세 키워드, 정의와 출처)을 지키는지 검사한다."""
     if manifest.get("year") != 2025 or len(manifest.get("cases", [])) != 3:
         raise ValueError("이번 사례는 2025년, 서로 다른 스타일 세 개로 고정합니다.")
     keywords = [c["keyword"] for c in manifest["cases"]]
@@ -75,11 +77,13 @@ def validate_record(record, channel, keywords, end):
 
 
 def points(record, keyword):
+    """네이버 응답에서 한 키워드의 월별 값을 꺼낸다."""
     row = next(r for r in record["response"]["results"] if r["title"] == keyword)
     return {p["period"][:7]: p["ratio"] for p in row["data"]}
 
 
 def signal(values):
+    """3월 대비 4월이 20% 이상 올랐는지로 관찰(WATCH), 지지 어려움, 보류를 정한다. 숫자만 보는 기준선이다."""
     march, april = values.get("2025-03"), values.get("2025-04")
     growth = None
     status = "HOLD"
@@ -91,6 +95,7 @@ def signal(values):
 
 
 def build_monthly_bundle(case, records):
+    """3~4월 자료만으로 AI 에게 넘길 근거 묶음을 만든다. 5월 이후 자료가 섞이면 멈춘다."""
     evidence, features = [], {}
     for channel in ("shopping", "search"):
         r = records[channel]
@@ -118,6 +123,7 @@ def build_monthly_bundle(case, records):
 
 
 def monthly_outcome(case, records):
+    """3~10월 실제 흐름을 정리한다. 월별 변화율, 정점 달, 빠진 달을 계산한다."""
     values = {ch: points(records[ch], case["keyword"]) for ch in ("shopping", "search")}
     series = [{"month": f"2025-{month:02}", **{ch: values[ch].get(f"2025-{month:02}") for ch in values}}
               for month in range(3, 11)]
@@ -154,6 +160,7 @@ def monthly_outcome(case, records):
 
 
 def compare(selection, review, outcome):
+    """숫자 기준선, AI 판단, 이후 실제 결과를 한 줄씩 나란히 놓는다."""
     result = review.get("result", {})
     ai = VERDICTS.get(result.get("verdict"), "AI 검토 미완료")
     baseline = VERDICTS[selection["status"]]
@@ -167,23 +174,32 @@ def compare(selection, review, outcome):
 
 
 class MonthlyService:
+    """월간 사례 실험 전체를 순서대로 돌리는 관리자다.
+
+    준비, 수집, 입력 고정, AI 검토, 후속 자료 평가, 내보내기 순서를 지킨다.
+    한 번 고정한 입력은 해시로 검사해 나중에 바뀌지 않았음을 보장한다.
+    """
     def __init__(self, root, run_dir, manifest_path, provider="cloud", naver_client=None):
         self.root, self.run_dir = Path(root), Path(run_dir)
         self.manifest_path, self.provider = Path(manifest_path), provider
         self.naver = naver_client
 
     def load(self, name, default=None):
+        """실행 폴더 안의 JSON 파일을 읽는다."""
         return read_json(self.run_dir / name, default)
 
     def case_dir(self, i):
+        """i 번째 사례의 폴더 경로다."""
         return self.run_dir / "cases" / f"{i + 1:02}"
 
     def client(self):
+        """네이버 API 접속 객체를 처음 쓸 때 만든다."""
         if self.naver is None:
             self.naver = NaverClient(self.root, provider=self.provider)
         return self.naver
 
     def prepare(self):
+        """실험 계획(기간, 문턱, 사례)을 저장한다. 이미 저장된 계획과 다르면 멈춘다."""
         manifest = validate_manifest(read_json(self.manifest_path))
         plan = {"schema_version": POLICY, "year": 2025, "provider": self.provider,
                 "initial": {"start": "2025-03-01", "end": "2025-04-30"},
@@ -202,6 +218,7 @@ class MonthlyService:
         return plan
 
     def _records(self, name, end):
+        """저장된 검색, 쇼핑 요청 기록을 읽고 기간과 키워드가 맞는지 검사한다."""
         records = self.load(name)
         if not isinstance(records, dict) or set(records) != {"shopping", "search"}:
             raise ValueError("검색, 쇼핑 요청 기록이 필요합니다.")
@@ -211,6 +228,7 @@ class MonthlyService:
         return records
 
     def collect(self):
+        """3~4월 자료를 받아 근거 묶음을 만들고 해시로 고정한다."""
         plan = self.prepare()
         if self.load("frozen.json"):
             self.verify_initial()
@@ -231,6 +249,7 @@ class MonthlyService:
         return self.status()
 
     def verify_initial(self):
+        """고정해 둔 계획, 출처, 요청, 묶음이 그 뒤로 바뀌지 않았는지 해시로 확인한다."""
         self.prepare()
         frozen = self.load("frozen.json")
         if not frozen:
@@ -247,6 +266,7 @@ class MonthlyService:
         return frozen
 
     def review(self, client=None):
+        """사례 세 개를 AI 에게 검토받는다. 이미 받은 결과는 다시 요청하지 않는다."""
         self.verify_initial()
         if self.load("completion.json"):
             self.verify_complete()
@@ -281,6 +301,7 @@ class MonthlyService:
         return run_review(self.root, case, read_json(case / "bundle.json"), client)
 
     def evaluate(self):
+        """AI 판단이 모두 저장되고 관측 기간이 끝난 뒤에만 후속 자료를 받는다. 답을 보고 판단을 고치는 일을 막는다."""
         frozen = self.verify_initial()
         reviews = [read_json(self.case_dir(i) / "review.json", {}) for i in range(3)]
         if any(r.get("status") != "complete" or r.get("input_sha256") != frozen["payload_sha256"][i] for i, r in enumerate(reviews)):
@@ -302,6 +323,7 @@ class MonthlyService:
         return self.status()
 
     def verify_complete(self):
+        """후속 자료와 AI 응답이 저장된 뒤 바뀌지 않았는지 해시로 확인한다."""
         self.verify_initial()
         completion = self.load("completion.json")
         if not completion:
@@ -314,6 +336,7 @@ class MonthlyService:
                 raise ValueError("저장된 초기 AI 응답이 변경됐습니다.")
 
     def export(self):
+        """사례별 결과를 보고서(HTML, CSV)로 내보낸다."""
         from .monthly_report import write_monthly_exports
         self.verify_initial()
         plan, sources = self.load("plan.json"), self.load("sources.json")
@@ -361,6 +384,7 @@ class MonthlyService:
         return write_monthly_exports(self.run_dir, report)
 
     def status(self):
+        """지금 어느 단계까지 진행됐는지 요약해 돌려준다."""
         return {"run_dir": str(self.run_dir.resolve()), "policy": POLICY, "initial_frozen": bool(self.load("frozen.json")),
                 "followup_complete": bool(self.load("completion.json")),
                 "cases": [{"keyword": c["keyword"], "review": read_json(self.case_dir(i) / "review.json", {}).get("status", "not_run")}

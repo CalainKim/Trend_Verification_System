@@ -202,6 +202,7 @@ def inline_fonts(css: str, css_dir: Path) -> tuple[str, int]:
     n = 0
 
     def swap(m):
+        """CSS 안의 글꼴 파일 하나를 읽어 글자(data URI)로 바꿔 넣는다."""
         nonlocal n
         raw = m.group(1).strip("\"'")
         if raw.startswith(("data:", "http")):
@@ -420,9 +421,11 @@ def inline_remote_images(html: str, timeout: float = 15.0) -> tuple[str, int]:
 
 
 def bundle(html: str, assets: Path) -> tuple[str, dict]:
+    """HTML 이 불러오는 CSS, JS, 글꼴을 모두 안에 넣어 파일 하나로 만든다. 인터넷 없이도 열린다."""
     stats = {"css": 0, "js": 0, "font": 0}
 
     def css_tag(m):
+        """CSS 링크 하나를 실제 내용으로 바꾼다."""
         href = m.group(1)
         f = (assets / href).resolve()
         if not f.exists():
@@ -436,6 +439,7 @@ def bundle(html: str, assets: Path) -> tuple[str, dict]:
     html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', css_tag, html)
 
     def js_tag(m):
+        """스크립트 링크 하나를 실제 내용으로 바꾼다."""
         src = m.group(1)
         f = (assets / src.lstrip("./")).resolve()
         if not f.exists():
@@ -637,6 +641,7 @@ def inline_local_images(html: str, assets: Path) -> tuple[str, int]:
     n = 0
 
     def one(m):
+        """로컬 사진 하나를 글자(data URI)로 바꿔 넣는다."""
         nonlocal n
         src = m.group(1)
         f = (assets / src).resolve()
@@ -655,6 +660,7 @@ def inline_local_images(html: str, assets: Path) -> tuple[str, int]:
 
 
 def main(argv=None) -> int:
+    """명령줄 인자를 읽어 파일 하나짜리 화면을 만든다. --relay 면 키 없이 중계 서버를 부르는 배포판이다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path, help="패치가 끝난 .html")
     ap.add_argument("--assets", type=Path, required=True,

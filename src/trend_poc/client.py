@@ -12,6 +12,7 @@ class VerificationAIError(RuntimeError):
 
 
 class IncompleteResponse(VerificationAIError):
+    """AI 응답이 중간에 끊겨 끝까지 받지 못했을 때 내는 오류다."""
     pass
 
 
@@ -75,14 +76,21 @@ class ClaudeClient:
         )
 
     def close(self):
+        """API 연결을 닫는다."""
         self.client.close()
 
     def count(self, payload):
+        """보내기 전에 입력 토큰 수를 센다. 비용을 미리 가늠하려고 쓴다."""
         return self.client.messages.count_tokens(
             model=payload["model"], system=payload["system"], messages=payload["messages"]
         ).input_tokens
 
     def generate(self, payload, checkpoint):
+        """Claude 에게 요청을 보내고 답을 흘려받듯(스트리밍) 받는다.
+
+        받는 도중에도 checkpoint 로 중간 내용을 저장해, 끊겨도 받은 만큼은 남긴다.
+        끝까지 정상으로 받았는지와 토큰 사용량을 함께 돌려준다.
+        """
         text_parts, usage = {}, {}
         message_id = actual_model = stop_reason = None
         ended = False

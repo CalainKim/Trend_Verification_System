@@ -70,6 +70,7 @@ class GoogleTrendsUnavailable(RuntimeError):
 
 
 class GoogleTrendsCollector(Collector):
+    """구글 트렌드 검색 지수를 받아 오는 수집기다. 막히면 천천히 다시 시도한다."""
     channel = "gtrends"
 
     #: 구글은 공식 한도를 밝히지 않는다. 넉넉히 둔다.
@@ -93,6 +94,7 @@ class GoogleTrendsCollector(Collector):
         self._throttled = False
 
     def _fresh_client(self):
+        """구글 트렌드 접속 객체를 새로 만든다. 막힌 세션을 버리고 다시 시작하려고 쓴다."""
         from pytrends.request import TrendReq
 
         # 재시도마다 새 세션을 만든다. 막힌 세션을 계속 쓰면 같은 결과가 나온다.

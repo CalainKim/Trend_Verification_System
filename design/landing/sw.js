@@ -31,6 +31,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// 저장해 둬도 되는 응답인지 본다. 정상 응답이고 같은 사이트에서 왔고 다른 곳으로 넘기지 않은 것만 저장한다.
 const cacheable = (res) => res && res.ok && res.type === 'basic' && !res.redirected;
 
 self.addEventListener('fetch', (event) => {

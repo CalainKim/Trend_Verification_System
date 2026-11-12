@@ -59,6 +59,7 @@ class StubClient:
         self.calls = 0
 
     def generate(self, payload, checkpoint=None):
+        """돈이 드는 AI 대신 숫자 규칙으로 가짜 판정을 낸다. 실제 호출 전에 흐름을 시험할 때 쓴다."""
         self.calls += 1
         ctx = json.loads(payload["messages"][0]["content"])
         f = ctx.get("features") or {}
@@ -91,6 +92,7 @@ def pick(benchmark: Path, n: int, seed: int) -> List[Path]:
 
 
 def main(argv=None) -> int:
+    """벤치마크에서 사례를 뽑아 AI 판정을 받는다. --dry-run 이면 가짜 판정기로 돈 없이 돌린다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--benchmark", type=Path, default=ROOT / "benchmark")
     ap.add_argument("--n", type=int, default=30, help="판정할 케이스 수")

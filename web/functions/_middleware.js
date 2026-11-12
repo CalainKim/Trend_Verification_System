@@ -13,6 +13,7 @@ import { configured, hasSession, safeNext } from './_shared/session.js';
 
 const GATED = [/^\/app(\/|$)/, /^\/api(\/|$)/];
 
+// 모든 요청이 먼저 지나는 문지기. 입장권이 없으면 /app 과 /api 를 막고 로그인 화면으로 보낸다.
 export async function onRequest(ctx) {
   const { request, env, next } = ctx;
   const url = new URL(request.url);

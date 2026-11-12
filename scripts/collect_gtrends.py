@@ -101,6 +101,7 @@ def load_terms(limit: Optional[int]) -> List[Dict[str, str]]:
 
 
 def print_plan(terms, geos, props, start, end) -> None:
+    """몇 번 요청할지, 얼마나 걸릴지, 속성마다 어떤 검색어를 쓸지 미리 보여 준다."""
     n_req = len(terms) * len(geos) * len(props)
     print(f"질의 계획: 속성 {len(terms)}개 x 지역 {len(geos)}개 x 속성값 {len(props)}개 "
           f"= {n_req}회")
@@ -113,6 +114,7 @@ def print_plan(terms, geos, props, start, end) -> None:
 
 
 def main(argv=None) -> int:
+    """명령줄 인자를 읽어 구글 트렌드를 받는다. 빠진 것만, 오래된 것만 골라 받을 수도 있다."""
     p = argparse.ArgumentParser(description="구글 트렌드 수집 (지역별 질의어 분리)")
     p.add_argument("--start", default="2021-01-01")
     p.add_argument("--end", default=None, help="기본값은 오늘")
@@ -167,6 +169,7 @@ def main(argv=None) -> int:
         return 2
 
     def skip_set(alias):
+        """이번에 건너뛸 속성 목록을 정한다. 이미 새 자료가 있는 속성이다."""
         gprop = PROP_ALIASES[alias]
         if args.stale_days is not None:
             return fresh_terms(conn, "gtrends", gprop, args.stale_days, end)

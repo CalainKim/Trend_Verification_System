@@ -29,6 +29,7 @@ MIN_BASELINE_SHARE = 0.02
 
 @dataclass(frozen=True)
 class Skew:
+    """특정 연령대나 성별이 평소보다 얼마나 더 몰렸는지(리프트)를 담는다."""
     group: str
     observed_share: float
     baseline_share: float
@@ -118,6 +119,7 @@ def overlap_window(
 ) -> Optional[tuple]:
     """키워드와 기준선이 둘 다 존재하는 기간."""
     def span(name):
+        """한 키워드가 관측된 첫날과 마지막 날을 돌려준다. 자료가 없으면 None 이다."""
         r = conn.execute(
             "SELECT MIN(observed_at) a, MAX(observed_at) b FROM signal_raw "
             "WHERE channel=? AND keyword_raw=? AND entity LIKE ? AND entity NOT LIKE '%;%'",

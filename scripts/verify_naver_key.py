@@ -43,6 +43,7 @@ def probe_earliest(collector, make_call, floor=date(2007, 1, 1), ceil=None) -> s
 
 
 def main() -> int:
+    """네이버 API 키가 제대로 설정됐고 실제로 응답하는지 확인한다."""
     print("네이버 오픈 API 확인\n" + "─" * 60)
 
     try:

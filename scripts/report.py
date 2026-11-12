@@ -32,11 +32,13 @@ def width(s: str) -> int:
 
 
 def pad(s: str, n: int) -> str:
+    """한글 폭을 고려해 글자를 정해진 칸 수로 맞춘다."""
     s = trim(s, n)
     return s + " " * max(0, n - width(s))
 
 
 def trim(s: str, n: int) -> str:
+    """한글 폭을 고려해 칸 수를 넘는 글자를 자르고 말줄임표를 붙인다."""
     if width(s) <= n:
         return s
     out = ""
@@ -48,16 +50,19 @@ def trim(s: str, n: int) -> str:
 
 
 def paint(s: str, color: str, enabled: bool) -> str:
+    """터미널에서 글자에 색을 입힌다."""
     return f"{C[color]}{s}{C['reset']}" if enabled and color in C else s
 
 
 def section(title: str, color: bool) -> None:
+    """구획 제목과 밑줄을 출력한다."""
     print()
     print(paint(title, "bold", color))
     print(paint("─" * 74, "dim", color))
 
 
 def render_coverage(conn, color: bool) -> None:
+    """날짜별로 수집이 빠진 날이 있는지 보여 준다."""
     rows = analytics.coverage(conn, "commerce_rank")
     section("수집 현황", color)
     if not rows:
@@ -80,6 +85,7 @@ def render_coverage(conn, color: bool) -> None:
 
 
 def render_items(title, items, days, color, kind, top) -> None:
+    """순위가 오른 상품이나 새로 들어온 상품을 표로 출력한다."""
     first, last = days[0], days[-1]
     section(title, color)
     if not items:
@@ -104,6 +110,7 @@ def render_items(title, items, days, color, kind, top) -> None:
 
 
 def render_contradictions(items, days, color, top) -> None:
+    """순위는 올랐는데 리뷰가 늘지 않은 상품을 보여 준다. 실제 구매 없이 오른 순위일 수 있다."""
     from datetime import date
 
     first, last = days[0], days[-1]
@@ -135,6 +142,7 @@ def render_contradictions(items, days, color, top) -> None:
 
 
 def main(argv=None) -> int:
+    """수집 자료를 터미널 보고서로 출력한다."""
     p = argparse.ArgumentParser(description="수집 데이터 터미널 리포트")
     p.add_argument("--db", default=None)
     p.add_argument("--top", type=int, default=8)

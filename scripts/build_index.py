@@ -40,6 +40,7 @@ def collect_texts(conn, channel=None):
 
 
 def main(argv=None) -> int:
+    """수집한 키워드를 벡터로 바꿔 색인에 넣고, 원하면 비슷한 말끼리 묶는다."""
     p = argparse.ArgumentParser(description="벡터 색인 생성")
     p.add_argument("--db", default=None)
     p.add_argument("--channel", default=None, help="특정 채널만")

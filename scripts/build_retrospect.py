@@ -50,6 +50,7 @@ def curve(item: Dict[str, float], days: List[str]) -> List[dict]:
 
 
 def main(argv=None) -> int:
+    """지난 시점마다 무엇이 보였고 그 뒤 어떻게 됐는지 회고 자료(JSON)를 만든다."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("-o", "--out", default="build/retrospect.json")
     p.add_argument("--db", default=None)

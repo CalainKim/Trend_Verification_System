@@ -45,6 +45,7 @@ MATCH_LIMIT = 20
 
 @dataclass
 class ChannelTrend:
+    """한 채널에서 본 키워드의 최근 흐름이다. 최근 평균을 직전 평균으로 나눈 변화율을 담는다."""
     channel: str
     entity: str
     n_days: int
@@ -108,6 +109,7 @@ class CommerceSignal:
 
 @dataclass
 class CaseFeatures:
+    """사례 하나를 판정할 때 쓰는 특징 묶음이다. 채널별 흐름과 연령, 성별 쏠림이 들어 있다."""
     keyword: str
     as_of: str
     window_start: str
@@ -123,6 +125,7 @@ class CaseFeatures:
     notes: List[str] = field(default_factory=list)
 
     def to_json(self) -> str:
+        """특징 묶음을 JSON 문자열로 바꾼다. 키 순서를 고정해 같은 입력이면 같은 글자가 나온다."""
         return json.dumps(asdict(self), ensure_ascii=False, sort_keys=True)
 
 
@@ -163,6 +166,11 @@ def channel_trend(
     as_of: str, recent_days: int = RECENT_DAYS, base_days: int = BASE_DAYS,
     metric_type: Optional[str] = None,
 ) -> Optional[ChannelTrend]:
+    """확인 시점(as_of) 직전 두 구간의 평균을 비교해 채널별 흐름을 계산한다.
+
+    최근 구간(recent_days)과 그 앞 기준 구간(base_days)의 평균을 내고 비율을 구한다.
+    확인 시점 이후 자료는 읽지 않는다. 자료가 하나도 없으면 None 이다.
+    """
     cut = date.fromisoformat(as_of[:10])
     recent_start = cut - timedelta(days=recent_days)
     base_start = recent_start - timedelta(days=base_days)
@@ -345,6 +353,7 @@ class MixedQueryWindow(RuntimeError):
 
 
 def _pearson(xs: List[float], ys: List[float]) -> Optional[float]:
+    """두 수열이 같이 움직이는 정도(피어슨 상관계수)를 구한다. 점이 5개 미만이면 None 이다."""
     if len(xs) < 5:
         return None
     mx, my = statistics.fmean(xs), statistics.fmean(ys)
@@ -393,6 +402,10 @@ def lead_lag(
     start = (cut - timedelta(days=window_days)).isoformat()
 
     def load(g):
+        """한 지역의 구글 트렌드 주간 값을 날짜별로 읽는다.
+
+        서로 다른 요청 창에서 받은 값이 섞여 있으면 기준이 달라 비교할 수 없으므로 멈춘다.
+        """
         entity = geo_entity(g, gprop)
         args = (keyword, entity, start, cut.isoformat())
 

@@ -39,6 +39,7 @@ class UnknownVerdict(ValueError):
 
 
 def to_prediction(verdict: str) -> Optional[str]:
+    """어느 어휘로 온 판정이든 지속(persist), 소멸(fade), 보류(None) 셋 중 하나로 바꾼다. 모르는 값이면 멈춘다."""
     key = verdict.strip()
     if key not in VERDICT_MAP:
         lowered = key.lower()
@@ -51,6 +52,10 @@ def to_prediction(verdict: str) -> Optional[str]:
 
 
 def wilson(k: int, n: int, z: float = 1.96) -> Tuple[float, float]:
+    """k 번 맞힘 / n 번 시도의 95% 신뢰구간(윌슨 구간)을 구한다.
+
+    건수가 적을 때 정확도가 얼마나 흔들릴 수 있는지 보여 주려고 쓴다.
+    """
     if n == 0:
         return (0.0, 0.0)
     p = k / n
@@ -62,6 +67,7 @@ def wilson(k: int, n: int, z: float = 1.96) -> Tuple[float, float]:
 
 @dataclass
 class Scorecard:
+    """채점 결과표다. 정확도를 기저율(찍었을 때의 점수)과 나란히 담는다."""
     n_cases: int
     n_answered: int
     n_abstained: int
@@ -79,10 +85,12 @@ class Scorecard:
 
     @property
     def coverage(self) -> float:
+        """전체 사례 가운데 보류하지 않고 답한 비율이다."""
         return self.n_answered / self.n_cases if self.n_cases else 0.0
 
     @property
     def lift(self) -> Optional[float]:
+        """정확도가 기저율보다 몇 점 높은지다. 0 이하면 찍은 것보다 낫지 않다."""
         if self.accuracy is None or self.base_rate_answered is None:
             return None
         return self.accuracy - self.base_rate_answered
@@ -138,6 +146,7 @@ def score(labels: Mapping[str, str],
     # 누수를 막고 문제지를 다시 만들자 지속이 40.3% 가 되어, 전부 소멸이
     # 59.7% 로 가장 센 기준이 됐다.
     def _majority(vals) -> Optional[float]:
+        """전부 한쪽으로 찍었을 때 얻는 가장 높은 정확도를 구한다."""
         vals = list(vals)
         if not vals:
             return None

@@ -35,6 +35,7 @@ W = {"rise": 0.35, "review": 0.30, "discount": 0.15, "season": 0.20}
 
 
 def clamp(x: float, lo: float = 0.0, hi: float = 100.0) -> float:
+    """값을 lo 와 hi 사이로 자른다."""
     return max(lo, min(hi, x))
 
 
@@ -75,6 +76,7 @@ def season_of(case: dict) -> Optional[float]:
 
 
 def main(argv=None) -> int:
+    """숫자 규칙만으로 점수를 매기고 채점한다. AI 판정과 비교할 기준선이다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--benchmark", type=Path, default=ROOT / "benchmark")
     ap.add_argument("--cut", type=float, default=50.0,

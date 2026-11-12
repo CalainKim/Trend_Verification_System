@@ -27,6 +27,8 @@ D, R, Y, G, C, B = "\033[2m", "\033[0m", "\033[33m", "\033[32m", "\033[36m", "\0
 TTY = sys.stdout.isatty()
 
 
+# 터미널 글자 색 도우미. 터미널이 아니면(파일로 저장할 때) 색 없이 그대로 돌려준다.
+# dim 흐리게, hi 노랑 강조, ok 초록, cy 청록(명령), bold 굵게.
 def dim(s):   return f"{D}{s}{R}" if TTY else s
 def hi(s):    return f"{Y}{s}{R}" if TTY else s
 def ok(s):    return f"{G}{s}{R}" if TTY else s
@@ -35,6 +37,7 @@ def bold(s):  return f"{B}{s}{R}" if TTY else s
 
 
 def rule(n, title):
+    """장 제목을 가는 줄로 감싸 출력한다."""
     print()
     print(dim("─" * 96))
     print(bold(f"[{n}] {title}"))
@@ -42,12 +45,14 @@ def rule(n, title):
 
 
 def cmd(line):
+    """실행한 명령을 터미널 프롬프트처럼 출력한다."""
     print(cy(f"$ {line}"))
 
 
 # ───────────────────────────────────────────────────────── 1. API 원문
 
 def s1(conn, rows, live):
+    """1장. 네이버 API 원문 응답을 보여 준다. --live 면 실제로 호출한다."""
     rule(1, "네이버 API 원문 응답")
     if live:
         cmd("curl -X POST naverapihub.apigw.ntruss.com/search-trend/v1/search")
@@ -80,6 +85,7 @@ def s1(conn, rows, live):
 # ───────────────────────────────────────────────── 2. 29CM 원본 상품명
 
 def s2(conn, rows, live):
+    """2장. 29CM 에서 모은 상품명 원본을 보여 준다."""
     rule(2, f"29CM 수집 원본 상품명 (앞 {rows}건)")
     cmd("SELECT DISTINCT keyword_raw FROM signal_raw WHERE channel='commerce_rank'")
     names = [r[0] for r in conn.execute(
@@ -97,6 +103,7 @@ def s2(conn, rows, live):
 # ───────────────────────────────────────────────────────── 3. 정규화
 
 def s3(conn, rows, live):
+    """3장. 임베딩 전에 상품명에서 군더더기를 지우는 모습을 보여 준다."""
     rule(3, f"정규화 — 임베딩에 넣기 전 군더더기 제거 (앞 {rows}건)")
     cmd("embeddings.normalize_for_embedding(name)")
     names = [r[0] for r in conn.execute(
@@ -118,6 +125,7 @@ def s3(conn, rows, live):
 # ───────────────────────────────────────────── 4. 클러스터링 결과
 
 def s4(conn, rows, live):
+    """4장. 흩어진 표현이 비슷한 말끼리 묶이는 모습을 보여 준다."""
     rule(4, "동의어 클러스터링 — 흩어진 표현을 하나의 후보로")
     cmd(f"clustering.cluster_texts(threshold={clustering.DEFAULT_THRESHOLD})")
     vectorstore.init(conn)
@@ -139,6 +147,7 @@ def s4(conn, rows, live):
 # ─────────────────────────────────────────── 5. 저장 스키마 실물
 
 def s5(conn, rows, live):
+    """5장. 여러 채널 자료가 한 표(signal_raw)에 같은 모양으로 들어 있음을 보여 준다."""
     rule(5, "공통 스키마 — 4개 채널이 한 테이블에")
     cmd("SELECT * FROM signal_raw ORDER BY RANDOM() LIMIT n")
     qs = conn.execute(
@@ -162,6 +171,7 @@ def s5(conn, rows, live):
 # ───────────────────────────────────────── 6. 저장 원본 파일
 
 def s6(conn, rows, live):
+    """6장. 관측일별 CSV 스냅샷 원본을 보여 준다."""
     rule(6, "저장 원본 — 관측일별 CSV")
     snaps = sorted((ROOT / "data" / "snapshots" / "commerce_rank").glob("*.csv"))
     if not snaps:
@@ -178,6 +188,7 @@ def s6(conn, rows, live):
 # ─────────────────────────────────── 7. 후보 → 상품 매칭 날것
 
 def s7(conn, rows, live):
+    """7장. 후보 검색어를 실제 상품과 잇는 모습을 보여 준다."""
     rule(7, "후보 → 실제 상품 연결 (벡터 + 어휘)")
     for kw in ("맨투맨", "후드티", "럭비티"):
         cmd(f"features.match_products(conn, '{kw}')")
@@ -199,6 +210,7 @@ SECTIONS = [s1, s2, s3, s4, s5, s6, s7]
 
 
 def main(argv=None) -> int:
+    """가공 전 원본 자료를 차례로 보여 주는 데모를 돌린다."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--rows", type=int, default=25)
     ap.add_argument("--only", type=int)

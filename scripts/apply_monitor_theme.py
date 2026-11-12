@@ -157,6 +157,7 @@ VIEWPORT_NEW = '<meta name="viewport" content="width=device-width, initial-scale
 
 
 def apply(html: str) -> tuple[str, dict]:
+    """디자인 HTML 의 색을 모니터 테마 색으로 바꾸고 테마 CSS 를 넣는다. 이미 바꾼 파일이면 그대로 둔다."""
     stats = {"hex": 0, "rgba": 0, "css": 0}
     if MARK in html:
         return html, stats
@@ -180,6 +181,7 @@ def apply(html: str) -> tuple[str, dict]:
 
 
 def main(argv: list[str]) -> int:
+    """파일 하나를 받아 테마를 입히고 몇 곳을 바꿨는지 알려 준다."""
     if len(argv) != 2:
         print(__doc__)
         return 2

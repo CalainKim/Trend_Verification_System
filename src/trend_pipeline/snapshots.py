@@ -40,6 +40,7 @@ def partition_key(channel: str, observed_at: str) -> str:
 
 
 def snapshot_path(root: Path, channel: str, observed_at: str) -> Path:
+    """채널과 날짜로 스냅샷 CSV 파일 경로를 정한다."""
     return Path(root) / channel / f"{partition_key(channel, observed_at)}.csv"
 
 
@@ -88,6 +89,7 @@ def write_snapshots_for(
 
 
 def read_snapshot(path: Path) -> Iterable[RawRecord]:
+    """스냅샷 CSV 한 개를 읽어 원천 기록(RawRecord)을 하나씩 돌려준다."""
     with Path(path).open(newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             yield RawRecord(

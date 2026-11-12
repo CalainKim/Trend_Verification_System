@@ -29,6 +29,7 @@ GT_ATTRS = ["탑", "크루넥", "와플", "터틀넥", "후드티", "니트", "�
 
 
 def daily_runs(c):
+    """날짜마다 그날 마지막으로 수집한 시각을 찾는다."""
     return dict(c.execute("""select substr(observed_at,1,10), max(observed_at) from signal_raw
                              where channel='commerce_rank' and metric_type='rank' group by 1"""))
 
@@ -48,11 +49,13 @@ def rank_snapshot(c, ts):
 
 
 def nearest_on_or_before(runs, day):
+    """주어진 날짜 당일이나 그 이전 가운데 가장 가까운 수집 시각을 고른다."""
     days = [d for d in runs if d <= day.isoformat()]
     return runs[max(days)]
 
 
 def commerce_attributes(c, runs):
+    """이번 주와 지난주 순위에서 속성(소재, 핏, 색 등)별 상품 수를 비교한다."""
     attrs, colors, _ = load_dictionary()
     last_day = date.fromisoformat(max(runs))
     now_ts = runs[max(runs)]
@@ -60,6 +63,7 @@ def commerce_attributes(c, runs):
     now, prev = rank_snapshot(c, now_ts), rank_snapshot(c, prev_ts)
 
     def by_attr(snap):
+        """순위표의 상품 이름에서 속성을 뽑아 속성별 상품 목록으로 묶는다."""
         out = defaultdict(list)
         for item, v in snap.items():
             for h in extract(v["name"], attrs, colors):
@@ -81,7 +85,9 @@ def commerce_attributes(c, runs):
 
 
 def gtrends(c):
+    """속성마다 한국과 해외의 구글 트렌드 주간 값을 모은다. 8주보다 짧으면 뺀다."""
     def series(kw, geo):
+        """키워드 하나, 지역 하나의 주간 값을 날짜순으로 읽는다."""
         return c.execute("""select observed_at, metric_value from signal_raw where channel='gtrends'
                             and keyword_raw=? and entity=? order by observed_at""", (kw, f"geo={geo}")).fetchall()
 
@@ -108,6 +114,7 @@ def persistence_track(c, runs):
     last_day = date.fromisoformat(max(runs))
 
     def snap(day):
+        """그날(또는 그 이전 가장 가까운 날)의 상품별 순위표를 읽는다."""
         ts = nearest_on_or_before(runs, day)
         return {tuple((ent.split("@") + [""])[:2]): (rank, name) for name, ent, rank in c.execute(
             """select keyword_raw, entity, metric_value from signal_raw
@@ -147,6 +154,7 @@ def base_rate_29cm():
 
 
 def main(argv=None) -> int:
+    """DB 의 실제 값을 뽑아 디자인 시안용 JSON 을 만든다."""
     argv = sys.argv[1:] if argv is None else argv
     out = Path(argv[0]) if argv else OUT
     c = sqlite3.connect(DB)

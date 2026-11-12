@@ -172,6 +172,7 @@ def _verdict_from(obj) -> str:
 
 
 def load_verdicts(path: Path) -> Dict[str, str]:
+    """판정 파일(또는 폴더)을 읽어 사례번호별 판정으로 만든다."""
     if path.is_file():
         data = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
@@ -194,6 +195,7 @@ def load_verdicts(path: Path) -> Dict[str, str]:
 
 
 def render(card: sc.Scorecard, title: str) -> str:
+    """채점 결과표를 사람이 읽을 마크다운 문장으로 만든다."""
     L = [f"## {title}", ""]
     L.append(f"- 케이스 {card.n_cases}건, 답변 {card.n_answered}건, "
              f"기권 {card.n_abstained}건 (커버리지 {card.coverage:.1%})")
@@ -247,6 +249,7 @@ def baselines(labels: Dict[str, str]) -> str:
 
 
 def main(argv=None) -> int:
+    """판정을 정답과 맞춰 채점한다. 기준 전략(전부 지속, 전부 소멸 등)도 함께 낸다."""
     p = argparse.ArgumentParser(description="판정 채점")
     p.add_argument("--verdicts", default=None, help="판정 파일이나 디렉터리")
     p.add_argument("--benchmark", default=str(DEFAULT_BENCH),

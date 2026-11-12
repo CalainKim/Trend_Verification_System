@@ -38,26 +38,34 @@ DEFAULT_THRESHOLD = 0.985
 
 @dataclass
 class Cluster:
+    """같은 뜻으로 묶인 키워드 무리다. 대표 이름 하나와 구성원 목록을 가진다."""
     canonical: str
     members: List[str] = field(default_factory=list)
     channels: List[str] = field(default_factory=list)
 
     @property
     def size(self) -> int:
+        """무리에 든 키워드 개수다."""
         return len(self.members)
 
 
 class _UnionFind:
+    """서로 비슷한 키워드끼리 같은 무리로 합치는 자료구조다.
+
+    '가와 나가 같고 나와 다가 같으면 가와 다도 같다'를 빠르게 처리한다.
+    """
     def __init__(self, n: int):
         self.parent = list(range(n))
 
     def find(self, x: int) -> int:
+        """x 가 속한 무리의 대표 번호를 찾는다. 찾는 길에 경로를 줄여 다음 조회를 빠르게 한다."""
         while self.parent[x] != x:
             self.parent[x] = self.parent[self.parent[x]]
             x = self.parent[x]
         return x
 
     def union(self, a: int, b: int) -> None:
+        """a 와 b 가 속한 두 무리를 하나로 합친다."""
         ra, rb = self.find(a), self.find(b)
         if ra != rb:
             self.parent[rb] = ra
@@ -128,6 +136,7 @@ def pick_canonical(texts: Sequence[str]) -> str:
     적은 쪽이 읽기 좋다.
     """
     def noise(t: str) -> int:
+        """괄호, 밑줄, 겹친 공백처럼 지저분한 글자가 몇 개인지 센다. 적을수록 대표 이름으로 낫다."""
         return sum(t.count(c) for c in "[]()/_") + t.count("  ")
 
     return min(texts, key=lambda t: (noise(t), len(t), t))

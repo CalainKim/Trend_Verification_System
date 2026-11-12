@@ -75,6 +75,10 @@ def survey(keyword: str, synonyms) -> int:
 
 
 def build(args) -> int:
+    """키워드 하나의 역추적 사례를 만든다.
+
+    정점(T_peak)에서 몇 주 앞을 확인 시점(T_cut)으로 잡고, 그 전날까지의 자료만 모은다.
+    """
     t_peak = date.fromisoformat(args.t_peak)
     t_cut = t_peak - timedelta(weeks=args.lead_weeks)
     start = t_cut - timedelta(days=365 * args.history_years)
@@ -224,6 +228,7 @@ def build(args) -> int:
 
 
 def main(argv=None) -> int:
+    """명령줄 인자를 읽어 추이를 훑어보거나(--survey) 사례 하나를 만든다."""
     p = argparse.ArgumentParser(description="역추적 케이스 번들 생성")
     p.add_argument("--survey", nargs="+", metavar="KEYWORD",
                    help="추이만 출력하고 종료 (첫 값이 대표어)")

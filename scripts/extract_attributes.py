@@ -67,6 +67,7 @@ def compile_variant(variant: str) -> re.Pattern:
 
 
 def _words(lines) -> set:
+    """쉼표로 나열한 낱말들을 소문자 집합으로 만든다."""
     out = set()
     for line in lines or []:
         out.update(w.strip().lower() for w in line.split(",") if w.strip())
@@ -74,6 +75,7 @@ def _words(lines) -> set:
 
 
 def load_dictionary(path: Path = DICT_PATH) -> Tuple[List[dict], set, set]:
+    """속성 사전(yaml)을 읽어 속성별 찾기 규칙과 색 낱말 목록을 만든다."""
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     attrs = []
     for a in raw["attributes"]:
@@ -115,6 +117,7 @@ def followed_by_color(text: str, pos: int, colors: set) -> bool:
 
 
 def extract(name: str, attrs: List[dict], colors: set) -> List[dict]:
+    """상품 이름 하나에서 사전에 있는 속성(소재, 핏, 무늬 등)을 모두 찾아낸다."""
     text = clean(name)
     out = []
     for a in attrs:
@@ -148,6 +151,7 @@ def leftover_tokens(name: str, hits: List[dict], stop: set) -> List[str]:
 
 
 def main(argv=None) -> int:
+    """수집한 상품 이름 전체에서 속성을 뽑아 통계나 CSV 로 낸다. 사전에 없는 낱말만 볼 수도 있다."""
     p = argparse.ArgumentParser(description="상품명에서 속성 키워드 추출")
     p.add_argument("--db", default=str(DB_PATH))
     p.add_argument("--out", default=None, help="상품별 속성 매핑 CSV 경로")

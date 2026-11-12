@@ -17,6 +17,7 @@ floor(-3.2 if PORTRAIT else -1.6, '#151412', rough=0.18)
 
 
 def ribbon(name, pts, depth, mat):
+    """점들을 이어 두께 있는 리본(추세선)을 만든다."""
     cu = bpy.data.curves.new(name, 'CURVE')
     cu.dimensions = '3D'
     cu.bevel_depth = depth

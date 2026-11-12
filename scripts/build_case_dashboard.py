@@ -27,14 +27,17 @@ CONTEXT_DAYS = 180          # 차트에 보여줄 T_cut 이전 구간
 
 
 def esc(s) -> str:
+    """HTML 에 넣어도 안전하도록 특수문자를 바꾼다."""
     return html.escape(str(s), quote=True)
 
 
 def fmt(v, digits=2, suffix=""):
+    """숫자를 정해진 자릿수 글자로 바꾼다. 값이 없으면 줄표다."""
     return "—" if v is None else f"{v:.{digits}f}{suffix}"
 
 
 def series(conn, keyword, channel, entity, start, end, metric):
+    """키워드 하나의 채널별 날짜 값을 DB 에서 읽는다."""
     rows = conn.execute(
         """
         SELECT observed_at, AVG(metric_value) v FROM signal_raw
@@ -73,6 +76,7 @@ def line_chart(named_series, t_cut) -> str:
     W, H, L, R, T, B = 820, 250, 44, 96, 14, 30
     pw, ph = W - L - R, H - T - B
 
+    # x 는 날짜를 가로 위치로, y 는 0~1 값을 세로 위치로 바꾼다.
     def x(d): return L + pw * idx[d] / max(1, len(days) - 1)
     def y(v): return T + ph * (1 - v)
 
@@ -169,6 +173,7 @@ def lift_chart(skews) -> str:
 
 
 def case_section(conn, case) -> str:
+    """사례 하나의 그래프와 특징 표를 HTML 로 그린다. 확인 시점 이후 자료는 쓰지 않는다."""
     kw, t_cut = case["keyword"], case["t_cut"]
     start = (date.fromisoformat(t_cut) - timedelta(days=CONTEXT_DAYS)).isoformat()
     cat = "50000169"
@@ -257,6 +262,7 @@ def case_section(conn, case) -> str:
 
 
 def build(conn) -> str:
+    """모든 사례를 모아 케이스 분석 페이지 HTML 을 만든다."""
     cases = conn.execute("SELECT * FROM trend_case ORDER BY case_id").fetchall()
     now = datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")
     total = conn.execute("SELECT COUNT(*) FROM signal_raw").fetchone()[0]
@@ -295,6 +301,7 @@ def build(conn) -> str:
 
 
 def main() -> int:
+    """DB 를 열어 케이스 분석 페이지를 docs 에 쓴다."""
     conn = storage.connect()
     storage.init_db(conn)
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -23,6 +23,7 @@ def new_run_id() -> str:
 
 
 def connect(db_path: Optional[Path] = None) -> sqlite3.Connection:
+    """SQLite DB 에 연결한다. 폴더가 없으면 만들고, 외래키 검사와 동시 읽기(WAL)를 켠다."""
     path = Path(db_path) if db_path is not None else DEFAULT_DB_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path))
@@ -33,6 +34,7 @@ def connect(db_path: Optional[Path] = None) -> sqlite3.Connection:
 
 
 def init_db(conn: sqlite3.Connection) -> None:
+    """schema.sql 을 실행해 테이블을 만든다. 이미 있으면 그대로 둔다."""
     conn.executescript(_SCHEMA_PATH.read_text(encoding="utf-8"))
     conn.commit()
 

@@ -193,6 +193,7 @@ def parse_best(html: str) -> Tuple[List[Dict[str, Any]], Optional[int]]:
 
 
 class KolonRankCollector(Collector):
+    """코오롱몰 판매 순위를 받아 오는 수집기다."""
     channel = "kolon_rank"
     platform = "kolonmall"
 
@@ -288,6 +289,7 @@ class KolonRankCollector(Collector):
         observed_at: str,
         run_id: Optional[str],
     ) -> Iterator[RawRecord]:
+        """코오롱몰 응답의 상품 하나를 순위 기록으로 바꾼다. 정가와 할인가 이름을 29CM 와 같게 맞춘다."""
         code = item.get("code")
         name = (item.get("name") or "").strip()
         if not code or not name:

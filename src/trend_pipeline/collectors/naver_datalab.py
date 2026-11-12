@@ -44,6 +44,7 @@ MAX_KEYWORDS_PER_GROUP = 20
 
 
 class NaverDataLabCollector(NaverCollector):
+    """네이버 데이터랩 검색어 트렌드를 받아 오는 수집기다."""
     channel = "naver_datalab"
 
     def collect(

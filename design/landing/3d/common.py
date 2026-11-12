@@ -33,6 +33,7 @@ COL = {
 
 
 def setup(name, frames=FRAMES):
+    """블렌더 장면을 비우고 프레임 수, 해상도, 렌더 엔진을 정한다. 미리보기면 작고 빠르게 그린다."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.frame_start, sc.frame_end = 1, frames
@@ -84,6 +85,7 @@ def setup(name, frames=FRAMES):
 
 
 def camera(loc, target, lens=50, fstop=None, focus=None):
+    """카메라를 놓고 target 을 바라보게 한다. fstop 을 주면 배경을 흐리게(심도) 만든다."""
     cam = bpy.data.objects.new('Cam', bpy.data.cameras.new('Cam'))
     bpy.context.scene.collection.objects.link(cam)
     bpy.context.scene.camera = cam
@@ -98,11 +100,13 @@ def camera(loc, target, lens=50, fstop=None, focus=None):
 
 
 def aim(obj, target):
+    """물체가 target 쪽을 바라보도록 돌린다."""
     d = Vector(target) - obj.location
     obj.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
 
 
 def area_light(loc, target, energy, size, color='#ffffff', hide_reflect=True):
+    """넓은 면 조명을 놓는다. 반사에는 안 비치게 할 수 있다."""
     l = bpy.data.objects.new('L', bpy.data.lights.new('L', 'AREA'))
     bpy.context.scene.collection.objects.link(l)
     l.location = loc
@@ -120,6 +124,7 @@ def area_light(loc, target, energy, size, color='#ffffff', hide_reflect=True):
 
 
 def point_light(loc, energy, color, radius=0.2):
+    """점 조명을 놓는다."""
     l = bpy.data.objects.new('P', bpy.data.lights.new('P', 'POINT'))
     bpy.context.scene.collection.objects.link(l)
     l.location = loc
@@ -130,10 +135,12 @@ def point_light(loc, energy, color, radius=0.2):
 
 
 def _bsdf(m):
+    """재질의 기본 셰이더 노드를 꺼낸다."""
     return m.node_tree.nodes['Principled BSDF']
 
 
 def mat_principled(name, color, rough=0.4, metal=0.0, coat=0.0, trans=0.0, ior=1.45, emit=None, emit_str=0.0, alpha=1.0):
+    """색, 거칠기, 금속성, 투명도 등을 받아 일반 재질을 만든다."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     b = _bsdf(m)
@@ -151,6 +158,7 @@ def mat_principled(name, color, rough=0.4, metal=0.0, coat=0.0, trans=0.0, ior=1
 
 
 def mat_emit(name, color, strength):
+    """스스로 빛나는 재질을 만든다."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -189,6 +197,7 @@ def mat_logo(name, png, strength=2.5):
 
 
 def add(obj, mat=None):
+    """물체를 장면에 넣고 재질을 입힌다."""
     bpy.context.scene.collection.objects.link(obj)
     if mat:
         obj.data.materials.append(mat)
@@ -196,6 +205,7 @@ def add(obj, mat=None):
 
 
 def mesh_obj(name, mesh_fn, mat=None, **kw):
+    """블렌더 기본 도형 함수로 물체를 만들고 이름과 재질을 붙인다."""
     mesh_fn(**kw)
     o = bpy.context.active_object
     o.name = name
@@ -205,6 +215,7 @@ def mesh_obj(name, mesh_fn, mat=None, **kw):
 
 
 def rounded_box(name, size, bevel, mat=None, segments=6):
+    """모서리가 둥근 상자를 만든다."""
     bpy.ops.mesh.primitive_cube_add(size=1)
     o = bpy.context.active_object
     o.name = name
@@ -221,6 +232,7 @@ def rounded_box(name, size, bevel, mat=None, segments=6):
 
 
 def sphere_mesh(r=1.0, seg=24, ring=12):
+    """구 모양 메시 자료만 만들어 돌려준다. 여러 물체가 같은 모양을 나눠 쓸 때 쓴다."""
     bpy.ops.mesh.primitive_uv_sphere_add(radius=r, segments=seg, ring_count=ring)
     o = bpy.context.active_object
     bpy.ops.object.shade_smooth()
@@ -230,16 +242,19 @@ def sphere_mesh(r=1.0, seg=24, ring=12):
 
 
 def key_loc(o, f, v):
+    """f 번째 프레임에 위치 키프레임을 찍는다."""
     o.location = v
     o.keyframe_insert('location', frame=f)
 
 
 def key_scale(o, f, s):
+    """f 번째 프레임에 크기 키프레임을 찍는다."""
     o.scale = (s, s, s) if isinstance(s, (int, float)) else s
     o.keyframe_insert('scale', frame=f)
 
 
 def linear_all():
+    """모든 애니메이션 곡선을 일정한 속도(선형)로 바꾼다."""
     for a in bpy.data.actions:
         try:
             curves = a.fcurves
@@ -251,11 +266,13 @@ def linear_all():
 
 
 def ease(t):
+    """0~1 사이 값을 천천히 시작해 천천히 끝나는 곡선으로 바꾼다."""
     t = max(0.0, min(1.0, t))
     return 4 * t * t * t if t < 0.5 else 1 - pow(-2 * t + 2, 3) / 2
 
 
 def floor(z=0.0, color='#191816', rough=0.22, size=80):
+    """바닥 판을 깐다."""
     bpy.ops.mesh.primitive_plane_add(size=size, location=(0, 0, z))
     o = bpy.context.active_object
     o.name = 'Floor'
@@ -264,6 +281,7 @@ def floor(z=0.0, color='#191816', rough=0.22, size=80):
 
 
 def render():
+    """STILL 이 있으면 그 프레임 한 장만, 없으면 전체 영상을 렌더한다."""
     sc = bpy.context.scene
     if STILL:
         sc.frame_set(STILL)

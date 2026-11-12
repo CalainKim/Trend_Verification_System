@@ -28,6 +28,7 @@ COLOR = sys.stdout.isatty()
 
 
 def p(text="", color=None):
+    """글을 출력한다. 터미널이면 색을 입힌다."""
     if color and COLOR:
         print(f"{C[color]}{text}{C['0']}")
     else:
@@ -35,6 +36,7 @@ def p(text="", color=None):
 
 
 def head(n, title):
+    """장 제목을 굵은 줄로 감싸 출력한다."""
     print()
     p("━" * W, "d")
     p(f" {n}. {title}", "t")
@@ -60,6 +62,7 @@ def sql(query, conn, note=None):
 
 
 def pause(on):
+    """on 이면 Enter 를 누를 때까지 기다린다. 미팅에서 한 장씩 넘길 때 쓴다."""
     if on:
         try:
             input("\n  [Enter] ")
@@ -70,6 +73,7 @@ def pause(on):
 # ─────────────────────────────────────────────────────────────── 구간
 
 def s1(conn):
+    """1장. 채널마다 몇 건을 언제부터 언제까지 모았는지 보여 준다."""
     head(1, "무엇을 얼마나 모았는가")
     sql("""
         SELECT channel, COUNT(*) AS rows_, COUNT(DISTINCT keyword_raw) AS keywords,
@@ -82,6 +86,7 @@ def s1(conn):
 
 
 def s2(conn):
+    """2장. 같은 행의 관측일과 수집일을 나란히 보여 주며 시점을 둘로 나눈 이유를 설명한다."""
     head(2, "시점을 두 개로 나눈 이유")
     p("  같은 행의 두 시점을 본다.\n")
     sql("""
@@ -98,6 +103,7 @@ def s2(conn):
 
 
 def s3(conn):
+    """3장. 확인 시점 이후 자료가 실제로 차단되는지 사례 하나로 보여 준다."""
     head(3, "누수 차단이 실제로 막는가")
     case = conn.execute("SELECT * FROM trend_case LIMIT 1").fetchone()
     if not case:
@@ -127,6 +133,7 @@ def s3(conn):
 
 
 def s4(conn):
+    """4장. 연령, 성별 자료를 기준선과 비교해야 하는 이유를 보여 준다."""
     head(4, "인구통계는 왜 그대로 쓰면 안 되는가")
     cat = "50000169"
     base = dg.daily_shares(conn, f"category:{cat}", "age")
@@ -150,6 +157,7 @@ def s4(conn):
 
 
 def s5(conn):
+    """5장. 해외 검색이 한국보다 먼저 오르는지 자료로 확인한다."""
     head(5, "해외가 먼저인가 — 가설을 자료로 확인")
     found = False
     for kw in ("맨투맨", "후드티"):
@@ -172,6 +180,7 @@ def s5(conn):
 
 
 def s6(conn):
+    """6장. 검색어 후보를 실제 판매 상품과 잇는 모습을 보여 준다."""
     head(6, "후보와 실제 상품을 잇는다")
     p("  후보는 검색어이고 커머스 자료는 상품명이라 문자열로는 이어지지 않는다.\n")
     for kw in ("맨투맨", "럭비티"):
@@ -190,6 +199,7 @@ def s6(conn):
 
 
 def s7(conn):
+    """7장. 검증 파트에 넘기는 사례 묶음 파일을 보여 준다."""
     head(7, "검증 파트에 넘기는 것")
     case_dir = ROOT / "cases" / "case_pilot_rugby"
     if not case_dir.exists():
@@ -210,6 +220,7 @@ SECTIONS = [s1, s2, s3, s4, s5, s6, s7]
 
 
 def main(argv=None) -> int:
+    """미팅용 데모를 1장부터 7장까지 차례로 보여 준다."""
     ap = argparse.ArgumentParser(description="미팅용 라이브 데모")
     ap.add_argument("--step", action="store_true", help="구간마다 멈춤")
     ap.add_argument("--only", type=int, help="특정 구간만 (1~7)")

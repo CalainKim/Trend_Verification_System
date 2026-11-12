@@ -72,6 +72,7 @@ _TYPE_RE = [(name, re.compile(pat, re.I)) for name, pat in TYPE_RULES]
 
 
 def type_of(name: str) -> str:
+    """상품 이름으로 옷 유형(후드, 맨투맨 등)을 정한다. 어디에도 안 맞으면 '기타'다."""
     for label, rx in _TYPE_RE:
         if rx.search(name):
             return label
@@ -79,6 +80,7 @@ def type_of(name: str) -> str:
 
 
 def snapshot_days(conn: sqlite3.Connection) -> List[str]:
+    """29CM 순위를 모은 날짜를 모두 돌려준다."""
     rows = conn.execute(
         "SELECT DISTINCT substr(observed_at, 1, 10) FROM signal_raw"
         " WHERE channel = 'commerce_rank' AND metric_type = 'rank' ORDER BY 1"
@@ -155,6 +157,7 @@ def ranks_on(conn: sqlite3.Connection, day: str) -> Dict[str, dict]:
 
 def weekly_series(conn: sqlite3.Connection, keyword: str, entity: str,
                   weeks: int) -> List[dict]:
+    """키워드 하나, 지역 하나의 구글 트렌드 주간 값을 최근 weeks 주만큼 읽는다."""
     rows = conn.execute(
         """
         SELECT observed_at, metric_value FROM signal_raw
@@ -187,6 +190,7 @@ def lead_of(conn: sqlite3.Connection, keyword: str, as_of: str,
 
 def build_g(conn: sqlite3.Connection, keywords: List[str],
             as_of: Optional[str] = None) -> Dict[str, dict]:
+    """속성마다 한국과 미국의 검색 흐름을 정리한다. 화면의 '검색이 받쳐 주는가' 판정에 쓰인다."""
     g: Dict[str, dict] = {}
     for kw in keywords:
         kr = weekly_series(conn, kw, "geo=KR", WEEKS)
@@ -422,10 +426,12 @@ def build_score(benchmark: Path, verdicts: Optional[Path]) -> Optional[dict]:
 
 
 def js_literal(name: str, value) -> str:
+    """파이썬 값을 화면이 읽는 자바스크립트 상수 한 줄로 바꾼다."""
     return f"const {name} = {json.dumps(value, ensure_ascii=False)};\n"
 
 
 def main(argv=None) -> int:
+    """DB 에서 확인 시점 기준 화면 자료를 뽑아 frontend_data.js 로 쓴다. 배포 화면에 들어가는 실제 숫자다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--week", default=None, help="확인 시점 날짜 (기본: 최신 수집일)")
     ap.add_argument("--db", type=Path, default=None)

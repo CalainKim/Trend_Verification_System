@@ -27,6 +27,7 @@ from trend_pipeline import features as ft, storage  # noqa: E402
 
 
 def main(argv=None) -> int:
+    """속성마다 해외 검색이 한국보다 며칠 앞서는지 보고한다."""
     p = argparse.ArgumentParser(description="해외 선행 일수 보고")
     p.add_argument("--db", default=None)
     p.add_argument("--geo", default="US", help="한국과 견줄 지역")

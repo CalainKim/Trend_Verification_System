@@ -164,6 +164,7 @@ main{max-width:none;padding:0}
 
 
 def _case_card(case, year, index, single=False, report=None):
+    """사례 하나를 카드 HTML 로 그린다. 선정 근거, AI 판단, 이후 흐름을 담는다."""
     selection, review, outcome = (case.get(k) or {} for k in ("selection", "review", "outcome"))
     result = review.get("result") or {}
     actual = review.get("status") == "complete" and bool(result)
@@ -221,6 +222,7 @@ def _case_card(case, year, index, single=False, report=None):
 
 
 def render_dashboard(report, index=None):
+    """월간 사례 보고서 전체 HTML 을 만든다. index 를 주면 사례 하나만 그린다."""
     year = int(report.get("year", 2025))
     cases = report.get("cases") or []
     single = index is not None

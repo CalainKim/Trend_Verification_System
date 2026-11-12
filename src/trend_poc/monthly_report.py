@@ -14,10 +14,12 @@ from urllib.parse import urlsplit
 
 
 def _esc(value):
+    """HTML 에 넣어도 안전하도록 특수문자를 바꾼다."""
     return html.escape(str(value if value is not None else ""), quote=True)
 
 
 def _text(value):
+    """어떤 값이든 화면에 쓸 글자로 바꾼다. 사전과 목록은 JSON 으로 바꾼다."""
     if value is None:
         return ""
     if isinstance(value, (dict, list)):
@@ -26,32 +28,39 @@ def _text(value):
 
 
 def _short(value, limit=150):
+    """글이 limit 보다 길면 줄이고 말줄임표를 붙인다."""
     value = re.sub(r"\s+", " ", _text(value)).strip()
     return value if len(value) <= limit else value[:limit].rstrip() + "…"
 
 
 def _first_sentence(value):
+    """글의 첫 문장만 꺼낸다."""
     return re.split(r"(?<=[.!?])\s+", re.sub(r"\s+", " ", _text(value)).strip(), maxsplit=1)[0]
 
 
 def _download(value, mime, filename, label):
+    """글을 파일로 내려받는 링크 HTML 을 만든다."""
     encoded=base64.b64encode(value.encode("utf-8")).decode("ascii")
     return f'<a href="data:{mime};base64,{encoded}" download="{_esc(filename)}">{_esc(label)}</a>'
 
 
 def _finite(value):
+    """제대로 된 숫자(무한대나 NaN 이 아닌 수)인지 확인한다."""
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
 def _num(value, digits=1):
+    """숫자를 천 단위 쉼표가 있는 글자로 바꾼다. 숫자가 아니면 줄표다."""
     return f"{value:,.{digits}f}" if _finite(value) else "—"
 
 
 def _pct(value):
+    """숫자를 +12.3% 같은 증감률 글자로 바꾼다."""
     return f"{value:+.1f}%" if _finite(value) else "—"
 
 
 def _axis_max(values):
+    """그래프 세로축의 위 끝을 보기 좋은 단위로 올림한다."""
     maximum=max([1.0]+values)
     if maximum<=1:
         return 1.0
@@ -60,14 +69,17 @@ def _axis_max(values):
 
 
 def _axis_tick(value):
+    """세로축 눈금 글자를 만든다."""
     return _num(value,0 if float(value).is_integer() else 1)
 
 
 def _json(value):
+    """값을 사람이 읽기 좋은 들여쓰기 JSON 으로 바꾼다."""
     return json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False, default=str)
 
 
 def _date(value):
+    """글자에서 날짜를 읽는다. 못 읽으면 None 이다."""
     try:
         return date.fromisoformat(str(value)[:10])
     except (ValueError, TypeError):
@@ -75,12 +87,14 @@ def _date(value):
 
 
 def _month(value):
+    """'2025-03' 같은 달 글자를 그달 1일 날짜로 바꾼다."""
     if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}", value):
         return None
     return _date(value + "-01")
 
 
 def _safe_url(value):
+    """http, https 이고 계정 정보가 없는 주소만 통과시킨다. 링크로 위험한 주소가 들어가는 것을 막는다."""
     if not isinstance(value, str) or any(ord(c) < 32 for c in value) or "\\" in value:
         return None
     try:
@@ -93,6 +107,7 @@ def _safe_url(value):
 
 
 def _badge(status):
+    """판정 상태를 색깔 배지 HTML 로 바꾼다."""
     labels = {"WATCH": ("관찰 후보", "watch"), "HOLD": ("보류", "hold"),
               "NOT_SUPPORTED": ("지지 어려움", "neutral"), "complete": ("응답 완료", "watch"),
               "failed": ("실행 실패", "hold"), "running": ("실행 중", "neutral")}
@@ -101,6 +116,7 @@ def _badge(status):
 
 
 def _details(title, value):
+    """접었다 펼 수 있는 원본 JSON 상자 HTML 을 만든다."""
     return f'<details><summary>{_esc(title)}</summary><pre>{_esc(_json(value))}</pre></details>'
 
 
@@ -212,6 +228,7 @@ def monthly_chart(case, year):
 
 
 def _missing_note(case, year):
+    """자료가 빠진 달을 사람이 읽을 문장으로 만든다."""
     if (case.get("outcome") or {}).get("label") == "후속 자료 미수집":
         return "월별 자료 조회 전"
     missing = (case.get("outcome") or {}).get("missing_months") or []
@@ -233,6 +250,7 @@ def _missing_note(case, year):
 
 
 def _reasons(items):
+    """AI 가 낸 이유를 앞의 두 개만 보여 준다. 원문과 근거 번호는 말풍선에 담는다."""
     values=[]
     for item in (items or [])[:2]:
         if isinstance(item,dict):
@@ -249,6 +267,7 @@ def _reasons(items):
 
 
 def _reference(reference):
+    """외부 출처 하나를 제목, 관측 기간, 게시일, 대상 집단과 함께 그린다."""
     title=reference.get("title") or "외부 기록"
     url=_safe_url(reference.get("url"))
     heading=f'<a href="{_esc(url)}" target="_blank" rel="noopener noreferrer">{_esc(title)} ↗</a>' if url else _esc(title)
@@ -266,6 +285,7 @@ def _reference(reference):
 
 
 def _comparison(case):
+    """숫자 기준선, AI 판단, 이후 관측을 나란히 그린다."""
     value=case.get("comparison") or {}
     labels=(("baseline","수치만 봤을 때"),("ai","AI 판단"),("observed","이후 관측"))
     rows=''.join(f'<div><dt>{label}</dt><dd>{_esc(_short(value.get(key),170)) or "미기록"}</dd></div>' for key,label in labels)
@@ -282,6 +302,7 @@ def _comparison(case):
 
 
 def _monthly_details(case, year):
+    """3~10월 월별 수치와 전월 대비 변화율 표를 그린다."""
     values=_series(case,int(year))
     rows=[]
     for month in range(3,11):
@@ -297,11 +318,13 @@ def _monthly_details(case, year):
 
 
 def _document(report, index=None):
+    """보고서 HTML 을 만든다. 실제 그리기는 monthly_dashboard 가 맡는다."""
     from .monthly_dashboard import render_dashboard
     return render_dashboard(report, index)
 
 
 def _csv_cell(value):
+    """CSV 칸에 넣을 글자를 만든다. 엑셀이 수식으로 읽을 만한 글자는 앞에 따옴표를 붙여 막는다."""
     text=_text(value)
     # Preserve numeric values; neutralize formula-like untrusted text on export.
     if isinstance(value,str) and text.lstrip().startswith(("=","+","-","@")):
@@ -310,6 +333,7 @@ def _csv_cell(value):
 
 
 def _monthly_csv(case,year):
+    """사례 하나의 월별 수치를 CSV 글자로 만든다."""
     stream=io.StringIO(newline="")
     writer=csv.writer(stream)
     writer.writerow(["month","shopping","shopping_growth_pct","search","search_growth_pct"])
@@ -321,6 +345,7 @@ def _monthly_csv(case,year):
 
 
 def _comparison_csv(report):
+    """모든 사례의 판단과 결과를 한 장의 CSV 로 만든다."""
     stream=io.StringIO(newline="")
     writer=csv.writer(stream)
     writer.writerow(["keyword","definition","selection_status","selection_growth_pct","review_status","model_verdict","model","observed_label","peak_month","missing_months","baseline","ai","observed","contribution","assessment"])

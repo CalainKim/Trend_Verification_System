@@ -12,18 +12,22 @@ from .client import ClaudeClient, MODEL
 
 
 def canonical(value):
+    """같은 값이면 언제나 같은 글자가 나오도록 JSON 을 정렬해 만든다."""
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
 def digest(value):
+    """값의 SHA-256 해시를 구한다."""
     return hashlib.sha256(canonical(value).encode("utf-8")).hexdigest()
 
 
 def now():
+    """지금 시각을 UTC 문자열로 돌려준다."""
     return datetime.now(timezone.utc).isoformat()
 
 
 def save(path, value):
+    """JSON 을 임시 파일에 먼저 쓴 뒤 바꿔치기한다. 쓰다가 끊겨도 반쪽 파일이 남지 않는다."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
@@ -64,6 +68,7 @@ WATCH는 후속 관찰 가치, HOLD는 자료/근거 부족, NOT_SUPPORTED는 �
 
 
 def build_payload(bundle):
+    """근거 묶음에서 허용한 칸만 골라 AI 요청을 만든다. 정답이나 이후 결과는 들어가지 않는다."""
     # Whitelist is deliberately separate from the experiment plan / outcome.
     keys = ("candidate", "claim", "simulated_cutoff", "evidence", "features",
             "limitations", "historical_available_at", "experiment_type")
@@ -107,6 +112,7 @@ def build_payload(bundle):
 
 
 def validate_result(response, bundle):
+    """AI 응답이 정상 종료됐고, 요청한 모델이 답했고, 정해진 형식을 지키는지 검사한다."""
     if response.get("stop_reason") != "end_turn" or not response.get("usage_complete"):
         raise ValueError("AI 응답이 정상 종료되지 않았습니다.")
     if response.get("actual_model") != MODEL:
@@ -147,6 +153,11 @@ def validate_result(response, bundle):
 
 
 def run_review(root, run_dir, bundle, client=None):
+    """사례 하나를 AI 에게 한 번만 검토받는다.
+
+    이미 결과가 있으면 다시 부르지 않는다. 실패한 호출을 자동으로 재시도해 돈이 두 번
+    나가는 일을 막는다.
+    """
     run_dir = Path(run_dir)
     payload = build_payload(bundle)
     input_hash = digest(payload)
@@ -172,6 +183,7 @@ def run_review(root, run_dir, bundle, client=None):
     last_checkpoint = 0.0
     checkpoint_errors = 0
     def checkpoint(partial):
+        """받는 중인 답을 0.5초마다 임시 파일에 저장한다. 저장이 실패해도 호출은 멈추지 않는다."""
         nonlocal last_checkpoint, checkpoint_errors
         current = time.monotonic()
         if current - last_checkpoint < 0.5 and not partial.get("stop_reason"):

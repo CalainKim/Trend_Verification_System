@@ -16,6 +16,7 @@ from trend_pipeline import snapshots, storage  # noqa: E402
 
 
 def main(argv=None) -> int:
+    """CSV 스냅샷을 읽어 DB 를 다시 채운다. 새 컴퓨터에서 DB 를 만들 때 쓴다."""
     root = Path(argv[0]) if argv else ROOT / "data" / "snapshots"
     conn = storage.connect()
     storage.init_db(conn)

@@ -46,14 +46,17 @@ class NaverError(RuntimeError):
 
 
 def _now():
+    """지금 시각을 UTC 마이크로초 단위 문자열로 돌려준다."""
     return datetime.now(timezone.utc).isoformat(timespec="microseconds")
 
 
 def _canonical(value):
+    """같은 값이면 언제나 같은 글자가 나오도록 JSON 을 정렬해 만든다. 해시 계산용이다."""
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
 def _digest(value):
+    """값의 SHA-256 해시를 구한다. 기록이 바뀌었는지 확인할 때 쓴다."""
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
@@ -93,6 +96,7 @@ def _credentials(root):
 
 
 def _day(value):
+    """'YYYY-MM-DD' 형식이 정확한 날짜만 받아들인다."""
     if not isinstance(value, str):
         raise ValueError("not an ISO date")
     parsed = date.fromisoformat(value)
@@ -102,6 +106,7 @@ def _day(value):
 
 
 def _payload(channel, keywords, start_date, end_date, *, time_unit="date"):
+    """네이버 API 요청 본문을 만들면서 채널, 단위, 키워드, 기간을 검사한다."""
     if channel not in ("shopping", "search"):
         raise NaverError("INVALID_CHANNEL", "채널은 shopping 또는 search여야 합니다.")
     if time_unit not in ("date", "month"):
@@ -195,6 +200,10 @@ def _write_immutable(path, record):
 
 
 class NaverClient:
+    """네이버 검색어 트렌드와 쇼핑인사이트를 부르는 접속 객체다.
+
+    받은 응답은 해시와 함께 보관하고, 같은 요청은 보관본을 다시 쓴다.
+    """
     def __init__(self, root: Path, provider="developers", session=None):
         if provider not in URLS:
             raise NaverError("INVALID_PROVIDER", "provider는 developers 또는 cloud여야 합니다.")
@@ -206,6 +215,7 @@ class NaverClient:
         # leaving secrets in a supplied session or mixing providers' credentials.
 
     def close(self):
+        """직접 만든 연결이면 닫는다."""
         if self._owns_session:
             self.session.close()
 
@@ -216,6 +226,7 @@ class NaverClient:
         self.close()
 
     def _read_cache(self, path, channel, url, payload, request_hash):
+        """보관해 둔 응답을 읽고, 요청 조건과 해시가 모두 맞을 때만 다시 쓴다."""
         try:
             record = json.loads(path.read_text(encoding="utf-8"))
             if (not isinstance(record, dict) or record.get("status") != "complete"
@@ -285,6 +296,7 @@ class NaverClient:
             raise error from None
 
     def _record_error(self, archive_dir, channel, url, request_hash, error):
+        """실패한 요청을 오류 기록으로 남긴다. 기록마저 실패해도 원래 오류를 가리지 않는다."""
         entry = {"id": "error-" + uuid.uuid4().hex, "status": "failed", "provider": self.provider,
                  "channel": channel, "url": url, "request_sha256": request_hash,
                  "occurred_at": _now(), "code": error.code, "http_status": error.status}

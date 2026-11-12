@@ -26,6 +26,7 @@ OUT = ROOT / "docs" / "index.html"
 SERIES = webtheme.SERIES
 
 def esc(s: str) -> str:
+    """HTML 에 넣어도 안전하도록 특수문자를 바꾼다."""
     return html.escape(str(s), quote=True)
 
 
@@ -40,9 +41,11 @@ def rank_chart(days, items, highlights, max_rank: int = 100) -> str:
     pw, ph = W - L - R, H - T - B
 
     def x(i):
+        """몇 번째 날인지를 그래프의 가로 위치로 바꾼다."""
         return L + (pw * i / max(1, len(days) - 1))
 
     def y(rank):  # 1위가 위로 가도록 뒤집는다
+        """순위를 세로 위치로 바꾼다. 1위가 맨 위에 오도록 뒤집는다."""
         return T + ph * (rank - 1) / max(1, max_rank - 1)
 
     parts = [
@@ -112,6 +115,7 @@ def rank_chart(days, items, highlights, max_rank: int = 100) -> str:
 
 
 def mover_table(items, first, last, kind) -> str:
+    """새로 들어온 상품이나 순위가 크게 바뀐 상품을 표로 그린다."""
     if not items:
         return '<p class="note">해당 없음</p>'
     head = "신규 순위" if kind == "new" else "순위 변화"
@@ -139,6 +143,7 @@ def mover_table(items, first, last, kind) -> str:
 
 
 def build(conn, top: int = 10) -> str:
+    """수집 현황 페이지 HTML 을 만든다. 날짜별 수집 여부와 순위 변동을 보여 준다."""
     cov = analytics.coverage(conn, "commerce_rank")
     days, items = analytics.build_items(conn)
     now = datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")
@@ -226,6 +231,7 @@ def build(conn, top: int = 10) -> str:
 
 
 def main() -> int:
+    """DB 를 열어 수집 현황 페이지를 docs 에 쓴다."""
     conn = storage.connect()
     storage.init_db(conn)
     OUT.parent.mkdir(parents=True, exist_ok=True)

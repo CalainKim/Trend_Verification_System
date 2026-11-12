@@ -83,6 +83,7 @@ COMPUTE = """    const dUp = p.prevDisc == null ? null : (p.disc || 0) - p.prevD
 
 
 def swap_data(src: str) -> str:
+    """디자인 화면 안의 예시 숫자를 지우고 실제 자료(frontend_data.js)로 바꿔 끼운다."""
     lines = src.split("\n")
     if not DATA.exists():
         raise SystemExit(f"{DATA} 가 없다. ./scripts/export_frontend.py 를 먼저 돌려라")
@@ -134,6 +135,7 @@ def swap_data(src: str) -> str:
 
 
 def wire_stages(src: str) -> str:
+    """거르기 단계 표에서 '자료 없음'과 '쟀지만 거르지 않음'을 구분해 적게 바꾼다."""
     # 단계 표에서 na 를 떼고 info 로 바꾼다. na 는 "자료 없음", info 는
     # "쟀지만 거르지 않음" 이다. 화면이 둘을 다르게 적어야 한다.
     for label in ("할인 효과", "해외 선행"):
@@ -364,6 +366,7 @@ def wire_score(src: str) -> str:
 
 
 def wire_week(src: str) -> tuple[str, int]:
+    """화면에 박혀 있던 날짜를 확인 주(WEEK) 값으로 바꿔 주가 바뀌면 같이 움직이게 한다."""
     # 신선도 문턱. 주가 바뀌면 같이 움직여야 한다.
     src, n = re.subn(r"'2026-10-18'", "WEEK.baseISO", src)
     # 검증 기록 CSV
@@ -439,6 +442,7 @@ def fix_base_rate(src: str) -> tuple[str, str]:
     js = DATA.read_text(encoding="utf-8")
 
     def pick(name, open_c, close_c):
+        """생성된 자료 파일에서 상수 하나를 찾아 값을 꺼낸다."""
         m = re.search(r"const %s = (\%s.*?\%s);" % (name, open_c, close_c),
                       js, re.S)
         if not m:
@@ -590,6 +594,7 @@ def unmix_examples(src: str) -> tuple[str, int]:
 
 
 def main(argv=None) -> int:
+    """Claude Design 에서 받은 화면에 실제 자료, 날짜, 사진, 모델 이름을 차례로 입힌다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path, help="Claude Design 에서 받은 .dc.html")
     ap.add_argument("-o", "--out", type=Path, required=True)

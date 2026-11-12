@@ -1155,12 +1155,14 @@ const SLIDES = [
 const C = {pri:'36,94,255', paper:'255,255,255', collect:'224,224,224', search:'189,189,189', analyze:'158,158,158', verify:'214,214,214', ok:'36,94,255', hold:'204,204,204', err:'243,17,16'};
 const NIGHT = '#000000';
 
+// 캔버스를 화면 크기와 선명도(레티나)에 맞춘다.
 function fit(cv){
   const dpr = Math.min(devicePixelRatio || 1, 2), r = cv.getBoundingClientRect();
   cv.width = Math.max(1, r.width*dpr); cv.height = Math.max(1, r.height*dpr);
   const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   return {ctx, w:r.width, h:r.height};
 }
+// 매번 같은 무늬가 나오는 난수. 장면마다 seed 를 정해 새로고침해도 그림이 같다.
 let seed = 7;
 const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
 const ease = t => t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
@@ -1283,12 +1285,14 @@ const heroEl=document.getElementById('hero');
 const vids=[...document.querySelectorAll('.hero video')];
 // 세로 화면(폰)은 세로로 렌더한 영상을 쓴다
 const tall=matchMedia('(max-aspect-ratio: 4/5)');
+// 화면 비율에 맞는 영상(가로용, 세로용)을 고른다.
 function pickVideos(){
   const dir=tall.matches?'assets/hero/m/':'assets/hero/';
   vids.forEach(v=>{ const src=dir+v.dataset.name+'.mp4'; if(v.dataset.src!==src){ v.dataset.src=src; v.poster=dir+v.dataset.name+'.jpg'; v.src=src; v.load(); } });
 }
 const vidOK=vids.map(()=>false);
 let usingVideo=false;
+// i 번째 장면을 캔버스 대신 3D 영상으로 보여 준다.
 function useVideo(i, offset){
   const v=vids[i]; usingVideo=true; sourcesEl.classList.remove('on'); heroEl.classList.add('vid');
   try{ v.currentTime=Math.min(offset||0, Math.max(0,(v.duration||5)-0.05)); }catch(e){}
@@ -1303,6 +1307,7 @@ vids.forEach((v,k)=>{
 });
 
 let cur=-1, timer=null, paused=false, busy=false, start=0;
+// i 번째 장면으로 바꾼다. 문구, 점 표시, 영상을 함께 갈아 끼운다.
 function show(i){
   cur=i; start=performance.now(); seed=11+i*97; H=fit(hero); scenes[i].init();
   vids.forEach((v,k)=>{ if(k!==i){ v.classList.remove('on'); v.pause(); } });
@@ -1321,6 +1326,7 @@ function show(i){
   });
   schedule();
 }
+// 지금 장면을 내보내는 효과를 낸 뒤 i 번째 장면을 띄운다.
 function go(i){
   if(busy||i===cur) return;
   busy=true; clearTimeout(timer);
@@ -1328,6 +1334,7 @@ function go(i){
   groups[cur]?.classList.add('out'); groups[cur]?.classList.remove('in');
   setTimeout(()=>{ show((i+SLIDES.length)%SLIDES.length); busy=false; }, reduce?0:OUT);
 }
+// 일정 시간 뒤 다음 장면으로 자동으로 넘긴다. 멈춤 상태면 넘기지 않는다.
 function schedule(){ clearTimeout(timer); if(!paused&&!reduce) timer=setTimeout(()=>go((cur+1)%SLIDES.length),DUR); }
 document.getElementById('prev').onclick=()=>go((cur-1+SLIDES.length)%SLIDES.length);
 document.getElementById('next').onclick=()=>go((cur+1)%SLIDES.length);
@@ -1338,6 +1345,7 @@ pauseBtn.onclick=()=>{ paused=!paused; document.getElementById('hero').classList
 
 let heroVisible=true;
 new IntersectionObserver(e=>{ heroVisible=e[0].isIntersecting; const v=vids[cur]; if(v&&usingVideo){ heroVisible&&!reduce?v.play().catch(()=>{}):v.pause(); } }).observe(hero);
+// 매 프레임 지금 장면을 캔버스에 그린다. 화면 밖이거나 영상 재생 중이면 쉰다.
 function loop(now){ if(heroVisible&&cur>=0&&!usingVideo) scenes[cur].draw(H.ctx, reduce?4000:now-start); requestAnimationFrame(loop); }
 addEventListener('resize',()=>{ H=fit(hero); seed=11+cur*97; scenes[cur]?.init(); });
 hero.style.opacity=0; hero.style.transition='opacity 1.2s ease';
@@ -1383,6 +1391,7 @@ document.querySelectorAll('.odo').forEach(o=>{
     } else { const s=document.createElement('span'); s.className='sep'; s.textContent=ch; o.append(s); }
   });
 });
+// 숫자 칸을 굴려 목표 숫자에서 멈추게 한다(주행거리계 효과).
 function rollOdo(o){ o.querySelectorAll('.col').forEach(c=>{ if(reduce) c.style.transition='none'; c.style.transform=`translateY(-${10+ +c.dataset.n}em)`; }); }
 
 // 원칙 그림: 선 길이를 재서 그려지게 한다

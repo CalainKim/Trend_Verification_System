@@ -41,4 +41,5 @@ class Collector(ABC):
         """수집 결과를 RawRecord 로 내놓는다."""
 
     def collect_list(self, **kwargs: object) -> List[RawRecord]:
+        """collect 결과를 목록으로 한꺼번에 받는다. 시험과 짧은 수집에 쓴다."""
         return list(self.collect(**kwargs))

@@ -18,12 +18,14 @@ const enc = new TextEncoder();
 const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)))
   .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
+// 비밀값으로 서명(HMAC-SHA256)을 만든다. 쿠키가 위조되지 않았음을 확인하는 데 쓴다.
 async function hmac(secret, msg) {
   const key = await crypto.subtle.importKey('raw', enc.encode(secret),
     { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   return b64url(await crypto.subtle.sign('HMAC', key, enc.encode(msg)));
 }
 
+// 글자의 SHA-256 해시를 16진수로 돌려준다.
 async function sha256(text) {
   return b64url(await crypto.subtle.digest('SHA-256', enc.encode(text)));
 }
@@ -37,6 +39,7 @@ function sameString(a, b) {
   return diff === 0;
 }
 
+// 비밀번호와 서명용 비밀값이 Cloudflare 에 설정돼 있는지 확인한다. 없으면 아무도 들어오지 못하게 막는다.
 export function configured(env) {
   return Boolean(env && env.SITE_PASSWORD && env.SESSION_SECRET);
 }
@@ -52,20 +55,24 @@ export async function checkPassword(input, env) {
   return sameString(a, b);
 }
 
+// 만료 시각 하나에 대한 서명을 만든다.
 async function signedFor(exp, env) {
   return hmac(env.SESSION_SECRET, `v1|${exp}|${await sha256(env.SITE_PASSWORD)}`);
 }
 
+// 비밀번호가 맞았을 때 내주는 입장권 쿠키를 만든다. 만료 시각과 서명이 들어 있다.
 export async function issueCookie(env, now = Date.now()) {
   const exp = Math.floor(now / 1000) + MAX_AGE;
   const value = `${exp}.${await signedFor(exp, env)}`;
   return `${COOKIE}=${value}; Path=/; Max-Age=${MAX_AGE}; HttpOnly; Secure; SameSite=Lax`;
 }
 
+// 입장권 쿠키를 지우는 헤더 값을 만든다(로그아웃).
 export function clearCookie() {
   return `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
 }
 
+// 요청 헤더에서 입장권 쿠키 값만 꺼낸다.
 function readCookie(header) {
   if (!header) return null;
   for (const part of header.split(';')) {
@@ -75,6 +82,7 @@ function readCookie(header) {
   return null;
 }
 
+// 요청에 유효한 입장권(서명 일치, 만료 전)이 있는지 확인한다.
 export async function hasSession(request, env, now = Date.now()) {
   if (!configured(env)) return false;
   const value = readCookie(request.headers.get('cookie'));

@@ -33,11 +33,13 @@ const MAX_BODY_BYTES = 256 * 1024;
 const MAX_MESSAGES = 8;
 const ALLOWED_EFFORT = new Set(['low', 'medium', 'high']);
 
+// 객체를 JSON 응답으로 만든다.
 const json = (obj, status) => new Response(JSON.stringify(obj), {
   status,
   headers: { 'content-type': 'application/json; charset=utf-8' },
 });
 
+// 오류 응답을 Anthropic API 와 같은 모양으로 만든다. 화면이 같은 방식으로 읽을 수 있다.
 const fail = (status, message) => json({ error: { message } }, status);
 
 // 스위치. 평소에는 닫아 두고 교수님 미팅 같은 시연 때만 정한 시각까지 연다.
@@ -48,6 +50,8 @@ export function relayOpen(env, now = Date.now()) {
   return Number.isFinite(until) && until > now;
 }
 
+// 화면의 심층 검증 요청을 받아 검사한 뒤 Anthropic API 로 대신 보낸다.
+// API 키는 서버에만 있고 화면에는 내려가지 않는다. 닫혀 있으면 바로 거절한다.
 export async function onRequestPost({ request, env }) {
   // 키를 보기 전에 막는다. 닫혀 있으면 Anthropic 에 요청이 한 번도 나가지 않는다
   if (!relayOpen(env)) {

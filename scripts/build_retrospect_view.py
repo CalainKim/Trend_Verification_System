@@ -262,6 +262,7 @@ draw();
 
 
 def main(argv=None) -> int:
+    """회고 자료를 HTML 한 장에 넣어 열어 볼 수 있게 만든다."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--data", default="build/retrospect.json")
     p.add_argument("-o", "--out", default=None)

@@ -21,6 +21,7 @@ from trend_pipeline import storage, vectorstore  # noqa: E402
 
 
 def main(argv=None) -> int:
+    """검색어와 뜻이 가까운 수집 상품을 찾아 보여 준다."""
     p = argparse.ArgumentParser(description="수집 아이템 유사도 검색")
     p.add_argument("query")
     p.add_argument("--limit", type=int, default=10)

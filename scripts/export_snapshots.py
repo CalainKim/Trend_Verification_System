@@ -51,6 +51,7 @@ def partitions(conn, channels):
 
 
 def main(argv=None) -> int:
+    """DB 내용을 채널별 CSV 스냅샷으로 다시 쓴다."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("channels", nargs="*", help="내보낼 채널. 비우면 전부")
     ap.add_argument("--db", type=Path, default=None, help="읽을 DB 경로")

@@ -85,6 +85,7 @@ def encode_query(text: str, model_name: str = DEFAULT_MODEL) -> List[float]:
 
 
 def _encode(prefixed: Sequence[str], model_name: str) -> List[List[float]]:
+    """접두어를 붙인 문장들을 임베딩 모델로 숫자 벡터로 바꾼다."""
     model = load_model(model_name)
     # 정규화해 두면 코사인 유사도를 내적으로 계산할 수 있다.
     vectors = model.encode(
@@ -100,4 +101,5 @@ def pack(vector: Iterable[float]) -> bytes:
 
 
 def unpack(blob: bytes) -> List[float]:
+    """DB 에 바이트로 저장한 벡터를 숫자 목록으로 되돌린다. pack 의 반대다."""
     return list(struct.unpack(f"{len(blob) // 4}f", blob))

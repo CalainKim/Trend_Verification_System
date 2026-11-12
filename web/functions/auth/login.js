@@ -9,12 +9,14 @@ import { checkPassword, configured, issueCookie, safeNext } from '../_shared/ses
 const FAIL_DELAY_MS = 600;
 const MAX_BODY = 4 * 1024;
 
+// 다른 주소로 보내는 응답을 만든다. 쿠키를 함께 심을 수 있다.
 const go = (location, cookie) => {
   const headers = new Headers({ location, 'cache-control': 'no-store' });
   if (cookie) headers.append('set-cookie', cookie);
   return new Response(null, { status: 303, headers });
 };
 
+// 비밀번호를 받아 맞으면 입장권 쿠키를 주고 원래 가려던 곳으로 보낸다. 틀리면 잠깐 기다린 뒤 되돌린다.
 export async function onRequestPost({ request, env }) {
   if (!configured(env)) {
     return new Response('서버에 SITE_PASSWORD 와 SESSION_SECRET 이 설정되지 않았습니다.', {

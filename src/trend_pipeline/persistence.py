@@ -76,6 +76,7 @@ class Window:
 
 @dataclass
 class RiseEvent:
+    """판매 순위가 확 오른 상품 하나의 기록이다. 기준 구간과 감지 구간의 평균 순위를 담는다."""
     item_key: str
     name: str
     brand: str
@@ -290,6 +291,7 @@ def load_series(
 
 
 def observed_days(series: Dict[str, Dict[str, dict]]) -> List[str]:
+    """어느 상품이든 관측된 날짜를 모두 모아 오래된 순으로 돌려준다."""
     return sorted({d for v in series.values() for d in v})
 
 
@@ -331,6 +333,7 @@ def _avg_rank(item: Dict[str, dict],
 
 
 def _latest(item: Dict[str, dict], days: Sequence[str], key: str, default=None):
+    """주어진 날짜들 가운데 가장 최근에 기록된 값을 찾는다. 없으면 default 다."""
     for d in reversed(days):
         if d in item and key in item[d]:
             return item[d][key]
@@ -420,6 +423,7 @@ MIN_RISE_RATIO = 1.2
 
 @dataclass
 class IndexRiseEvent:
+    """검색 지수처럼 상대값 시계열이 오른 사례 하나다. 기준 평균, 감지 평균, 작년 대비 비율을 담는다."""
     key: str                     # 키워드와 entity 를 합친 시계열 키
     keyword: str
     entity: str
@@ -431,6 +435,7 @@ class IndexRiseEvent:
     coverage: float              # 창 안에서 실제로 관측된 비율
 
     def features(self) -> Dict[str, object]:
+        """판정에 넘길 숫자 특징을 반올림해 사전으로 돌려준다."""
         return {
             "base_mean": round(self.base_mean, 2),
             "detect_mean": round(self.detect_mean, 2),
@@ -441,6 +446,7 @@ class IndexRiseEvent:
         }
 
     def evidence(self, w: "Window", channel: str) -> List[dict]:
+        """사람이 읽을 근거 문장 목록을 만든다. 변화율, 관측 비율, 계절성 세 가지다."""
         out = [
             {"id": "index_change", "channel": channel,
              "observation": f"지수 평균이 기준 구간 {self.base_mean:.1f} 에서 "
@@ -469,10 +475,12 @@ SERIES_SEP = "@"
 
 
 def series_key(keyword: str, entity: str) -> str:
+    """키워드와 세부 구분(entity)을 하나의 시계열 키로 합친다."""
     return f"{keyword}{SERIES_SEP}{entity}" if entity else keyword
 
 
 def split_series_key(key: str) -> Tuple[str, str]:
+    """series_key 로 합친 키를 키워드와 세부 구분으로 다시 나눈다."""
     kw, _, ent = key.partition(SERIES_SEP)
     return kw, ent
 
@@ -521,6 +529,7 @@ def load_index_series(conn: sqlite3.Connection, channel: str,
 
 
 def _mean(item: Dict[str, float], days: Sequence[str]) -> Tuple[Optional[float], float]:
+    """주어진 날짜들의 평균과, 그 가운데 실제로 값이 있던 비율을 함께 돌려준다."""
     vals = [item[d] for d in days if d in item]
     if not vals:
         return None, 0.0
@@ -545,6 +554,7 @@ def window_yoy(item: Dict[str, float], days: Sequence[str],
     from datetime import date, timedelta
 
     def mean_in(lo: date, hi: date) -> Optional[float]:
+        """작년 같은 기간(앞뒤 여유 포함)의 평균을 구한다. 자료가 없으면 None 이다."""
         vals = [v for k, v in item.items()
                 if lo - timedelta(days=pad_days) <= date.fromisoformat(k) <= hi]
         return sum(vals) / len(vals) if vals else None

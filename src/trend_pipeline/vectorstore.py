@@ -53,6 +53,7 @@ def enable(conn: sqlite3.Connection) -> None:
 
 
 def init(conn: sqlite3.Connection, dim: int = embeddings.EMBED_DIM) -> None:
+    """벡터 검색용 가상 테이블과 본문 테이블을 만든다."""
     enable(conn)
     conn.execute(
         f"CREATE VIRTUAL TABLE IF NOT EXISTS {VEC_TABLE} USING vec0(embedding float[{dim}])"
@@ -75,6 +76,7 @@ def init(conn: sqlite3.Connection, dim: int = embeddings.EMBED_DIM) -> None:
 
 @dataclass(frozen=True)
 class Hit:
+    """벡터 검색 결과 한 건이다. 거리가 작을수록 뜻이 가깝다."""
     text: str
     channel: str
     entity: str
@@ -154,6 +156,7 @@ def search_vector(
     channel: Optional[str] = None,
     min_similarity: Optional[float] = None,
 ) -> List[Hit]:
+    """주어진 벡터와 뜻이 가까운 문장을 찾는다. 채널과 최소 유사도로 거를 수 있다."""
     # 채널로 걸러야 하면 넉넉히 받아서 거른다. vec0 는 MATCH 와 일반 조건을
     # 함께 쓰는 데 제약이 있어 후처리하는 편이 안전하다.
     k = limit * 5 if channel else limit
@@ -175,4 +178,5 @@ def search_vector(
 
 
 def count(conn: sqlite3.Connection) -> int:
+    """저장된 문장 수를 센다."""
     return conn.execute(f"SELECT COUNT(*) FROM {META_TABLE}").fetchone()[0]

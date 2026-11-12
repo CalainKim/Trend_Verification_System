@@ -81,6 +81,7 @@ MAX_PAGE_SIZE = 100
 
 
 class Cm29RankCollector(Collector):
+    """29CM 판매 순위를 받아 오는 수집기다. 상의 분류별 TOP 목록을 기록으로 바꾼다."""
     channel = "commerce_rank"
     platform = "29cm"
 
@@ -199,6 +200,7 @@ class Cm29RankCollector(Collector):
         run_id: Optional[str] = None,
         now: Optional[datetime] = None,
     ) -> Iterator[RawRecord]:
+        """분류마다 순위 목록을 받아 상품 하나당 기록을 만든다."""
         codes = list(category_codes) if category_codes else list(TOPS_CATEGORY_CODES)
         observed_at = self.observed_at_for(period_sort, now)
 
@@ -216,6 +218,7 @@ class Cm29RankCollector(Collector):
         observed_at: str,
         run_id: Optional[str],
     ) -> Iterator[RawRecord]:
+        """29CM 응답의 상품 하나를 순위 기록으로 바꾼다. 가격, 할인율, 리뷰 같은 부가 정보는 metadata 에 담는다."""
         item_no = item.get("itemNo")
         name = (item.get("itemName") or "").strip()
         if item_no is None or not name:

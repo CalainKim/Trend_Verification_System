@@ -1,0 +1,21 @@
+{
+  "case_id": "synthetic-hoodie-01",
+  "candidate": "가상후디",
+  "definition": "테스트를 위해 만든 가상의 가벼운 후드 상의 스타일",
+  "aliases": [
+    "가상 라이트 후디"
+  ],
+  "claim": "제공된 근거 묶음에서 가상후디의 대상 반응이 서로 다른 원출처 3개에서 독립적으로 관측됐다",
+  "cutoff": "2026-11-01T18:00:00+09:00",
+  "scope": {
+    "market": "KR",
+    "gender": "male",
+    "age_min": 20,
+    "age_max": 29,
+    "category": "tops"
+  },
+  "initial_evidence_ids": [
+    "E-rank"
+  ],
+  "synthetic": true
+}

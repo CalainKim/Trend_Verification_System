@@ -1,0 +1,45 @@
+{
+  "template": true,
+  "schema_version": "candidate-verification-v1",
+  "record_id": null,
+  "phase": "reference_independent",
+  "reviewer_id": null,
+  "created_at": null,
+  "case_id": null,
+  "corpus_hash": null,
+  "corpus_file": null,
+  "outputs_seen_before_freeze": null,
+  "facts": [
+    {
+      "id": null,
+      "text": null,
+      "evidence_ids": [],
+      "source_locations": [],
+      "population_and_period": null,
+      "notes": null
+    }
+  ],
+  "important_counterevidence": [
+    {
+      "id": null,
+      "text": null,
+      "evidence_ids": [],
+      "source_locations": [],
+      "why_decision_relevant": null,
+      "agreement_status": null
+    }
+  ],
+  "unknowns": [
+    {
+      "id": null,
+      "text": null,
+      "why_needed": null,
+      "evidence_ids": []
+    }
+  ],
+  "scope_and_source_cautions": [],
+  "unresolved_items": [],
+  "supersedes_record_id": null,
+  "change_reason": null,
+  "frozen_at": null
+}

@@ -1,0 +1,22 @@
+{
+  "template": true,
+  "schema_version": "candidate-verification-v1",
+  "record_id": null,
+  "reviewer_id": null,
+  "created_at": null,
+  "criterion_id": null,
+  "private_source_ref": null,
+  "source_access_confirmed": null,
+  "transcript_quality_concerns": [],
+  "proposed_interpretation": null,
+  "decision": null,
+  "revised_hypothesis": null,
+  "revised_question": null,
+  "expected_evidence": null,
+  "applicability": null,
+  "counterexamples": [],
+  "reason": null,
+  "reviewed": false,
+  "hypothesis_truth_not_established": true,
+  "frozen_at": null
+}

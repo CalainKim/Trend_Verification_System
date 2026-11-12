@@ -1,0 +1,17 @@
+{
+  "template": true,
+  "schema_version": "candidate-verification-v1",
+  "record_id": null,
+  "run_id": null,
+  "model_output_hash": null,
+  "case_id": null,
+  "reviewer_id": null,
+  "decided_at": null,
+  "model_recommendation": null,
+  "human_verdict": null,
+  "adopted_or_changed": null,
+  "reason": null,
+  "evidence_ids": [],
+  "change_conditions": [],
+  "is_future_outcome_label": false
+}

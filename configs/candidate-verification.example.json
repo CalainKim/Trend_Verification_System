@@ -1,0 +1,39 @@
+{
+  "schema_version": "candidate-verification-v1",
+  "live_execution_enabled": false,
+  "models": {
+    "claude": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-5-5",
+      "base_url": "https://api.anthropic.com",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "max_tokens": 8192,
+      "temperature": null,
+      "timeout_seconds": 300,
+      "checkpoint_label": "commercial-pilot",
+      "model_revision": "",
+      "quantization": "",
+      "input_price_per_million": 2,
+      "output_price_per_million": 10,
+      "enable_thinking": null,
+      "effort": "low"
+    },
+    "qwen": {
+      "provider": "openai_compatible",
+      "model": "Qwen/Qwen3-8B",
+      "base_url": "http://127.0.0.1:18000/v1",
+      "api_key_env": "",
+      "max_tokens": 8192,
+      "temperature": 0.6,
+      "timeout_seconds": 300,
+      "checkpoint_label": "base",
+      "model_revision": "",
+      "quantization": "BF16 (no quantization)",
+      "input_price_per_million": null,
+      "output_price_per_million": null,
+      "enable_thinking": true,
+      "effort": null
+    }
+  },
+  "existing_budget_ledger": "private/research-pilot/state.json"
+}

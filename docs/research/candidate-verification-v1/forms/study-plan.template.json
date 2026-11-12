@@ -1,0 +1,55 @@
+{
+  "template": true,
+  "schema_version": "candidate-verification-v1",
+  "study_id": null,
+  "created_at": null,
+  "frozen_at": null,
+  "planned_candidates": 6,
+  "models": [
+    "claude",
+    "qwen"
+  ],
+  "conditions": [
+    "with_interview",
+    "without_interview"
+  ],
+  "planned_final_outputs": 24,
+  "unit": "candidate_model_condition_first_attempt",
+  "candidate_selection_rules": [],
+  "candidate_exclusion_rules": [],
+  "criterion_version": null,
+  "criterion_hash": null,
+  "interview_review_record_hash": null,
+  "search_maximum": 2,
+  "search_top_k": 3,
+  "counter_search_required": true,
+  "retriever_version": null,
+  "prompt_version": null,
+  "model_settings_files": [],
+  "model_settings_hashes": [],
+  "cases": [
+    {
+      "case_id": null,
+      "candidate": null,
+      "claim": null,
+      "cutoff": null,
+      "selection_reason": null,
+      "case_hash": null,
+      "corpus_hash": null,
+      "initial_evidence_ids": [],
+      "source_family_dependencies": [],
+      "synthetic": false
+    }
+  ],
+  "planned_order": [
+    {
+      "case_id": null,
+      "model": null,
+      "condition": null,
+      "order": null
+    }
+  ],
+  "reference_reviews_frozen": false,
+  "new_model_outputs_seen": false,
+  "subsequent_changes": []
+}

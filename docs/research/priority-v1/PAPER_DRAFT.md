@@ -1,5 +1,7 @@
 # 20대 남성 상의 트렌드 후보의 검토를 위한 근거 기반 리즈닝
 
+> **이전 설계 보관:** 현재 과제는 [candidate-verification-v1](../candidate-verification-v1/README.md)이다. 이 문서는 관찰 우선순위 설계의 변경 이력으로 보존하며 새 조사·반증 실험과 합산하지 않는다.
+
 교수님 검토용 연구 초안 · 2026-11-11 · 과제 버전 `evidence-priority-v1`
 
 ## 초록

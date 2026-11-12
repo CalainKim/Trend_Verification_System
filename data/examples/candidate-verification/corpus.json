@@ -1,0 +1,219 @@
+[
+  {
+    "id": "E-rank",
+    "kind": "observation",
+    "title": "가상후디 순위 상승",
+    "text": "가상후디 순위 상승 관측. 합성 대상 패널에서 70위에서 35위로 이동했다. 초기 수집표는 A·B·C 보고를 서로 다른 원출처 3개로 분류했다. 실제 조사나 판매 결과가 아니다.",
+    "source_url": "https://example.test/synthetic/E-rank",
+    "source_family_id": "E-rank-producer",
+    "repost_of": null,
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": "2026-10-31T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "male",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true,
+    "observations": [
+      {
+        "at": "2026-10-20T10:00:00+09:00",
+        "metric": "rank",
+        "value": 70,
+        "unit": "relative_rank"
+      },
+      {
+        "at": "2026-10-31T10:00:00+09:00",
+        "metric": "rank",
+        "value": 35,
+        "unit": "relative_rank"
+      },
+      {
+        "at": "2026-10-31T10:00:00+09:00",
+        "metric": "reported_original_sources",
+        "value": 3,
+        "unit": "source_count"
+      }
+    ]
+  },
+  {
+    "id": "E-search",
+    "kind": "observation",
+    "title": "가상후디 순위 상승 검색 맥락",
+    "text": "가상후디 순위 상승과 함께 검색 반응이 높아졌다는 합성 맥락 관측이다. 이용자 연령과 성별은 모른다.",
+    "source_url": "https://example.test/synthetic/E-search",
+    "source_family_id": "E-search-producer",
+    "repost_of": null,
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": "2026-10-31T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "all",
+      "age_min": null,
+      "age_max": null,
+      "category": "tops"
+    },
+    "synthetic": true
+  },
+  {
+    "id": "E-counter",
+    "kind": "observation",
+    "title": "가상후디 캠페인 정정",
+    "text": "가상후디 캠페인 정정 자료. 원본을 대조한 결과 초기 A·B·C 세 보고 모두가 같은 원본의 재게시임을 확인했다. 따라서 이 묶음에서 서로 다른 원출처는 1개다. 시장 전체나 미래 반응의 정답은 아니다.",
+    "source_url": "https://example.test/synthetic/E-counter",
+    "source_family_id": "campaign-origin",
+    "repost_of": null,
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": "2026-10-31T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "male",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true,
+    "observations": [
+      {
+        "at": "2026-10-31T10:00:00+09:00",
+        "metric": "distinct_original_sources",
+        "value": 1,
+        "unit": "source_count"
+      }
+    ]
+  },
+  {
+    "id": "E-repost",
+    "kind": "observation",
+    "title": "가상후디 캠페인 정정 재게시",
+    "text": "가상후디 캠페인 정정 자료의 동일 재게시다.",
+    "source_url": "https://example.test/synthetic/E-repost",
+    "source_family_id": "campaign-origin",
+    "repost_of": "E-counter",
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": "2026-10-31T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "male",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true
+  },
+  {
+    "id": "E-future",
+    "kind": "observation",
+    "title": "가상후디 캠페인 이후 결과",
+    "text": "미래 합성 자료: 어떤 조건에도 입력되지 않아야 한다.",
+    "source_url": "https://example.test/synthetic/E-future",
+    "source_family_id": "E-future-producer",
+    "repost_of": null,
+    "observed_at": "2026-11-02T10:00:00+09:00",
+    "published_at": "2026-11-02T11:00:00+09:00",
+    "collected_at": "2026-11-02T12:00:00+09:00",
+    "available_at": "2026-11-02T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "male",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true
+  },
+  {
+    "id": "E-interview",
+    "kind": "interview_criterion",
+    "title": "가상후디 인터뷰 기준",
+    "text": "INTERVIEW_LEAK_SENTINEL: 인터뷰 가설은 검색 결과로 전달하면 안 된다.",
+    "source_url": "https://example.test/synthetic/E-interview",
+    "source_family_id": "E-interview-producer",
+    "repost_of": null,
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": "2026-10-31T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "male",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true
+  },
+  {
+    "id": "E-label",
+    "kind": "label",
+    "title": "가상후디 평가 정답",
+    "text": "LABEL_LEAK_SENTINEL: 정답은 어느 모델 입력에도 들어가지 않는다.",
+    "source_url": "https://example.test/synthetic/E-label",
+    "source_family_id": "E-label-producer",
+    "repost_of": null,
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": "2026-10-31T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "male",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true
+  },
+  {
+    "id": "E-other",
+    "kind": "observation",
+    "title": "가상후디 다른 대상",
+    "text": "다른 고객군의 합성 관측",
+    "source_url": "https://example.test/synthetic/E-other",
+    "source_family_id": "E-other-producer",
+    "repost_of": null,
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": "2026-10-31T12:00:00+09:00",
+    "scope": {
+      "market": "KR",
+      "gender": "female",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true
+  },
+  {
+    "id": "E-unknown-time",
+    "kind": "observation",
+    "title": "가상후디 시점 미확인",
+    "text": "당시 가용 여부가 확인되지 않은 합성 자료",
+    "source_url": "https://example.test/synthetic/E-unknown-time",
+    "source_family_id": "E-unknown-time-producer",
+    "repost_of": null,
+    "observed_at": "2026-10-31T10:00:00+09:00",
+    "published_at": "2026-10-31T11:00:00+09:00",
+    "collected_at": "2026-10-31T12:00:00+09:00",
+    "available_at": null,
+    "scope": {
+      "market": "KR",
+      "gender": "male",
+      "age_min": 20,
+      "age_max": 29,
+      "category": "tops"
+    },
+    "synthetic": true
+  }
+]

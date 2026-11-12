@@ -1,0 +1,19 @@
+{
+  "template": true,
+  "schema_version": "candidate-verification-v1",
+  "visibility": "withhold_from_reviewers_until_independent_reviews_are_frozen",
+  "created_at": null,
+  "mappings": [
+    {
+      "blind_output_id": null,
+      "run_id": null,
+      "case_id": null,
+      "provider": null,
+      "model": null,
+      "condition": null,
+      "request_order": null,
+      "attempt": null,
+      "output_hash": null
+    }
+  ]
+}

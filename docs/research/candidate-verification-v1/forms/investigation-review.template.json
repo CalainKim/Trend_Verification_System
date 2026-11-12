@@ -1,0 +1,46 @@
+{
+  "template": true,
+  "schema_version": "candidate-verification-v1",
+  "record_id": null,
+  "run_id": null,
+  "reviewer_id": null,
+  "created_at": null,
+  "independent_output_review_frozen_at": null,
+  "corpus_hash": null,
+  "mandatory_counter_search_done": null,
+  "search_limits_respected": null,
+  "condition_isolation_respected": null,
+  "separate_critic_present": null,
+  "counter_trace": [
+    {
+      "reference_counter_id": null,
+      "evidence_ids": [],
+      "received_by_model": null,
+      "reflected_in_final": null,
+      "omission_stage": null,
+      "reason": null
+    }
+  ],
+  "critic_findings": [
+    {
+      "output_location": null,
+      "finding_supported": null,
+      "evidence_ids": [],
+      "reflected_in_final": null,
+      "reason": null
+    }
+  ],
+  "criterion_checks": [
+    {
+      "criterion_id": null,
+      "applicability_correct": null,
+      "review_status_respected": null,
+      "evidence_connection_correct": null,
+      "reason": null
+    }
+  ],
+  "provisional_verdict": null,
+  "final_verdict": null,
+  "revision_reason_supported": null,
+  "notes": null
+}

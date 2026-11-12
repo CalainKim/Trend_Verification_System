@@ -1,0 +1,557 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<mxfile host="app.diagrams.net" type="device" version="26.0.0">
+  <diagram id="candidate-architecture" name="01 후보 검증 구조">
+    <mxGraphModel dx="1800" dy="1490" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1490" math="0" shadow="0" background="#F4F7FB">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="background" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#F4F7FB;strokeColor=#F4F7FB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1800" height="1490" as="geometry" />
+        </mxCell>
+        <mxCell id="header" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#172C45;strokeColor=#172C45;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1800" height="159" as="geometry" />
+        </mxCell>
+        <mxCell id="eyebrow-0" value="CANDIDATE VERIFICATION  /  01" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#9DD7D1;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="60" y="20.0" width="1300" height="26.35" as="geometry" />
+        </mxCell>
+        <mxCell id="title-0" value="초기 신호에서 근거 검토와 판정 수정까지" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=36;fontColor=#FFFFFF;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="60" y="55.0" width="1680" height="55.800000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle-0" value="한국 20대 남성 상의 스타일  ·  candidate-verification-v1  ·  AI 권고와 사람의 최종 판단을 구분" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#CEDBEB;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="60" y="111.0" width="1680" height="31.0" as="geometry" />
+        </mxCell>
+        <mxCell id="section-input-0" value="근거 준비  |  시계열과 인터뷰 가설을 함께 검토" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=23;fontColor=#087F77;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="184.0" width="900" height="35.65" as="geometry" />
+        </mxCell>
+        <mxCell id="signal" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="260" width="500" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="signal-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#087F77;strokeColor=#087F77;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="280" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="signal-title-0" value="01  시계열 초기 신호" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="281.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="signal-body-0" value="관심 변화·지속·약화의 관측" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="334.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="signal-body-1" value="네이버·SNS 등에서 후보 발견" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="368.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="signal-body-2" value="시계열은 이후 판단의 실질적 근거" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="402.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="candidate" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="260" width="500" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="candidate-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#087F77;strokeColor=#087F77;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="280" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="candidate-title-0" value="02  후보와 판단 범위" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="281.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="candidate-body-0" value="스타일 정의·동의어·대상 집단" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="334.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="candidate-body-1" value="판단 시점과 관측 범위 고정" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="368.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="candidate-body-2" value="확인할 주장과 미확인 조건 명시" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="402.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="260" width="500" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#087F77;strokeColor=#087F77;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="280" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence-title-0" value="03  근거와 검수된 가설" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="281.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence-body-0" value="시계열·과거 기록·원출처 묶음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="334.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence-body-1" value="인터뷰 가설의 원문·출처 검수" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="368.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence-body-2" value="판단 시점의 검색 자료 묶음 고정" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="402.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="signal-candidate" style="edgeStyle=none;rounded=1;html=0;strokeColor=#087F77;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="365" as="sourcePoint" />
+            <mxPoint x="642" y="365" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="candidate-evidence" style="edgeStyle=none;rounded=1;html=0;strokeColor=#087F77;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="365" as="sourcePoint" />
+            <mxPoint x="1212" y="365" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="evidence-provisional" style="edgeStyle=none;rounded=1;html=0;strokeColor=#087F77;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1470" y="470" as="sourcePoint" />
+            <mxPoint x="72" y="710" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1470" y="515" />
+              <mxPoint x="50" y="515" />
+              <mxPoint x="50" y="710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="frozen-note-bg" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#F4F7FB;strokeColor=#F4F7FB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="496" width="500" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="frozen-note-0" value="미래 자료 제외 · 근거 ID와 버전 보존" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#087F77;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="676" y="500.0" width="448" height="31.0" as="geometry" />
+        </mxCell>
+        <mxCell id="section-review-0" value="검증 과정  |  질문과 반증을 거쳐 판단을 수정" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=23;fontColor=#285DAB;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="548.0" width="950" height="35.65" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EEF3FB;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="590" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#285DAB;strokeColor=#285DAB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="610" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional-title-0" value="04  잠정 판단" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="611.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional-body-0" value="현재 근거가 지지하는 설명 정리" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="664.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional-body-1" value="관측 사실과 해석을 구분" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="698.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional-body-2" value="판정의 전제와 불확실성 기록" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="732.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional-body-3" value="검수된 가설도 반박 가능하게 사용" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="766.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="questions" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EEF3FB;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="590" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="questions-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#285DAB;strokeColor=#285DAB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="610" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="questions-title-0" value="05  AI의 추가 확인" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="611.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="questions-body-0" value="판단을 바꿀 수 있는 질문 선택" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="664.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="questions-body-1" value="고정된 자료 묶음 안에서 검색" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="698.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="questions-body-2" value="질문·선택 이유·검색 결과 기록" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="732.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="questions-body-3" value="찾지 못한 사실은 미확인으로 유지" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="766.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="counter" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#F6F1FB;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="590" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="counter-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#7057A3;strokeColor=#7057A3;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="610" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="counter-title-0" value="06  별도 반증 검토" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="611.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="counter-body-0" value="잠정 판단과 다른 설명을 점검" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="664.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="counter-body-1" value="캠페인·재게시·대상 혼동 검토" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="698.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="counter-body-2" value="누락된 반대 근거와 논리 비약 확인" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="732.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="counter-body-3" value="수정할 주장과 남는 쟁점 기록" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="766.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="provisional-questions" style="edgeStyle=none;rounded=1;html=0;strokeColor=#285DAB;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="710" as="sourcePoint" />
+            <mxPoint x="642" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="questions-counter" style="edgeStyle=none;rounded=1;html=0;strokeColor=#285DAB;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="710" as="sourcePoint" />
+            <mxPoint x="1212" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="counter-recommendation" style="edgeStyle=none;rounded=1;html=0;strokeColor=#7057A3;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1470" y="835" as="sourcePoint" />
+            <mxPoint x="72" y="1112" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1470" y="884" />
+              <mxPoint x="50" y="884" />
+              <mxPoint x="50" y="1112" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="revision-note-bg" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#F4F7FB;strokeColor=#F4F7FB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="675" y="864" width="450" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="revision-note-0" value="반증 수용 여부와 수정 이유를 보존" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#7057A3;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="697" y="868.0" width="406" height="31.0" as="geometry" />
+        </mxCell>
+        <mxCell id="section-output-0" value="권고와 결정  |  판단 결과와 변경 이력을 분리" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=23;fontColor=#285DAB;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="938.0" width="950" height="35.65" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="990" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#285DAB;strokeColor=#285DAB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1010" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation-title-0" value="07  AI 검증 권고" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1011.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation-body-0" value="CONFIRM / HOLD / REJECT" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1064.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation-body-1" value="근거·반증·부족한 정보와 연결" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1098.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation-body-2" value="잠정 판단에서 바뀐 부분과 이유" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1132.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation-body-3" value="추가 관측 시 재검토할 조건 제시" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1166.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="human" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="990" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="human-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#7057A3;strokeColor=#7057A3;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="1010" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="human-title-0" value="08  사람의 최종 판단" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="1011.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="human-body-0" value="원자료와 AI의 설명을 대조" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="1064.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="human-body-1" value="AI 권고 수용·수정 여부 기록" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="1098.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="human-body-2" value="최종 판단과 이유를 별도 저장" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="1132.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="human-body-3" value="AI의 동의를 시장 정답으로 삼지 않음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="1166.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="new-cutoff" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EAF7F4;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="990" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="new-cutoff-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#087F77;strokeColor=#087F77;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="1010" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="new-cutoff-title-0" value="새 자료와 새 판단 시점" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="1011.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="new-cutoff-body-0" value="후속 관측은 새 시점의 입력으로 등록" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="1064.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="new-cutoff-body-1" value="이전 근거·권고·사람 판단을 보존" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="1098.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="new-cutoff-body-2" value="새 판정과 변경 사유를 추가 기록" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="1132.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="new-cutoff-body-3" value="이전 결론을 덮어쓰지 않음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="1166.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="recommendation-human" style="edgeStyle=none;rounded=1;html=0;strokeColor=#285DAB;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="1112" as="sourcePoint" />
+            <mxPoint x="642" y="1112" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="human-new-cutoff" style="edgeStyle=none;rounded=1;html=0;strokeColor=#087F77;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="1112" as="sourcePoint" />
+            <mxPoint x="1212" y="1112" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="new-cutoff-loop" style="edgeStyle=none;rounded=1;html=0;strokeColor=#087F77;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1470" y="1235" as="sourcePoint" />
+            <mxPoint x="900" y="252" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1470" y="1273" />
+              <mxPoint x="1760" y="1273" />
+              <mxPoint x="1760" y="225" />
+              <mxPoint x="900" y="225" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="loop-label-0" value="새 시점의 후보 검토로 다시 연결" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#087F77;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1210" y="185.0" width="520" height="31.0" as="geometry" />
+        </mxCell>
+        <mxCell id="status" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EEF3FB;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1312" width="1640" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="demo-status-0" value="구현 확인 대상: 데모 흐름과 기록 연결" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="104" y="1333.0" width="780" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="effect-status-0" value="연구 검증 대상: 방법론과 판단 논리" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="944" y="1333.0" width="748" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="demo-detail-0" value="질문 선택·검색·반증·수정 이력이 남는지 확인" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="104" y="1373.0" width="780" height="31.0" as="geometry" />
+        </mxCell>
+        <mxCell id="effect-detail-0" value="실제 자료에서의 효과는 아직 측정하지 않음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="944" y="1373.0" width="748" height="31.0" as="geometry" />
+        </mxCell>
+        <mxCell id="footer-0" value="권고는 확보한 근거와 판단 시점에 조건부다. 근거가 부족하면 보류하며, 새로운 관측은 다음 판단 기록으로 연결한다." style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=19;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="1450.0" width="1640" height="29.45" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="candidate-evaluation" name="02 방법론과 논리 검증">
+    <mxGraphModel dx="1800" dy="1490" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1490" math="0" shadow="0" background="#F4F7FB">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="background" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#F4F7FB;strokeColor=#F4F7FB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1800" height="1490" as="geometry" />
+        </mxCell>
+        <mxCell id="header" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#172C45;strokeColor=#172C45;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1800" height="159" as="geometry" />
+        </mxCell>
+        <mxCell id="eyebrow-0" value="CANDIDATE VERIFICATION  /  02" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=17;fontColor=#9DD7D1;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="60" y="20.0" width="1300" height="26.35" as="geometry" />
+        </mxCell>
+        <mxCell id="title-0" value="인터뷰 가설의 기여와 검증 과정의 논리를 비교" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=36;fontColor=#FFFFFF;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="60" y="55.0" width="1680" height="55.800000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle-0" value="같은 후보·같은 자료 묶음·같은 검증 흐름  ·  모델의 설명과 실제 근거를 대조" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=20;fontColor=#CEDBEB;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="60" y="111.0" width="1680" height="31.0" as="geometry" />
+        </mxCell>
+        <mxCell id="comparison-label-0" value="비교 설계  |  인터뷰 가설 제공 여부를 모델별로 비교" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=23;fontColor=#087F77;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="184.0" width="1600" height="35.65" as="geometry" />
+        </mxCell>
+        <mxCell id="controls" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="260" width="500" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="controls-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#087F77;strokeColor=#087F77;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="280" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="controls-title-0" value="공통으로 고정하는 것" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="281.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="controls-body-0" value="후보의 정의·대상·판단 시점" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="334.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="controls-body-1" value="초기 근거와 추가 검색 자료 묶음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="368.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="controls-body-2" value="질문 선택·검색·반증·수정 절차" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="402.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="controls-body-3" value="모델 내 실행 조건과 출력 형식" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="436.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="controls-body-4" value="선택한 질문과 실제 검색 결과 보존" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="470.4" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="matrix" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="260" width="1070" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="matrix-label-provided-0" value="인터뷰 가설 제공" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=24;fontColor=#285DAB;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="878" y="280.0" width="350" height="37.2" as="geometry" />
+        </mxCell>
+        <mxCell id="matrix-label-withheld-0" value="인터뷰 가설 미제공" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=24;fontColor=#7057A3;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1294" y="280.0" width="360" height="37.2" as="geometry" />
+        </mxCell>
+        <mxCell id="model-0-0" value="Claude" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="682" y="361.0" width="170" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="provided-0" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EEF3FB;strokeColor=#C7D6EB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="862" y="338" width="392" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="provided-text-0-0" value="검수된 가설 + 공통 근거" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=21;fontColor=#285DAB;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="886" y="364.0" width="344" height="32.550000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="withheld-0" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#F6F1FB;strokeColor=#D2C5E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="338" width="420" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="withheld-text-0-0" value="같은 근거 · 가설 설명은 제외" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=21;fontColor=#7057A3;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1294" y="364.0" width="372" height="32.550000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="model-1-0" value="Qwen" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="682" y="464.0" width="170" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="provided-1" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EEF3FB;strokeColor=#C7D6EB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="862" y="441" width="392" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="provided-text-1-0" value="검수된 가설 + 공통 근거" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=21;fontColor=#285DAB;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="886" y="467.0" width="344" height="32.550000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="withheld-1" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#F6F1FB;strokeColor=#D2C5E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="441" width="420" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="withheld-text-1-0" value="같은 근거 · 가설 설명은 제외" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=21;fontColor=#7057A3;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1294" y="467.0" width="372" height="32.550000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EAF7F4;strokeColor=#C5E5DB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="590" width="1640" height="103" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow-title-0" value="모든 조건에서 같은 검증 흐름을 수행" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#087F77;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="104" y="606.0" width="1590" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow-body-0" value="잠정 판단 → AI의 추가 질문·검색 → 별도 반증 검토 → 수정된 CONFIRM / HOLD / REJECT 권고" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=24;fontColor=#172C45;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="104" y="646.0" width="1590" height="37.2" as="geometry" />
+        </mxCell>
+        <mxCell id="review-label-0" value="사람 평가  |  근거 기준표는 모델 출력을 보기 전에 작성" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=23;fontColor=#285DAB;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="729.0" width="1640" height="35.65" as="geometry" />
+        </mxCell>
+        <mxCell id="reference" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="777" width="500" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="reference-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#087F77;strokeColor=#087F77;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="797" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="reference-title-0" value="사전 근거 기준표" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="798.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="reference-body-0" value="확인 가능한 사실·중요 반대 근거" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="851.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="reference-body-1" value="미확인 정보와 허용할 해석의 범위" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="885.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="reference-body-2" value="질문이 해결해야 할 쟁점을 정리" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="919.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="reference-body-3" value="최초 기준표와 합의 기준표를 보존" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="953.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="blind-review" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="777" width="500" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="blind-review-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#285DAB;strokeColor=#285DAB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="650" y="797" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="blind-review-title-0" value="두 명의 독립 검토" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="798.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="blind-review-body-0" value="모델명·인터뷰 제공 조건을 가림" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="851.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="blind-review-body-1" value="서로의 평가를 보기 전에 판독" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="885.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="blind-review-body-2" value="동일 원자료에서 주장과 이유 확인" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="919.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="blind-review-body-3" value="가림만으로 완전한 맹검을 주장하지 않음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="672" y="953.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#D4DEEB;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="777" width="500" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus-accent" value="" style="rounded=0;arcSize=12;whiteSpace=wrap;html=0;fillColor=#7057A3;strokeColor=#7057A3;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="797" width="5" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus-title-0" value="불일치와 합의 기록" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=26;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="798.0" width="456" height="40.300000000000004" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus-body-0" value="최초 평가와 합의 결과를 분리" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="851.0" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus-body-1" value="불일치를 근거와 논리로 대조" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="885.1" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus-body-2" value="합의되지 않은 쟁점도 보존" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="919.2" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="consensus-body-3" value="모델 답변 자체를 정답으로 채택하지 않음" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1242" y="953.3" width="456" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="reference-blind" style="edgeStyle=none;rounded=1;html=0;strokeColor=#087F77;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="896" as="sourcePoint" />
+            <mxPoint x="642" y="896" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="blind-consensus" style="edgeStyle=none;rounded=1;html=0;strokeColor=#285DAB;strokeWidth=3;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="896" as="sourcePoint" />
+            <mxPoint x="1212" y="896" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="checks-label-0" value="검증하는 것  |  사실·반증·질문·수정의 연결을 확인" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=23;fontColor=#285DAB;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="1054.0" width="1640" height="35.65" as="geometry" />
+        </mxCell>
+        <mxCell id="check-0" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1101" width="380" height="174" as="geometry" />
+        </mxCell>
+        <mxCell id="check-title-0-0" value="사실과 출처" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=25;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1123.0" width="336" height="38.75" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-0-0" value="주장·수치·시점·대상이" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1170.0" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-0-1" value="원자료와 맞는가" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="102" y="1204.1" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="check-1" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1101" width="380" height="174" as="geometry" />
+        </mxCell>
+        <mxCell id="check-title-1-0" value="반대 근거" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=25;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="522" y="1123.0" width="336" height="38.75" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-1-0" value="다른 설명과 불리한 관측을" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="522" y="1170.0" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-1-1" value="다루었는가" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="522" y="1204.1" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="check-2" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1101" width="380" height="174" as="geometry" />
+        </mxCell>
+        <mxCell id="check-title-2-0" value="추가 질문" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=25;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="942" y="1123.0" width="336" height="38.75" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-2-0" value="판단을 바꿀 쟁점을 묻고" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="942" y="1170.0" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-2-1" value="근거를 찾았는가" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="942" y="1204.1" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="check-3" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#FFFFFF;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="1101" width="380" height="174" as="geometry" />
+        </mxCell>
+        <mxCell id="check-title-3-0" value="수정 논리" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=25;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1362" y="1123.0" width="336" height="38.75" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-3-0" value="반증을 수용·기각한 이유가" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1362" y="1170.0" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="check-body-3-1" value="일관적인가" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1362" y="1204.1" width="336" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="status" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=0;fillColor=#EEF3FB;strokeColor=#C6D4E6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1320" width="1640" height="106" as="geometry" />
+        </mxCell>
+        <mxCell id="status-title-0" value="데모 동작 확인과 실제 연구 효과를 구분" style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=23;fontColor=#172C45;fontStyle=1;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="104" y="1338.0" width="1590" height="35.65" as="geometry" />
+        </mxCell>
+        <mxCell id="status-body-0" value="흐름과 기록이 연결되어도 방법의 효과가 입증된 것은 아니다. 실제 자료의 비교·독립 평가 결과는 미측정이다." style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=22;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="104" y="1378.0" width="1590" height="34.1" as="geometry" />
+        </mxCell>
+        <mxCell id="footer-0" value="기술 실패·보류·미평가를 구분한다. 사실 확인, 반증, 질문 선택, 판정 수정의 근거를 함께 검토한다." style="text;html=0;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontFamily=Malgun Gothic;fontSize=19;fontColor=#53677F;fontStyle=0;spacing=0;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="80" y="1450.0" width="1640" height="29.45" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

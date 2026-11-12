@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1490" viewBox="0 0 1800 1490" role="img" aria-label="01 후보 검증 구조">
+<style>text{font-family:"Malgun Gothic","Noto Sans KR",sans-serif}</style>
+<rect x="0" y="0" width="1800" height="1490" rx="0" fill="#F4F7FB" stroke="#F4F7FB" stroke-width="1.5"/>
+<rect x="0" y="0" width="1800" height="159" rx="0" fill="#172C45" stroke="#172C45" stroke-width="1.5"/>
+<text x="60" y="37.0" font-size="17" fill="#9DD7D1" font-weight="700">CANDIDATE VERIFICATION  /  01</text>
+<text x="60" y="91.0" font-size="36" fill="#FFFFFF" font-weight="700">초기 신호에서 근거 검토와 판정 수정까지</text>
+<text x="60" y="131.0" font-size="20" fill="#CEDBEB" font-weight="400">한국 20대 남성 상의 스타일  ·  candidate-verification-v1  ·  AI 권고와 사람의 최종 판단을 구분</text>
+<text x="80" y="207.0" font-size="23" fill="#087F77" font-weight="700">근거 준비  |  시계열과 인터뷰 가설을 함께 검토</text>
+<rect x="80" y="260" width="500" height="210" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="80" y="280" width="5" height="35" rx="0" fill="#087F77" stroke="#087F77" stroke-width="1.5"/>
+<text x="102" y="307.0" font-size="26" fill="#172C45" font-weight="700">01  시계열 초기 신호</text>
+<text x="102" y="356.0" font-size="22" fill="#53677F" font-weight="400">관심 변화·지속·약화의 관측</text>
+<text x="102" y="390.1" font-size="22" fill="#53677F" font-weight="400">네이버·SNS 등에서 후보 발견</text>
+<text x="102" y="424.2" font-size="22" fill="#53677F" font-weight="400">시계열은 이후 판단의 실질적 근거</text>
+<rect x="650" y="260" width="500" height="210" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="650" y="280" width="5" height="35" rx="0" fill="#087F77" stroke="#087F77" stroke-width="1.5"/>
+<text x="672" y="307.0" font-size="26" fill="#172C45" font-weight="700">02  후보와 판단 범위</text>
+<text x="672" y="356.0" font-size="22" fill="#53677F" font-weight="400">스타일 정의·동의어·대상 집단</text>
+<text x="672" y="390.1" font-size="22" fill="#53677F" font-weight="400">판단 시점과 관측 범위 고정</text>
+<text x="672" y="424.2" font-size="22" fill="#53677F" font-weight="400">확인할 주장과 미확인 조건 명시</text>
+<rect x="1220" y="260" width="500" height="210" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="1220" y="280" width="5" height="35" rx="0" fill="#087F77" stroke="#087F77" stroke-width="1.5"/>
+<text x="1242" y="307.0" font-size="26" fill="#172C45" font-weight="700">03  근거와 검수된 가설</text>
+<text x="1242" y="356.0" font-size="22" fill="#53677F" font-weight="400">시계열·과거 기록·원출처 묶음</text>
+<text x="1242" y="390.1" font-size="22" fill="#53677F" font-weight="400">인터뷰 가설의 원문·출처 검수</text>
+<text x="1242" y="424.2" font-size="22" fill="#53677F" font-weight="400">판단 시점의 검색 자료 묶음 고정</text>
+<polyline points="580,365 642,365" fill="none" stroke="#087F77" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="642.0,365.0 631.0,360.0 631.0,370.0" fill="#087F77"/>
+<polyline points="1150,365 1212,365" fill="none" stroke="#087F77" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1212.0,365.0 1201.0,360.0 1201.0,370.0" fill="#087F77"/>
+<polyline points="1470,470 1470,515 50,515 50,710 72,710" fill="none" stroke="#087F77" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="72.0,710.0 61.0,705.0 61.0,715.0" fill="#087F77"/>
+<rect x="650" y="496" width="500" height="38" rx="0" fill="#F4F7FB" stroke="#F4F7FB" stroke-width="1.5"/>
+<text x="676" y="520.0" font-size="20" fill="#087F77" font-weight="700">미래 자료 제외 · 근거 ID와 버전 보존</text>
+<text x="80" y="571.0" font-size="23" fill="#285DAB" font-weight="700">검증 과정  |  질문과 반증을 거쳐 판단을 수정</text>
+<rect x="80" y="590" width="500" height="245" rx="18" fill="#EEF3FB" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="80" y="610" width="5" height="35" rx="0" fill="#285DAB" stroke="#285DAB" stroke-width="1.5"/>
+<text x="102" y="637.0" font-size="26" fill="#172C45" font-weight="700">04  잠정 판단</text>
+<text x="102" y="686.0" font-size="22" fill="#53677F" font-weight="400">현재 근거가 지지하는 설명 정리</text>
+<text x="102" y="720.1" font-size="22" fill="#53677F" font-weight="400">관측 사실과 해석을 구분</text>
+<text x="102" y="754.2" font-size="22" fill="#53677F" font-weight="400">판정의 전제와 불확실성 기록</text>
+<text x="102" y="788.3" font-size="22" fill="#53677F" font-weight="400">검수된 가설도 반박 가능하게 사용</text>
+<rect x="650" y="590" width="500" height="245" rx="18" fill="#EEF3FB" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="650" y="610" width="5" height="35" rx="0" fill="#285DAB" stroke="#285DAB" stroke-width="1.5"/>
+<text x="672" y="637.0" font-size="26" fill="#172C45" font-weight="700">05  AI의 추가 확인</text>
+<text x="672" y="686.0" font-size="22" fill="#53677F" font-weight="400">판단을 바꿀 수 있는 질문 선택</text>
+<text x="672" y="720.1" font-size="22" fill="#53677F" font-weight="400">고정된 자료 묶음 안에서 검색</text>
+<text x="672" y="754.2" font-size="22" fill="#53677F" font-weight="400">질문·선택 이유·검색 결과 기록</text>
+<text x="672" y="788.3" font-size="22" fill="#53677F" font-weight="400">찾지 못한 사실은 미확인으로 유지</text>
+<rect x="1220" y="590" width="500" height="245" rx="18" fill="#F6F1FB" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="1220" y="610" width="5" height="35" rx="0" fill="#7057A3" stroke="#7057A3" stroke-width="1.5"/>
+<text x="1242" y="637.0" font-size="26" fill="#172C45" font-weight="700">06  별도 반증 검토</text>
+<text x="1242" y="686.0" font-size="22" fill="#53677F" font-weight="400">잠정 판단과 다른 설명을 점검</text>
+<text x="1242" y="720.1" font-size="22" fill="#53677F" font-weight="400">캠페인·재게시·대상 혼동 검토</text>
+<text x="1242" y="754.2" font-size="22" fill="#53677F" font-weight="400">누락된 반대 근거와 논리 비약 확인</text>
+<text x="1242" y="788.3" font-size="22" fill="#53677F" font-weight="400">수정할 주장과 남는 쟁점 기록</text>
+<polyline points="580,710 642,710" fill="none" stroke="#285DAB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="642.0,710.0 631.0,705.0 631.0,715.0" fill="#285DAB"/>
+<polyline points="1150,710 1212,710" fill="none" stroke="#285DAB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1212.0,710.0 1201.0,705.0 1201.0,715.0" fill="#285DAB"/>
+<polyline points="1470,835 1470,884 50,884 50,1112 72,1112" fill="none" stroke="#7057A3" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="72.0,1112.0 61.0,1107.0 61.0,1117.0" fill="#7057A3"/>
+<rect x="675" y="864" width="450" height="39" rx="0" fill="#F4F7FB" stroke="#F4F7FB" stroke-width="1.5"/>
+<text x="697" y="888.0" font-size="20" fill="#7057A3" font-weight="700">반증 수용 여부와 수정 이유를 보존</text>
+<text x="80" y="961.0" font-size="23" fill="#285DAB" font-weight="700">권고와 결정  |  판단 결과와 변경 이력을 분리</text>
+<rect x="80" y="990" width="500" height="245" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="80" y="1010" width="5" height="35" rx="0" fill="#285DAB" stroke="#285DAB" stroke-width="1.5"/>
+<text x="102" y="1037.0" font-size="26" fill="#172C45" font-weight="700">07  AI 검증 권고</text>
+<text x="102" y="1086.0" font-size="22" fill="#53677F" font-weight="400">CONFIRM / HOLD / REJECT</text>
+<text x="102" y="1120.1" font-size="22" fill="#53677F" font-weight="400">근거·반증·부족한 정보와 연결</text>
+<text x="102" y="1154.2" font-size="22" fill="#53677F" font-weight="400">잠정 판단에서 바뀐 부분과 이유</text>
+<text x="102" y="1188.3" font-size="22" fill="#53677F" font-weight="400">추가 관측 시 재검토할 조건 제시</text>
+<rect x="650" y="990" width="500" height="245" rx="18" fill="#FFFFFF" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="650" y="1010" width="5" height="35" rx="0" fill="#7057A3" stroke="#7057A3" stroke-width="1.5"/>
+<text x="672" y="1037.0" font-size="26" fill="#172C45" font-weight="700">08  사람의 최종 판단</text>
+<text x="672" y="1086.0" font-size="22" fill="#53677F" font-weight="400">원자료와 AI의 설명을 대조</text>
+<text x="672" y="1120.1" font-size="22" fill="#53677F" font-weight="400">AI 권고 수용·수정 여부 기록</text>
+<text x="672" y="1154.2" font-size="22" fill="#53677F" font-weight="400">최종 판단과 이유를 별도 저장</text>
+<text x="672" y="1188.3" font-size="22" fill="#53677F" font-weight="400">AI의 동의를 시장 정답으로 삼지 않음</text>
+<rect x="1220" y="990" width="500" height="245" rx="18" fill="#EAF7F4" stroke="#D4DEEB" stroke-width="1.5"/>
+<rect x="1220" y="1010" width="5" height="35" rx="0" fill="#087F77" stroke="#087F77" stroke-width="1.5"/>
+<text x="1242" y="1037.0" font-size="26" fill="#172C45" font-weight="700">새 자료와 새 판단 시점</text>
+<text x="1242" y="1086.0" font-size="22" fill="#53677F" font-weight="400">후속 관측은 새 시점의 입력으로 등록</text>
+<text x="1242" y="1120.1" font-size="22" fill="#53677F" font-weight="400">이전 근거·권고·사람 판단을 보존</text>
+<text x="1242" y="1154.2" font-size="22" fill="#53677F" font-weight="400">새 판정과 변경 사유를 추가 기록</text>
+<text x="1242" y="1188.3" font-size="22" fill="#53677F" font-weight="400">이전 결론을 덮어쓰지 않음</text>
+<polyline points="580,1112 642,1112" fill="none" stroke="#285DAB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="642.0,1112.0 631.0,1107.0 631.0,1117.0" fill="#285DAB"/>
+<polyline points="1150,1112 1212,1112" fill="none" stroke="#087F77" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1212.0,1112.0 1201.0,1107.0 1201.0,1117.0" fill="#087F77"/>
+<polyline points="1470,1235 1470,1273 1760,1273 1760,225 900,225 900,252" fill="none" stroke="#087F77" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="900.0,252.0 905.0,241.0 895.0,241.0" fill="#087F77"/>
+<text x="1210" y="205.0" font-size="20" fill="#087F77" font-weight="700">새 시점의 후보 검토로 다시 연결</text>
+<rect x="80" y="1312" width="1640" height="112" rx="16" fill="#EEF3FB" stroke="#C6D4E6" stroke-width="1.5"/>
+<text x="104" y="1355.0" font-size="22" fill="#172C45" font-weight="700">구현 확인 대상: 데모 흐름과 기록 연결</text>
+<text x="944" y="1355.0" font-size="22" fill="#172C45" font-weight="700">연구 검증 대상: 방법론과 판단 논리</text>
+<text x="104" y="1393.0" font-size="20" fill="#53677F" font-weight="400">질문 선택·검색·반증·수정 이력이 남는지 확인</text>
+<text x="944" y="1393.0" font-size="20" fill="#53677F" font-weight="400">실제 자료에서의 효과는 아직 측정하지 않음</text>
+<text x="80" y="1469.0" font-size="19" fill="#53677F" font-weight="400">권고는 확보한 근거와 판단 시점에 조건부다. 근거가 부족하면 보류하며, 새로운 관측은 다음 판단 기록으로 연결한다.</text>
+</svg>

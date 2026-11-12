@@ -1,0 +1,23 @@
+{
+  "template": true,
+  "schema_version": "candidate-verification-v1",
+  "record_id": null,
+  "case_id": null,
+  "human_decision_record_id": null,
+  "observed_at": null,
+  "collected_at": null,
+  "observations": [
+    {
+      "evidence_id": null,
+      "source_url": null,
+      "metric": null,
+      "value": null,
+      "unit": null,
+      "population": null,
+      "period": null
+    }
+  ],
+  "not_yet_observed_items": [],
+  "observation_limits": [],
+  "use_as_current_verdict_ground_truth": false
+}

@@ -6,7 +6,7 @@
 
 | 확정한 범위 | 현재 구현 | 아직 확인하지 않은 부분 |
 |---|---|---|
-| 한국 20대 남성의 상의 스타일 후보 검증 | 합성 예제로 조사·반증·판정 수정과 기록 화면 연결 | 실제 자료에서 인터뷰 기준이 주는 도움과 판단의 타당성 |
+| 한국 20대 남성의 상의 스타일 후보 검증 | 조사·반증·판정 기록 화면을 연결하고 보관된 실제 자료로 모델 연결과 출력 계약의 문제를 확인 | 인터뷰 가설 포함 절차의 정상 완료, 가설의 도움과 출력 근거·판단 논리의 타당성 |
 
 ## 무엇을 해결하려는가
 
@@ -29,6 +29,16 @@ AI는 미리 고정한 자료집에서 부족한 정보와 반대 설명을 찾�
 | REJECT · 기각 제안 | 현재 후보 가설을 받아들이기 어렵다는 구체적인 반대 근거가 있음 |
 
 확정은 미래 유행의 보장이 아니다. 미래값이 아직 없다는 이유만으로 보류하지 않고, 광고가 있다는 사실만으로 기각하지 않는다. 사람은 제안을 수용하거나 수정하고 그 이유를 따로 남긴다.
+
+## 지금 확인하고 있는 것
+
+전사문에서 AI가 선정한 질문 10개를 미검토 가설로 정리하고, 보관된 링거티 실제 자료에 조사·반증 절차를 연결해 실제 모델의 조건별 실행을 확인했다. 사람이 원문 해석을 승인했거나 가설을 입증한 상태는 아니다. 가설을 제공하지 않는 조건에는 가설과 다른 조건의 답이 전달되지 않는다.
+
+자료의 대상 범위와 측정 의미를 구분해 설명하는 출력이 확인됐다. 가설의 적용 상태값이 검사 규칙과 맞지 않거나 필수 항목을 빠뜨린 출력도 있어, 프롬프트의 선택 규칙과 필수 출력을 더 명료하게 설명하는 개발 진단을 분리했다. 실패와 원문을 보존하며 이를 곧바로 모델의 판단 능력 실패로 단정하지 않는다. 가설의 효과와 논문 본 평가의 성과는 별도 검토가 필요하다.
+
+추가 진단에서는 가설별 행을 받았지만 인용 항목 누락과 적용 상태 오류가 남아 유효한 최종 제안으로 이어지지 못했다. 실제 모델 연결과 실패 기록은 확인했으며, 인터뷰 가설을 포함한 전체 절차는 출력 구조를 더 보완해야 한다. 구조를 강제하거나 가설별 출력을 분리해 검사하는 방안은 다음 구현 과제다.
+
+이 자료는 과거 관측을 나중에 확보해 현재 시점에 다시 읽은 개발 사례다. 당시 유행을 미리 찾아냈거나 현재 수요를 확인했다는 결과로 사용하지 않는다.
 
 ## 방법을 어떻게 검증하는가
 
@@ -56,6 +66,7 @@ AI는 미리 고정한 자료집에서 부족한 정보와 반대 설명을 찾�
 - [판정·조사 계약과 평가 설계](https://github.com/CalainKim/Trend_Verification_System/tree/codex/reasoning-paper-pilot/docs/research/candidate-verification-v1)
 - [사람이 작성하는 평가표](https://github.com/CalainKim/Trend_Verification_System/blob/codex/reasoning-paper-pilot/docs/research/candidate-verification-v1/forms/WORKSHEETS.md)
 - [로컬 구현체·실행 안내·검증 범위](https://github.com/CalainKim/Trend_Verification_System/blob/codex/reasoning-paper-pilot/docs/research/candidate-verification-v1/IMPLEMENTATION.md)
+- [실제 모델 동작 점검과 확인된 한계](https://github.com/CalainKim/Trend_Verification_System/blob/codex/reasoning-paper-pilot/docs/research/candidate-verification-v1/LIVE_CHECK.md)
 - [편집 가능한 draw.io](https://github.com/CalainKim/Trend_Verification_System/blob/codex/reasoning-paper-pilot/docs/research/candidate-verification-v1/diagrams/candidate-verification-v1.drawio)
 
 인터뷰 해석의 검토 상태, 실제 자료와 합성 자료의 구분, 세부 실험 조건과 구현 상태는 위 문서에서 관리한다.

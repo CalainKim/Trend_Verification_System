@@ -195,6 +195,31 @@ def test_unreviewed_criterion_cannot_be_labeled_approved(tmp_path, inputs):
         run(tmp_path, inputs)
 
 
+@pytest.mark.parametrize("field", ["change_conditions", "criterion_reviews"])
+def test_missing_required_decision_fields_preserves_failure_not_hold(tmp_path, inputs, field):
+    client = RecordingClient("provisional", lambda d: d.pop(field))
+    result = run(tmp_path, inputs, client=client)
+    assert result["status"] == "schema_error" and result["final"] is None
+    raw = json.loads(result["stages"][0]["raw_response"]["text"])
+    assert field not in raw
+    assert verify_run(tmp_path / result["run_id"])["status"] == "schema_error"
+
+
+@pytest.mark.parametrize("state", ["applied_as_hypothesis", "not_applicable", "insufficient_evidence"])
+def test_unreviewed_hypothesis_allowed_states_remain_distinct(tmp_path, inputs, state):
+    client = RecordingClient("final", lambda d: d["criterion_reviews"][0].update(application_status=state))
+    result = run(tmp_path, inputs, client=client)
+    assert result["status"] == "complete"
+    assert result["final"]["criterion_reviews"][0]["application_status"] == state
+
+
+def test_reviewed_criterion_with_source_can_be_applied(tmp_path, inputs):
+    inputs[2][0].update(reviewed=True, source_ref="reviewed-interview-section-H1")
+    client = RecordingClient("final", lambda d: d["criterion_reviews"][0].update(application_status="applied"))
+    result = run(tmp_path, inputs, client=client)
+    assert result["status"] == "complete"
+
+
 def test_api_error_is_distinct_and_does_not_store_exception_or_hold(tmp_path, inputs):
     result = run(tmp_path, inputs, client=RecordingClient("critic", fail=True))
     assert result["status"] == "api_error" and result["final"] is None

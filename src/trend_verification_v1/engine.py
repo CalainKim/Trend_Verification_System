@@ -1,4 +1,4 @@
-"""Five-call maximum protocol with immutable records and a closed live gate."""
+"""Five-call maximum protocol with immutable records and a budgeted live adapter."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -15,6 +15,7 @@ from .inputs import (CONDITIONS, VERSION, canonical, digest, fields, identifier,
 MAX_SEARCHES = 2
 MAX_SEARCH_RESULTS = 3
 PROMPT_VERSION = "candidate-investigation-v1"
+LIVE_PROMPT_VERSION = "candidate-investigation-v1-live2"
 VERDICTS = ("CONFIRM", "HOLD", "REJECT")
 UNKNOWN_CODES = ("missing_past_evidence", "conflicting_evidence", "scope_unverified",
                  "source_relation_unverified", "future_unobserved")
@@ -33,6 +34,10 @@ context 자료를 목표 고객군의 직접 관측으로 바꾸지 않는다. �
 
 class LiveExecutionDisabled(RuntimeError):
     pass
+
+
+class BudgetLimitReached(RuntimeError):
+    """A pre-call reservation failed; this is neither an API error nor a verdict."""
 
 
 def now():
@@ -184,21 +189,22 @@ def inspect_live_config(config):
     return {"schema_version": VERSION, "live_execution_enabled": False, "models": models,
             "existing_budget_ledger": config["existing_budget_ledger"],
             "budget_action": "read_only_reference_not_reset",
-            "required_next_step": "Separate evaluation authorization and integration with the existing cumulative budget ledger"}
+            "required_next_step": "The live command requires hash-bound authorization and the existing cumulative budget audit"}
 
 
 def run_case(case, corpus, criteria, *, condition="with_interview", model_name="claude",
              model_config=None, output_dir="private/candidate-verification", client=None, demo=True):
-    """Execute one isolated arm. A real model call is deliberately unreachable here.
-
-    The injected offline client implements the existing transport's
-    generate(system, prompt) response contract. Live providers need future
-    explicit authorization plus cumulative-budget integration, not a new ledger.
-    """
-    if demo is not True or (client is not None and getattr(client, "offline", False) is not True):
-        raise LiveExecutionDisabled("Live calls are locked; no existing budget has been reset or consumed")
+    """Execute one arm; live execution requires the cumulative budget adapter."""
+    if type(demo) is not bool:
+        raise LiveExecutionDisabled("Execution mode must be explicit")
+    if demo and client is not None and getattr(client, "offline", False) is not True:
+        raise LiveExecutionDisabled("Demo execution cannot use a live transport")
+    if not demo:
+        from .live import BudgetedClient
+        if not isinstance(client, BudgetedClient):
+            raise LiveExecutionDisabled("Live execution requires the authorized cumulative budget adapter")
     validate_case(case)
-    if not case["synthetic"]:
+    if demo and not case["synthetic"]:
         raise ValueError("Scripted demo requires explicitly synthetic input, never study cases")
     if condition not in CONDITIONS or model_name not in ("claude", "qwen"):
         raise ValueError("Invalid comparison arm")
@@ -208,19 +214,22 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
     eligible, excluded = prepare_corpus(case, corpus)
     effective = criteria if condition == "with_interview" else None
     config = model_config or ModelConfig(provider="demo", model="scripted-synthetic-v1", max_tokens=4096)
-    if config.provider != "demo":
+    if demo and config.provider != "demo":
         raise LiveExecutionDisabled("Inspectable live settings cannot be used to run the scripted demo")
+    if not demo:
+        client.bind(case, corpus, criteria, condition, model_name, config)
     if client is None:
         from .demo import ScriptedDemoClient
         client = ScriptedDemoClient()
     run_id = "cv1-" + uuid.uuid4().hex
     folder = Path(output_dir) / run_id
     folder.mkdir(parents=True, exist_ok=False)
-    record = {"schema_version": VERSION, "prompt_version": PROMPT_VERSION,
+    prompt_version = PROMPT_VERSION if demo else LIVE_PROMPT_VERSION
+    record = {"schema_version": VERSION, "prompt_version": prompt_version,
         "run_id": run_id, "created_at": now(),
-        "synthetic": True, "demo": True, "condition": condition,
+        "synthetic": case["synthetic"], "demo": demo, "condition": condition,
         "model": {"comparison_slot": model_name, "settings": config.public_dict(),
-                  "execution_kind": "scripted_offline_not_actual_model"},
+                  "execution_kind": "scripted_offline_not_actual_model" if demo else "live_provider"},
         "status": "running", "case": case, "input_evidence": [], "criteria": effective or [],
         "hashes": {"case": digest(case), "corpus": digest(corpus), "eligible_corpus": digest(eligible),
                    "system_prompt": digest(SYSTEM), "settings": digest(config.public_dict())},
@@ -229,6 +238,8 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
         "limits": {"max_searches": MAX_SEARCHES, "top_k": MAX_SEARCH_RESULTS, "max_model_calls": 5}}
     if effective is not None:
         record["hashes"]["criteria"] = digest(effective)
+    if not demo:
+        record["budget_authorization"] = client.public_authorization()
 
     def archive(name, value):
         record["artifacts"][name] = write_once(folder / name, value)
@@ -249,9 +260,27 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
         if effective is not None:
             payload["criteria"] = effective
             payload["criteria_instruction"] = "reviewed=false는 검토 전 가설이며 확정된 인터뷰 발언이 아니다."
+        if not demo:
+            payload["output_contract"] = {
+                "required_fields": list(schema),
+                "instruction": "response_schema의 모든 최상위 키를 반드시 출력한다. 짧게 쓰더라도 키를 생략하지 않는다. "
+                               "해당 내용이 없으면 허용된 빈 배열을 사용한다. JSON 객체 하나만 출력하며 설명문·코드 펜스는 붙이지 않는다. "
+                               "원자료의 지표 이름·단위·대상을 그대로 구분한다. 쇼핑 클릭을 검색량이나 구매량으로 바꾸지 않는다.",
+            }
+            if effective is not None:
+                payload["criteria_instruction"] = (
+                    "reviewed=false는 사람이 해석을 검토하지 않은 가설이다. reviewed=false이면 application_status=applied는 금지한다. "
+                    "자료에 대조해 사용하면 applied_as_hypothesis, 현재 주장에 적용할 대상이 아니면 not_applicable, "
+                    "적용 판단에 필요한 자료가 없으면 insufficient_evidence를 사용한다. reviewed=true일 때만 applied를 선택할 수 있다. "
+                    "response_schema에 criterion_reviews가 있으면 제공된 모든 기준 ID를 정확히 한 번씩 출력한다. "
+                    "자료가 없다는 이유로 검토 행을 생략하지 않는다. conflicting_evidence_ids에는 실제 반대 관측만 넣고 자료 부재는 이유에 설명한다. "
+                    "모든 가설을 만족해야 하는 체크리스트가 아니며 개별 가설의 자료 부족만으로 전체 판정을 자동 HOLD하지 않는다."
+                )
+                if "criterion_reviews" in schema:
+                    payload["output_contract"]["required_criterion_ids"] = [c["id"] for c in effective]
         prompt = canonical(payload)
         request = {"system": SYSTEM, "prompt": prompt}
-        entry = {"stage": stage, "prompt_version": PROMPT_VERSION,
+        entry = {"stage": stage, "prompt_version": prompt_version,
                  "request": request, "prompt_hash": digest(request),
                  "raw_response": None, "parsed": None, "validation_errors": []}
         record["stages"].append(entry)
@@ -259,6 +288,11 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
         archive(f"{index:02d}-{stage}.request.json", request)
         try:
             response = client.generate(SYSTEM, prompt)
+        except BudgetLimitReached:
+            record["status"] = "budget_blocked"
+            record["error"] = {"stage": stage, "code": "cumulative_budget_limit",
+                               "message": "No call was made: cumulative spend, stage count, or GPU deadline blocked reservation"}
+            return None
         except Exception:
             record["status"] = "api_error"
             record["error"] = {"stage": stage, "code": "provider_failure",
@@ -287,6 +321,8 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
             if not isinstance(response, dict) or response.get("finish_reason") not in ("stop", "end_turn"):
                 raise ValueError("Response missing final text or truncated")
             text(response.get("actual_model"), 300)
+            if not demo and response["actual_model"] != config.model:
+                raise ValueError("Actual model differs from the authorized configuration")
             if actual_model is not None and response["actual_model"] != actual_model:
                 raise ValueError("Actual model changed between stages")
             actual_model = response["actual_model"]
@@ -308,8 +344,10 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
             remaining = MAX_SEARCHES - index
             schema = {"query": "검색어 하나", "purpose": "support|counterevidence|scope|alternative_explanation",
                       "reason": "이 검색이 필요한 이유", "request_another_search": "boolean"}
+            previous_searches = record["searches"] if demo else [
+                {k: v for k, v in item.items() if k != "results"} for item in record["searches"]]
             plan = call(f"search_plan_{index + 1}", {
-                "provisional": provisional, "previous_searches": record["searches"],
+                "provisional": provisional, "previous_searches": previous_searches,
                 "remaining_searches": remaining, "counterevidence_search_still_required": not counter_done,
                 "search_contract": "동결 corpus만 검색. 쿼리 1개당 최대 3건. 최소 한 번 purpose=counterevidence 필수."
             }, schema, lambda d: _search_plan(d, remaining=remaining, counter_done=counter_done))
@@ -326,7 +364,9 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
             if not plan["request_another_search"]:
                 break
     if record["status"] == "running" and counter_done:
-        critic = call("critic", {"provisional": provisional, "searches": record["searches"],
+        critic_searches = record["searches"] if demo else [
+            {k: v for k, v in item.items() if k != "results"} for item in record["searches"]]
+        critic = call("critic", {"provisional": provisional, "searches": critic_searches,
             "instruction": "앞선 결론과 별도인 반증 역할이다. 누락·과장·대안 설명과 반대 근거를 검토하라."},
             {"assessment": "supported|challenged|insufficient", "summary": "짧은 반증 요약",
              "counterarguments": [{"text": "반대 설명", "evidence_ids": ["제공된 ID"]}],
@@ -349,6 +389,8 @@ def run_case(case, corpus, criteria, *, condition="with_interview", model_name="
                            "message": "Required counterevidence search was not completed"}
     record["completed_at"] = now()
     record["model"]["actual_model"] = actual_model
+    if not demo:
+        record["budget_receipts"] = client.receipts
     record["evidence_considered"] = list(evidence.values())
     record["source_families"] = sorted({d["source_family_id"] for d in evidence.values() if d["source_family_id"]})
     record["hashes"]["all_requests"] = digest([s["request"] for s in record["stages"]])

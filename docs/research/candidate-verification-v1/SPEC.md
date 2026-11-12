@@ -57,7 +57,7 @@
 
 ## 인터뷰 기준 입력
 
-기준 항목은 `id`, `hypothesis`, `question`, `expected_evidence`, `source_ref`, `reviewed`를 가지며 `applicability`, `counterexamples`를 함께 보관할 수 있다. `reviewed=true`는 출처 구간과 사람 해석 검토를 확인했다는 뜻이며 사실성을 입증했다는 뜻이 아니다. 미검토 초안은 로컬 진단에서만 가설로 다룬다. 실제 본 비교 전에 [가설 검토 절차](INTERVIEW_HYPOTHESES.md)를 마친다.
+기준 항목은 `id`, `hypothesis`, `question`, `expected_evidence`, `source_ref`, `reviewed`를 가지며 `applicability`, `counterexamples`를 함께 보관할 수 있다. `reviewed=true`는 출처 구간과 사람 해석 검토를 확인했다는 뜻이며 사실성을 입증했다는 뜻이 아니다. 미검토 초안은 개발 동작 점검에서 가설로만 다룬다. 실제 본 비교 전에 [가설 검토 절차](INTERVIEW_HYPOTHESES.md)를 마친다.
 
 가설별 적용 상태는 `applied`, `applied_as_hypothesis`, `not_applicable`, `insufficient_evidence`다. 미검토 기준을 `applied`로 표시하지 않는다. 인터뷰를 사실 주장에 대한 독립된 시장 근거로 인용하지 않는다.
 

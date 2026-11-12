@@ -35,5 +35,5 @@
       "effort": null
     }
   },
-  "existing_budget_ledger": "private/research-pilot/state.json"
+  "existing_budget_ledger": "private/candidate-live/budget"
 }
